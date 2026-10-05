@@ -805,6 +805,34 @@ nav button[aria-selected="true"]{color:var(--ink);border-top-color:var(--accent)
 #map.picking{cursor:crosshair}
 .as-start{margin-top:6px;padding:6px 10px;border-radius:999px;border:0;background:var(--climbed);color:#fff;font-weight:600;cursor:pointer;font-size:.8rem}
 @media (min-width:760px){.wpanel{right:auto;width:400px}}
+.lpanel{position:absolute;right:10px;top:10px;z-index:1050;width:min(310px,calc(100% - 66px));max-height:calc(100% - 20px);overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+.lp-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lp-head .close{width:32px;height:32px}
+.bases{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bases button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;padding:7px 9px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer;font-weight:600;font-size:.86rem;min-width:0}
+.bases button small{font-weight:400;font-size:.7rem;color:var(--muted)}
+.bases button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.lp-rows{display:flex;flex-direction:column;gap:6px}
+.lp-rows .row{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer;font-weight:600;font-size:.86rem;text-align:left}
+.lp-rows .row::after{content:"";margin-left:auto;flex:none;width:30px;height:18px;border-radius:9px;background:var(--line);background-image:radial-gradient(circle at 9px 9px,#fff 6px,transparent 6.5px)}
+.lp-rows .row[aria-pressed="true"]{border-color:var(--ink)}
+.lp-rows .row[aria-pressed="true"]::after{background-color:var(--climbed);background-image:radial-gradient(circle at 21px 9px,#fff 6px,transparent 6.5px)}
+.ico.steig{width:18px;height:6px;border:0;border-radius:3px;background:repeating-linear-gradient(90deg,#D23A2A 0 6px,#111 6px 12px);box-shadow:0 0 0 2px #fff}
+.leaflet-layer.relief{mix-blend-mode:multiply}
+#steigeLegend{flex-basis:100%;margin-top:2px;font-size:.72rem;gap:2px 10px}
+#steigeLegend svg{width:22px}
+.wp-legend svg{flex:none}
+label.fl.grow{flex:1 1 180px;min-width:0}
+.wpanel label.fl select{flex:none;width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.wpanel .addrow{align-items:flex-end}
+.wpanel .go{padding:9px 14px}
+.wp-mix{display:flex;flex-direction:column;gap:5px}
+.mixbar{display:flex;height:10px;border-radius:5px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.mixbar i{display:block;height:100%}
+.mixchips{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:.76rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.mixchips span{display:inline-flex;align-items:center;gap:5px}
+.mixchips i{display:inline-block;width:10px;height:10px;border-radius:2px}
+.warn{margin:0;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--accent) 13%,transparent);border-left:3px solid var(--accent);font-size:.84rem;line-height:1.4}
 .nomap{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
 
 /* Panorama */
@@ -931,17 +959,29 @@ h3.sub{margin:4px 0 0;font-size:.72rem;font-weight:600;text-transform:uppercase;
 
   <main>
     <div class="view" id="map" role="region" aria-label="Karte der Gipfel"></div>
-    <div class="legend" id="legend"><span><i class="dot on"></i>Bestiegen</span><span><i class="dot goal"></i>Ziel</span><span><i class="dot"></i>Offen</span><span class="hint-lp">Lange auf die Karte drücken, um einen Gipfel hinzuzufügen.</span></div>
+    <div class="legend" id="legend"><span><i class="dot on"></i>Bestiegen</span><span><i class="dot goal"></i>Ziel</span><span><i class="dot"></i>Offen</span><span class="hint-lp">Lange auf die Karte drücken, um einen Gipfel hinzuzufügen.</span><div class="wp-legend" id="steigeLegend" hidden></div></div>
     <section class="wpanel" id="wpPanel" hidden aria-label="Wege und Route">
       <div class="wp-head"><h2 class="panel-title" id="wpTitle">–</h2><button class="close" id="wpClose" aria-label="Wege und Route ausblenden">×</button></div>
       <div class="wp-legend" id="wpLegend"></div>
       <p class="hint" id="wpMsg" hidden></p>
-      <div class="addrow"><select id="wpStart" aria-label="Startpunkt"></select><button type="button" class="primary" id="wpGo">Route berechnen</button></div>
+      <label class="fl">Start<select id="wpStart"></select></label>
+      <div class="addrow">
+        <label class="fl grow">Höchste Schwierigkeit<select id="wpMax">
+          <option value="2">bis T2 – Bergwandern</option>
+          <option value="3" selected>bis T3 – anspruchsvolles Bergwandern</option>
+          <option value="4">bis T4 – Alpinwandern</option>
+          <option value="5">bis T5 – anspruchsvolles Alpinwandern</option>
+          <option value="6">bis T6 – alles, auch weglos</option>
+        </select></label>
+        <button type="button" class="primary go" id="wpGo">Route berechnen</button>
+      </div>
       <div id="wpRes" hidden>
         <div class="wp-stats" id="wpStats"></div>
         <p class="hint" id="wpDiff"></p>
+        <div class="wp-mix" id="wpMix"></div>
+        <p class="warn" id="wpWarn" hidden></p>
         <canvas class="wp-prof" id="wpProf" aria-label="Höhenprofil"></canvas>
-        <div class="addrow"><button type="button" class="secondary" id="wpGpx">Als GPX speichern</button><button type="button" class="secondary" id="wpClear">Route ausblenden</button></div>
+        <div class="addrow"><button type="button" class="secondary" id="wpAlt">Andere Variante</button><button type="button" class="secondary" id="wpGpx">Als GPX</button><button type="button" class="secondary" id="wpClear">Ausblenden</button></div>
       </div>
       <p class="note">Wege und Routen stammen aus OpenStreetMap und werden automatisch berechnet. Vor der Tour mit Karte, Wetter und Verhältnissen vor Ort prüfen; Schnee und Sperren kennt die App nicht.</p>
     </section>
@@ -959,11 +999,27 @@ h3.sub{margin:4px 0 0;font-size:.72rem;font-weight:600;text-transform:uppercase;
       <button type="button" class="close" id="fClose" aria-label="Schließen">×</button>
     </div>
     <div class="layers" id="layers" role="group" aria-label="Zusatzebenen">
-      <button type="button" id="lyHut" aria-pressed="false"><i class="ico hut"></i>Hütten</button>
-      <button type="button" id="lyPark" aria-pressed="false"><i class="ico park">P</i>Parkplätze</button>
-      <button type="button" id="lyTrail" aria-pressed="false"><i class="ico trail"></i>Wanderwege</button>
+      <button type="button" id="lyOpen" aria-expanded="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>Karte &amp; Wege</button>
       <button type="button" id="offOpen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Offline</button>
       <button type="button" id="arOpen1" class="cam"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg>Gipfel-Erkenner</button>
+    </div>
+    <div class="lpanel" id="lpanel" hidden role="dialog" aria-label="Karte und Ebenen">
+      <div class="lp-head"><h3 class="sub">Kartenart</h3><button class="close" id="lpClose" aria-label="Schließen">×</button></div>
+      <div class="bases" id="bases">
+        <button type="button" data-base="topo" aria-pressed="true">Topo<small>OpenTopoMap, ganze Region</small></button>
+        <button type="button" data-base="at" aria-pressed="false">Österreich<small>amtlich, mit Relief</small></button>
+        <button type="button" data-base="by" aria-pressed="false">Bayern<small>amtliche Topokarte</small></button>
+        <button type="button" data-base="at_foto" aria-pressed="false">Luftbild AT<small>basemap.at</small></button>
+        <button type="button" data-base="by_foto" aria-pressed="false">Luftbild BY<small>Bayern</small></button>
+      </div>
+      <h3 class="sub">Einblenden</h3>
+      <div class="lp-rows">
+        <button type="button" class="row" id="lySteige" aria-pressed="false"><i class="ico steig"></i>Steige nach Schwierigkeit</button>
+        <button type="button" class="row" id="lyTrail" aria-pressed="false"><i class="ico trail"></i>Markierte Wanderwege</button>
+        <button type="button" class="row" id="lyHut" aria-pressed="false"><i class="ico hut"></i>Hütten</button>
+        <button type="button" class="row" id="lyPark" aria-pressed="false"><i class="ico park">P</i>Parkplätze</button>
+      </div>
+      <p class="note">Die amtlichen Karten zeigen nur ihr eigenes Land genau. Watzmann, Hochkalter und Berchtesgaden liegen in Bayern, der Rest meist in Österreich. „Topo“ deckt alles ab.</p>
     </div>
     <div class="layer-msg" id="layerMsg" hidden></div>
     <div class="banner" id="banner" hidden role="status">
@@ -1107,7 +1163,7 @@ h3.sub{margin:4px 0 0;font-size:.72rem;font-weight:600;text-transform:uppercase;
 
     <aside class="sheet" id="offSheet" hidden aria-label="Karte offline speichern">
       <div class="sheet-top"><h2 class="panel-title">Karte offline</h2><button class="close" id="offClose" aria-label="Schließen">×</button></div>
-      <p class="hint">Speichert den Kartenausschnitt, den du gerade siehst, samt Geländedaten für Rundblick und Gipfel-Erkenner (und die Wanderwege, wenn sie eingeschaltet sind). Dann funktioniert alles auch ohne Netz am Berg. Am besten im WLAN machen.</p>
+      <p class="hint">Speichert den Kartenausschnitt, den du gerade siehst, in der gewählten Kartenart, dazu alle Steige mit Schwierigkeit, samt Geländedaten für Rundblick und Gipfel-Erkenner (und die Wanderwege, wenn sie eingeschaltet sind). Dann funktioniert alles auch ohne Netz am Berg. Am besten im WLAN machen.</p>
       <label class="fl">Detailstufe<select id="offZoom">
         <option value="13">Übersicht (bis Zoomstufe 13)</option>
         <option value="14">Wandern (bis Zoomstufe 14)</option>
@@ -1331,6 +1387,27 @@ function renderCount(){
   $("bar").setAttribute("aria-valuenow", done); $("bar").setAttribute("aria-valuemax", PEAKS.length);
 }
 
+/* ---------- base maps ---------- */
+const BASES = {
+  topo:{url:"https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", sub:"abc", max:17, attr:'Karte: © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA), © <a href="https://www.openstreetmap.org/copyright">OSM</a>'},
+  at:{url:"https://mapsneu.wien.gv.at/basemap/bmaphidpi/normal/google3857/{z}/{y}/{x}.jpeg", max:19, relief:true, attr:'Karte: Datenquelle <a href="https://basemap.at">basemap.at</a>'},
+  by:{url:"https://wmtsod{s}.bayernwolke.de/wmts/by_amtl_karte/smerc/{z}/{x}/{y}", sub:"123456789", max:16, attr:'Karte: © <a href="https://www.geodaten.bayern.de">Bayerische Vermessungsverwaltung</a>'},
+  at_foto:{url:"https://mapsneu.wien.gv.at/basemap/bmaporthofoto30cm/normal/google3857/{z}/{y}/{x}.jpeg", max:19, attr:'Luftbild: Datenquelle <a href="https://basemap.at">basemap.at</a>'},
+  by_foto:{url:"https://wmtsod{s}.bayernwolke.de/wmts/by_dop/smerc/{z}/{x}/{y}", sub:"123456789", max:19, attr:'Luftbild: © <a href="https://www.geodaten.bayern.de">Bayerische Vermessungsverwaltung</a>'}
+};
+const RELIEF = {url:"https://mapsneu.wien.gv.at/basemap/bmapgelaende/grau/google3857/{z}/{y}/{x}.jpeg", max:17};
+let baseKey = "topo", baseLayer = null, reliefLayer = null;
+function fillUrl(tpl, z, x, y, sub){ return tpl.replace("{s}", sub ? sub[Math.abs(x+y)%sub.length] : "").replace("{z}", z).replace("{x}", x).replace("{y}", y); }
+function setBase(k){
+  if(!map) return; if(!BASES[k]) k = "topo"; baseKey = k; const b = BASES[k];
+  if(baseLayer) baseLayer.remove(); if(reliefLayer){ reliefLayer.remove(); reliefLayer = null; }
+  baseLayer = L.tileLayer(b.url, {subdomains:b.sub||"abc", maxNativeZoom:b.max, maxZoom:19, zIndex:1, attribution:b.attr}).addTo(map);
+  if(b.relief) reliefLayer = L.tileLayer(RELIEF.url, {maxNativeZoom:RELIEF.max, maxZoom:19, zIndex:2, opacity:.5, className:"relief"}).addTo(map);
+  document.querySelectorAll("#bases button").forEach(x=>x.setAttribute("aria-pressed", String(x.dataset.base===k)));
+  lsSet("gipfelbuch-hallein-base", k);
+  if(!$("offSheet").hidden) offEstimate();
+}
+
 /* ---------- map ---------- */
 let map = null; const markers = {}; let selected = null;
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -1350,9 +1427,10 @@ function addMarker(p){
 function initMap(){
   const el = $("map");
   if(typeof L === "undefined"){ el.innerHTML = '<div class="nomap">Die Karte konnte nicht geladen werden. Liste, Rundblick und Statistik funktionieren trotzdem.</div>'; return; }
-  map = L.map(el, {preferCanvas:true, zoomControl:true}).setView([47.64,13.15], 10);
+  // one shared drawing layer for peaks, paths and routes; a little tap tolerance makes thin lines easier to hit
+  map = L.map(el, {preferCanvas:true, renderer:L.canvas({tolerance:6}), zoomControl:true, maxZoom:18}).setView([47.64,13.15], 10);
   map.attributionControl.setPrefix(false);
-  L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,subdomains:"abc",attribution:'Karte: © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA), © <a href="https://www.openstreetmap.org/copyright">OSM</a>'}).addTo(map);
+  setBase(lsGet("gipfelbuch-hallein-base", "topo"));
   [5,10,20,40].forEach(km=>{
     L.circle(HALLEIN,{radius:km*1000,color:"#55625C",opacity:.55,weight:1,dashArray:"4 5",fill:false,interactive:false}).addTo(map);
     L.tooltip({permanent:true,direction:"center",className:"ring-label"}).setLatLng([HALLEIN[0]+km/111.2,HALLEIN[1]]).setContent(km+" km").addTo(map);
@@ -1364,9 +1442,11 @@ function initMap(){
   map.on("zoomend", labels); labels();
   map.on("contextmenu", e=>{ if(wp.picking) return; openAdd(e.latlng.lat, e.latlng.lng); });
   map.on("click", e=>{ if(wp.picking) setStart(e.latlng.lat, e.latlng.lng, "Punkt auf der Karte"); });
-  map.on("moveend", ()=>{ clearTimeout(poiTimer); poiTimer = setTimeout(loadPoi, 400); if(!$("offSheet").hidden) offEstimate(); });
+  map.on("moveend", ()=>{ clearTimeout(poiTimer); poiTimer = setTimeout(loadPoi, 400); clearTimeout(steigeTimer); steigeTimer = setTimeout(loadSteige, 450); if(!$("offSheet").hidden) offEstimate(); });
+  map.on("zoomend", restyleSteige);
+  map.on("click", ()=>{ if(!$("lpanel").hidden) closeLayersPanel(); });
   const lastLayers = lsGet("gipfelbuch-hallein-layers", {});
-  setTimeout(()=>{ if(lastLayers.hut) togglePoi("hut"); if(lastLayers.park) togglePoi("park"); if(lsGet("gipfelbuch-hallein-trail", false)) toggleTrail(true); }, 0);
+  setTimeout(()=>{ if(lastLayers.hut) togglePoi("hut"); if(lastLayers.park) togglePoi("park"); if(lsGet("gipfelbuch-hallein-trail", false)) toggleTrail(true); if(lsGet("gipfelbuch-hallein-steige", false)) toggleSteige(true); }, 0);
   // locate button
   const Loc = L.Control.extend({options:{position:"topleft"}, onAdd(){
     const b = L.DomUtil.create("button","map-btn"); b.type="button"; b.id="locBtn"; b.title="Mein Standort"; b.setAttribute("aria-label","Mein Standort"); b.setAttribute("aria-pressed","false");
@@ -1467,7 +1547,7 @@ $("lyPark").addEventListener("click", ()=>togglePoi("park"));
 /* ---------- offline map ---------- */
 const OFF_CACHE = "gipfelbuch-offline";
 const TILE_MAX = 3000;
-const tileUrl = (z,x,y) => "https://"+"abc"[Math.abs(x+y)%3]+".tile.opentopomap.org/"+z+"/"+x+"/"+y+".png";
+const tileUrl = (z,x,y) => fillUrl(BASES[baseKey].url, z, x, y, BASES[baseKey].sub);
 function lon2x(lon,z){ return Math.floor((lon+180)/360*2**z); }
 function lat2y(lat,z){ const r = rad(lat); return Math.floor((1 - Math.log(Math.tan(r) + 1/Math.cos(r))/Math.PI)/2*2**z); }
 function tilesFor(b, zmin, zmax){
@@ -1478,7 +1558,7 @@ function tilesFor(b, zmin, zmax){
   }
   return out;
 }
-function offPlan(){ if(!map) return null; const zmax = +$("offZoom").value, zmin = Math.max(8, Math.min(zmax, Math.floor(map.getZoom())-2)); return {zmin, zmax, tiles:tilesFor(map.getBounds(), zmin, zmax)}; }
+function offPlan(){ if(!map) return null; const zmax = Math.min(+$("offZoom").value, BASES[baseKey].max), zmin = Math.max(8, Math.min(zmax, Math.floor(map.getZoom())-2)); return {zmin, zmax, tiles:tilesFor(map.getBounds(), zmin, zmax)}; }
 function offEstimate(){
   const p = offPlan(); if(!p) return;
   const n = p.tiles.length;
@@ -1489,7 +1569,7 @@ function offEstimate(){
 async function offStats(){
   try{
     const c = await caches.open(OFF_CACHE); const keys = await c.keys();
-    const map_n = keys.filter(k=>k.url.includes("opentopomap")).length, tr_n = keys.filter(k=>k.url.includes("waymarkedtrails")).length, dem_n = keys.length - map_n - tr_n;
+    const dem_n = keys.filter(k=>k.url.includes("elevation-tiles")).length, tr_n = keys.filter(k=>k.url.includes("waymarkedtrails")).length, map_n = keys.length - dem_n - tr_n;
     let usage = "";
     if(navigator.storage && navigator.storage.estimate){ const e = await navigator.storage.estimate(); usage = " · App belegt insgesamt "+Math.round((e.usage||0)/1048576)+" MB"; }
     $("offStat").textContent = map_n ? map_n+" Kartenteile, "+(tr_n?tr_n+" Wanderwege-Teile, ":"")+dem_n+" Geländeteile gespeichert"+usage : "Noch keine Karten offline gespeichert."+usage;
@@ -1502,19 +1582,24 @@ async function offSave(){
   let cache; try{ cache = await caches.open(OFF_CACHE); }catch(e){ $("offMsg").textContent = "Offline-Speicher ist in diesem Browser nicht verfügbar."; return; }
   const run = offRun = {stop:false}; const list = plan.tiles.map(([z,x,y])=>tileUrl(z,x,y));
   if(trailOn) plan.tiles.forEach(([z,x,y])=>list.push(trailUrl(z,x,y)));
+  if(BASES[baseKey].relief) plan.tiles.forEach(([z,x,y])=>{ if(z <= RELIEF.max) list.push(fillUrl(RELIEF.url, z, x, y)); });
+  // paths with difficulty for this area
+  $("offMsg").textContent = "Speichere Steige …";
+  try{ await ensureSteige(cellsFor(map.getBounds(), STEIGE_CELL)); }catch(e){}
   // terrain for panorama and peak finder: the view plus 60 km around its centre
   const c = map.getCenter(); demTilesAround(c.lat, c.lng, 60).forEach(([x,y])=>list.push(demUrl(x,y)));
   $("offGo").hidden = true; $("offStop").hidden = false; $("offBar").hidden = false; $("offMsg").textContent = "Speichere …";
-  let done = 0, failed = 0, corsBlocked = false, i = 0;
+  let done = 0, ok = 0, failed = 0, corsBlocked = false, i = 0;
   const worker = async ()=>{ while(i < list.length && !run.stop){ const url = list[i++];
     try{
       if(!(await cache.match(url))){ const r = await fetch(url, {mode:"cors"}); if(!r.ok) throw new Error("http"); await cache.put(url, r); }
-    }catch(e){ failed++; if(e instanceof TypeError && done===0 && failed>=3) corsBlocked = true; }
+      ok++;
+    }catch(e){ failed++; if(e instanceof TypeError && ok===0 && failed>=6) corsBlocked = true; }
     done++; $("offBarI").style.width = (done/list.length*100).toFixed(1)+"%"; $("offMsg").textContent = "Speichere … "+done+" von "+list.length;
     if(corsBlocked){ run.stop = true; } } };
   await Promise.all([worker(), worker(), worker()]);
   $("offGo").hidden = false; $("offStop").hidden = true;
-  if(corsBlocked) $("offMsg").textContent = "Der Kartendienst erlaubt das Speichern gerade nicht. Versuch es später noch einmal.";
+  if(corsBlocked) $("offMsg").textContent = "Diese Kartenart lässt sich nicht offline speichern. Wähle unter „Karte & Wege“ eine andere, zum Beispiel Topo.";
   else if(run.stop) $("offMsg").textContent = "Abgebrochen. Bereits gespeicherte Teile bleiben erhalten.";
   else if(failed) $("offMsg").textContent = "Fertig, "+failed+" Teile fehlen (Verbindung). Einfach noch einmal speichern, dann werden nur die fehlenden geladen.";
   else { $("offMsg").textContent = "Fertig. Dieser Ausschnitt funktioniert jetzt auch ohne Netz."; setSave("Karte offline gespeichert"); }
@@ -1540,34 +1625,55 @@ function toggleTrail(force){
   if(!map) return;
   trailOn = typeof force === "boolean" ? force : !trailOn;
   $("lyTrail").setAttribute("aria-pressed", String(trailOn));
-  if(trailOn && !trailLayer) trailLayer = L.tileLayer(TRAIL_URL, {maxZoom:17, opacity:.85, attribution:'Wanderwege: © <a href="https://hiking.waymarkedtrails.org">Waymarked Trails</a>'}).addTo(map);
+  if(trailOn && !trailLayer) trailLayer = L.tileLayer(TRAIL_URL, {maxNativeZoom:17, maxZoom:19, zIndex:5, opacity:.85, attribution:'Wanderwege: © <a href="https://hiking.waymarkedtrails.org">Waymarked Trails</a>'}).addTo(map);
   if(!trailOn && trailLayer){ trailLayer.remove(); trailLayer = null; }
   lsSet("gipfelbuch-hallein-trail", trailOn);
 }
 $("lyTrail").addEventListener("click", ()=>toggleTrail());
 
-/* ---------- paths around a summit, coloured by difficulty (B) ---------- */
-// Austrian convention: blue = easy, red = medium, black = difficult
-const DIFF = [
-  {k:0, c:"#8C7A5B", l:"Forst- oder Fahrweg"},
-  {k:1, c:"#2F6AD0", l:"Leicht (blau, T1)"},
-  {k:2, c:"#D23A2A", l:"Mittel (rot, T2–T3)"},
-  {k:4, c:"#141414", l:"Schwer (schwarz, T4–T6)"},
-  {k:5, c:"#8E44AD", l:"Klettersteig"},
-  {k:-1, c:"#6B6B6B", l:"Steig ohne Angabe", dash:"5 6"}
-];
+/* ---------- paths coloured by difficulty ---------- */
+// Austrian colour convention (blue easy, red medium, black difficult); the line pattern adds detail.
+const DIFF = {
+  t1:   {c:"#2F6AD0", l:"T1 leicht (blau)"},
+  t23:  {c:"#D23A2A", l:"T2–T3 mittel (rot)"},
+  t4:   {c:"#111111", l:"T4 schwer (schwarz)"},
+  t56:  {c:"#111111", l:"T5–T6 sehr schwer, oft weglos", dash:[0.1, 2.1]},
+  kst:  {c:"#8E44AD", l:"Klettersteig", dash:[2.6, 1.4]},
+  unk:  {c:"#6B6B6B", l:"Steig ohne Angabe", dash:[2, 1.6], w:.8},
+  forst:{c:"#8C7A5B", l:"Forstweg oder Straße", w:.7}
+};
+const DIFF_ORDER = ["t1","t23","t4","t56","kst","unk","forst"];
+const SHORT = {t1:"T1", t23:"T2–T3", t4:"T4", t56:"T5–T6", kst:"Klettersteig", unk:"ohne Angabe", forst:"Forstweg/Straße"};
 const SACK = {hiking:1, mountain_hiking:2, demanding_mountain_hiking:3, alpine_hiking:4, demanding_alpine_hiking:5, difficult_alpine_hiking:6};
 const SACL = {1:"T1 Wandern", 2:"T2 Bergwandern", 3:"T3 anspruchsvolles Bergwandern", 4:"T4 Alpinwandern", 5:"T5 anspruchsvolles Alpinwandern", 6:"T6 schwieriges Alpinwandern"};
 function wayClass(t){
-  if(t.highway==="via_ferrata" || t.via_ferrata_scale) return {cls:DIFF[4], rank:7, txt:"Klettersteig"+(t.via_ferrata_scale?", Grad "+t.via_ferrata_scale:"")};
+  if(t.highway==="via_ferrata" || t.via_ferrata_scale) return {k:"kst", cls:DIFF.kst, rank:7, txt:"Klettersteig"+(t.via_ferrata_scale ? " (Grad "+t.via_ferrata_scale+")" : "")};
   const s = SACK[t.sac_scale];
-  if(s) return {cls: s===1 ? DIFF[1] : s<=3 ? DIFF[2] : DIFF[3], rank:s, txt:SACL[s]};
-  if(t.highway==="track" || t.highway==="service" || t.highway==="unclassified") return {cls:DIFF[0], rank:0, txt:"Forst- oder Fahrweg"};
-  if(t.highway==="path" || t.highway==="footway" || t.highway==="steps" || t.highway==="bridleway") return {cls:DIFF[5], rank:-1, txt:"Steig ohne Schwierigkeitsangabe"};
-  return {cls:DIFF[0], rank:0, txt:"Weg"};
+  if(s){ const k = s===1 ? "t1" : s<=3 ? "t23" : s===4 ? "t4" : "t56"; return {k, cls:DIFF[k], rank:s, txt:SACL[s]}; }
+  if(t.highway==="path" || t.highway==="footway" || t.highway==="steps" || t.highway==="bridleway") return {k:"unk", cls:DIFF.unk, rank:-1, txt:"Steig ohne Schwierigkeitsangabe"};
+  return {k:"forst", cls:DIFF.forst, rank:0, txt: t.highway==="track" ? "Forstweg" : "Weg oder Straße"};
 }
-let wegeLayer = null, routeLayer = null;
-const wp = {peak:null, start:null, picking:false, route:null, parks:[]};
+const badVis = t => /^(bad|horrible|no)$/.test((t && t.trail_visibility) || "");
+function lineW(z){ return z<=11 ? 2.2 : z===12 ? 2.8 : z===13 ? 3.4 : z===14 ? 4.2 : z===15 ? 5 : 5.8; }
+// [white casing, coloured line]
+function wayStyles(wc, t, w){
+  const c = wc.cls, ww = w*(c.w||1);
+  let dash = c.dash ? c.dash.map(x=>Math.max(.1, x*ww).toFixed(1)).join(" ") : null;
+  if(!dash && badVis(t)) dash = (2.4*ww).toFixed(1)+" "+(1.3*ww).toFixed(1);
+  const dotted = c.dash && c.dash[0] < 1;
+  return [{color:"#ffffff", weight:ww+3.5, opacity:.92, interactive:false, lineCap:"round", lineJoin:"round"},
+          {color:c.c, weight:dotted ? ww*1.25 : ww, opacity:1, dashArray:dash, lineCap: dotted ? "round" : "butt", lineJoin:"round"}];
+}
+function legendSwatch(k){
+  const c = DIFF[k], w = 4*(c.w||1), dotted = c.dash && c.dash[0] < 1;
+  const dash = c.dash ? c.dash.map(x=>Math.max(.1, x*w).toFixed(1)).join(" ") : "";
+  return '<svg width="28" height="10" viewBox="0 0 28 10" aria-hidden="true"><line x1="3" y1="5" x2="25" y2="5" stroke="#fff" stroke-width="'+(w+3)+'" stroke-linecap="round"/>'+
+    '<line x1="3" y1="5" x2="25" y2="5" stroke="'+c.c+'" stroke-width="'+(dotted ? w*1.25 : w)+'"'+(dash ? ' stroke-dasharray="'+dash+'"' : '')+' stroke-linecap="'+(dotted ? "round" : "butt")+'"/></svg>';
+}
+function renderLegend(el, keys){ el.innerHTML = keys.map(k=>'<span>'+legendSwatch(k)+escH(DIFF[k].l)+'</span>').join(""); }
+
+let routeLayer = null;
+const wp = {peak:null, start:null, picking:false, route:null, parks:[], alt:0, autoSteige:false};
 // Paths and routes share the map's single drawing layer with the peaks; afterwards the peaks are lifted on top again,
 // so they always stay tappable (a second drawing layer on top would swallow every tap).
 function peaksToFront(){ Object.values(markers).forEach(m=>m.bringToFront()); if(meMarker) meMarker.bringToFront(); }
@@ -1582,41 +1688,118 @@ async function overpass(q){
   if(!r.ok) throw new Error("load"); return r.json();
 }
 function wpMsg(t){ $("wpMsg").textContent = t||""; $("wpMsg").hidden = !t; }
-async function showWege(id){
+
+/* ---------- layer with every path in view, coloured by difficulty ---------- */
+const STEIGE_CELL = .05, STEIGE_AGE = 60*24*3600*1000;
+const KEEP_T = ["highway","sac_scale","via_ferrata_scale","name","ref","trail_visibility"];
+let steigeOn = false, steigeLayer = null, steigeLines = [], steigeSeen = new Set(), steigeBusy = false, steigeTimer = null;
+const steigeMem = new Map();
+const cellKey = (a,b) => "steige-"+a+"_"+b;
+async function steigeCacheGet(key){ try{ const c = await caches.open("gipfelbuch-wege"); const r = await c.match("https://gipfelbuch.app/cache/"+key); return r ? await r.json() : null; }catch(e){ return null; } }
+async function steigeCachePut(key, d){ try{ const c = await caches.open("gipfelbuch-wege"); await c.put("https://gipfelbuch.app/cache/"+key, new Response(JSON.stringify(d), {headers:{"Content-Type":"application/json"}})); }catch(e){} }
+async function fetchSteigeCells(cells){
+  const bb = [Math.min(...cells.map(c=>c[0]))*STEIGE_CELL, Math.min(...cells.map(c=>c[1]))*STEIGE_CELL,
+              (Math.max(...cells.map(c=>c[0]))+1)*STEIGE_CELL, (Math.max(...cells.map(c=>c[1]))+1)*STEIGE_CELL].map(v=>v.toFixed(4)).join(",");
+  const js = await overpass('[out:json][timeout:60];(way["highway"~"^(path|footway|steps|bridleway|via_ferrata)$"]('+bb+');way["via_ferrata_scale"]('+bb+'););out tags geom;');
+  const out = {}; cells.forEach(([a,b])=>out[cellKey(a,b)] = []);
+  (js.elements||[]).forEach(e=>{
+    if(!e.geometry || e.geometry.length < 2) return;
+    const m = e.geometry[Math.floor(e.geometry.length/2)];
+    const key = cellKey(Math.floor(m.lat/STEIGE_CELL), Math.floor(m.lon/STEIGE_CELL)); if(!out[key]) return;
+    const t = {}; KEEP_T.forEach(f=>{ if(e.tags && e.tags[f]) t[f] = e.tags[f]; });
+    out[key].push({id:e.id, t, g:e.geometry.map(n=>[+n.lat.toFixed(5), +n.lon.toFixed(5)])});
+  });
+  const now = Date.now();
+  await Promise.all(Object.entries(out).map(([k,ways])=>{ steigeMem.set(k, ways); return steigeCachePut(k, {t:now, ways}); }));
+  return out;
+}
+async function steigeFor(a, b){
+  const k = cellKey(a,b); let ways = steigeMem.get(k);
+  if(!ways){ const d = await steigeCacheGet(k); if(d && Date.now()-d.t < STEIGE_AGE){ ways = d.ways; steigeMem.set(k, ways); } }
+  return ways || null;
+}
+// make sure the paths of these cells are stored (used when saving an area for offline use)
+async function ensureSteige(cells){
+  if(cells.length > 400) return;
+  const need = []; for(const [a,b] of cells){ if(!(await steigeFor(a,b))) need.push([a,b]); }
+  for(let i=0; i<need.length; i+=24){ const out = await fetchSteigeCells(need.slice(i, i+24)); if(steigeLayer) Object.values(out).forEach(drawSteige); }
+}
+function steigPopup(t, wc){
+  const info = [wc.txt]; if(t.ref) info.push("Weg Nr. "+t.ref); if(badVis(t)) info.push("Weg schlecht erkennbar");
+  const warn = wc.k==="t56" ? "Oft weglos und ausgesetzt, mit Kletterstellen. Nur mit viel Erfahrung." :
+               wc.k==="kst" ? "Klettersteigset, Helm und Erfahrung nötig." :
+               wc.k==="t4" ? "Trittsicherheit und Schwindelfreiheit nötig, teils Hände zur Hilfe." : "";
+  return '<h4>'+escH(t.name || (wc.k==="kst" ? "Klettersteig" : "Steig"))+'</h4><p>'+escH(info.join(" · "))+'</p>'+(warn ? '<p>'+escH(warn)+'</p>' : '');
+}
+function keepOrder(){ if(routeLayer) routeLayer.eachLayer(l=>l.bringToFront && l.bringToFront()); peaksToFront(); }
+function drawSteige(ways){
+  if(!steigeLayer || !ways) return;
+  const fresh = ways.filter(x=>!steigeSeen.has(x.id)); if(!fresh.length) return;
+  fresh.forEach(x=>steigeSeen.add(x.id));
+  const w = lineW(map.getZoom());
+  // casings first, then lines; easier paths below harder ones
+  const items = fresh.map(x=>({x, wc:wayClass(x.t)})).sort((a,b)=>a.wc.rank-b.wc.rank);
+  const made = items.map(({x,wc})=>{ const [cs] = wayStyles(wc, x.t, w); return {x, wc, casing:L.polyline(x.g, cs).addTo(steigeLayer)}; });
+  made.forEach(o=>{ const [, ls] = wayStyles(o.wc, o.x.t, w);
+    o.line = L.polyline(o.x.g, ls).addTo(steigeLayer); o.line.bindPopup(()=>steigPopup(o.x.t, o.wc), {maxWidth:260});
+    steigeLines.push({casing:o.casing, line:o.line, wc:o.wc, t:o.x.t}); });
+  keepOrder();
+}
+function restyleSteige(){ if(!map || !steigeLines.length) return; const w = lineW(map.getZoom());
+  steigeLines.forEach(o=>{ const [cs, ls] = wayStyles(o.wc, o.t, w); o.casing.setStyle(cs); o.line.setStyle(ls); }); }
+let steigeMsg = "";
+function steigeNote(t){ steigeMsg = t; layerMsg(t); }
+async function loadSteige(){
+  if(!steigeOn || !map) return;
+  const z = map.getZoom();
+  const cells = z >= 12 ? cellsFor(map.getBounds().pad(.05), STEIGE_CELL) : [];
+  if(z < 12 || cells.length > 60){ steigeNote("Zum Anzeigen der Steige weiter hineinzoomen."); return; }
+  if(steigeMsg.startsWith("Zum Anzeigen der Steige")) steigeNote("");
+  const need = [];
+  for(const [a,b] of cells){ const ways = await steigeFor(a,b); if(ways) drawSteige(ways); else need.push([a,b]); }
+  if(!need.length || steigeBusy) return;
+  if(!navigator.onLine){ steigeNote("Ohne Internet gibt es Steige nur in offline gespeicherten Gebieten."); return; }
+  steigeBusy = true; steigeNote("Lade Steige …");
+  try{ for(let i=0; i<need.length; i+=24){ const out = await fetchSteigeCells(need.slice(i, i+24)); Object.values(out).forEach(drawSteige); } steigeNote(""); }
+  catch(e){ steigeNote("Steige gerade nicht abrufbar. Später noch einmal versuchen."); }
+  finally{ steigeBusy = false; }
+}
+function toggleSteige(force){
+  if(!map) return;
+  steigeOn = typeof force === "boolean" ? force : !steigeOn;
+  $("lySteige").setAttribute("aria-pressed", String(steigeOn));
+  if(steigeOn && !steigeLayer){ steigeLayer = L.layerGroup().addTo(map); steigeSeen = new Set(); steigeLines = []; loadSteige(); }
+  if(!steigeOn && steigeLayer){ steigeLayer.remove(); steigeLayer = null; steigeLines = []; steigeSeen = new Set(); steigeNote(""); }
+  renderLegend($("steigeLegend"), DIFF_ORDER.slice(0, 6)); $("steigeLegend").hidden = !steigeOn;
+  lsSet("gipfelbuch-hallein-steige", steigeOn);
+}
+
+/* ---------- layers panel ---------- */
+function closeLayersPanel(){ $("lpanel").hidden = true; $("lyOpen").setAttribute("aria-expanded","false"); }
+$("lyOpen").addEventListener("click", ()=>{ const open = $("lpanel").hidden; closeAllSheets(); $("lpanel").hidden = !open; $("lyOpen").setAttribute("aria-expanded", String(open)); });
+$("lpClose").addEventListener("click", closeLayersPanel);
+document.querySelectorAll("#bases button").forEach(b=>b.addEventListener("click", ()=>setBase(b.dataset.base)));
+$("lySteige").addEventListener("click", ()=>{ wp.autoSteige = false; toggleSteige(); });
+
+/* ---------- a summit's paths and route panel ---------- */
+function showWege(id){
   const p = byId[id]; if(!p || !map) return;
-  closeSheet(); showTab("map");
-  wp.peak = id; wp.route = null; if(routeLayer){ routeLayer.remove(); routeLayer = null; }
+  closeSheet(); closeLayersPanel(); showTab("map");
+  wp.peak = id; wp.route = null; wp.alt = 0; if(routeLayer){ routeLayer.remove(); routeLayer = null; }
   $("found").hidden = true; foundId = null;
   $("wpTitle").textContent = p.name; $("wpPanel").hidden = false; $("legend").hidden = true; $("wpRes").hidden = true;
-  fitAbovePanel(L.latLngBounds([[p.lat-.03, p.lon-.045],[p.lat+.03, p.lon+.045]]));
+  renderLegend($("wpLegend"), DIFF_ORDER);
+  if(!steigeOn){ toggleSteige(true); wp.autoSteige = true; }
   if(!poiOn.hut) togglePoi("hut"); if(!poiOn.park) togglePoi("park");
-  wpMsg("Lade Wege rund um den Gipfel …");
-  if(wegeLayer){ wegeLayer.remove(); wegeLayer = null; }
-  fillStarts();
-  try{
-    const data = await cachedJson("wege-"+id+"-"+p.lat.toFixed(4)+"-"+p.lon.toFixed(4), ()=>overpass('[out:json][timeout:40];(way["highway"~"^(path|footway|track|steps|bridleway|via_ferrata)$"](around:3500,'+p.lat.toFixed(5)+','+p.lon.toFixed(5)+');way["via_ferrata_scale"](around:3500,'+p.lat.toFixed(5)+','+p.lon.toFixed(5)+'););out tags geom;')
-      .then(js=>({ways:(js.elements||[]).filter(e=>e.geometry).map(e=>({t:e.tags||{}, g:e.geometry.map(n=>[+n.lat.toFixed(5), +n.lon.toFixed(5)])}))})));
-    if(wp.peak!==id) return;
-    wegeLayer = L.layerGroup().addTo(map);
-    const ways = data.ways.slice().sort((a,b)=>wayClass(a.t).rank - wayClass(b.t).rank);
-    ways.forEach(w=>{
-      const wc = wayClass(w.t), c = wc.cls;
-      L.polyline(w.g, {color:"#ffffff", weight:c.k===0?5:7, opacity:.85, interactive:false}).addTo(wegeLayer);
-      const line = L.polyline(w.g, {color:c.c, weight:c.k===0?2.5:4, dashArray:c.dash||(c.k===5?"9 6":null), opacity:.95}).addTo(wegeLayer);
-      const info = [wc.txt]; if(w.t.ref) info.push("Nr. "+w.t.ref); if(w.t.trail_visibility==="bad"||w.t.trail_visibility==="horrible"||w.t.trail_visibility==="no") info.push("Weg schlecht erkennbar");
-      line.bindPopup('<h4>'+escH(w.t.name || (w.t.highway==="track" ? "Forstweg" : "Steig"))+'</h4><p>'+escH(info.join(" · "))+'</p>');
-    });
-    peaksToFront();
-    const counts = {}; ways.forEach(w=>{ const l = wayClass(w.t).cls.l; counts[l] = (counts[l]||0)+1; });
-    $("wpLegend").replaceChildren(...DIFF.filter(d=>counts[d.l]).map(d=>{ const s=document.createElement("span"); s.innerHTML='<i class="sw"></i>'; s.firstChild.style.background=d.c; if(d.dash) s.firstChild.classList.add("dash"); s.append(d.l); return s; }));
-    wpMsg(ways.length ? "" : "Rund um diesen Gipfel sind in OpenStreetMap keine Wege eingetragen.");
-  }catch(e){ if(wp.peak===id) wpMsg("Wege gerade nicht abrufbar. Mit Internet noch einmal versuchen."); }
+  fitAbovePanel(L.latLngBounds([[p.lat-.03, p.lon-.045],[p.lat+.03, p.lon+.045]]));
+  wpMsg(""); fillStarts();
 }
 // keep what matters visible above the panel at the bottom of the map
 function fitAbovePanel(b){ const ph = $("wpPanel").hidden ? 0 : $("wpPanel").offsetHeight; map.fitBounds(b, {paddingTopLeft:[50,20], paddingBottomRight:[20, Math.min(ph, $("map").clientHeight*.6)+20]}); }
 function closeWege(){
   wp.peak = null; wp.route = null; wp.picking = false; $("map").classList.remove("picking");
-  if(wegeLayer){ wegeLayer.remove(); wegeLayer = null; } if(routeLayer){ routeLayer.remove(); routeLayer = null; }
+  if(routeLayer){ routeLayer.remove(); routeLayer = null; }
+  if(wp.autoSteige){ toggleSteige(false); wp.autoSteige = false; }
   $("wpPanel").hidden = true; $("legend").hidden = tab!=="map";
 }
 $("wpClose").addEventListener("click", closeWege);
@@ -1665,9 +1848,11 @@ async function calcRoute(){
   const p = byId[wp.peak]; if(!p) return;
   let s; try{ s = await startPoint(); }catch(e){ wpMsg(e && e.message==="nostart" ? "Wähle zuerst einen Startpunkt." : "Dein Standort ist gerade nicht verfügbar. Wähle einen Parkplatz oder einen Punkt auf der Karte."); return; }
   if(distKm([s.lat,s.lon],[p.lat,p.lon]) > 40){ wpMsg("Der Start ist mehr als 40 km vom Gipfel entfernt. Wähle einen näheren Startpunkt, etwa einen Parkplatz."); return; }
-  wpMsg("Berechne Route …"); $("wpGo").disabled = true;
+  wpMsg(wp.alt ? "Suche andere Variante …" : "Berechne Route …"); $("wpGo").disabled = true; $("wpAlt").disabled = true;
   try{
-    const url = "https://brouter.de/brouter?lonlats="+s.lon.toFixed(6)+","+s.lat.toFixed(6)+"|"+p.lon.toFixed(6)+","+p.lat.toFixed(6)+"&profile=hiking-mountain&alternativeidx=0&format=geojson";
+    const lim = +$("wpMax").value || 3, pref = lim<=3 ? 1 : lim===4 ? 2 : 3;
+    const url = "https://brouter.de/brouter?lonlats="+s.lon.toFixed(6)+","+s.lat.toFixed(6)+"|"+p.lon.toFixed(6)+","+p.lat.toFixed(6)+
+      "&profile=hiking-mountain&alternativeidx="+(wp.alt||0)+"&format=geojson&profile:SAC_scale_limit="+lim+"&profile:SAC_scale_preferred="+pref;
     const r = await fetch(url); const txt = await r.text();
     let js; try{ js = JSON.parse(txt); }catch(e){ throw new Error(/target|from-position|not mapped|no route/i.test(txt) ? "noroute" : "service"); }
     const f = js.features && js.features[0]; if(!f || !f.geometry) throw new Error("noroute");
@@ -1693,25 +1878,37 @@ async function calcRoute(){
       if(ci < co.length-1) segs.push({from:ci, to:co.length-1, wc:segs.length ? segs[segs.length-1].wc : wayClass({})});
     }
     if(!segs.length) segs.push({from:0, to:co.length-1, wc:null});
-    // draw
+    // distance per difficulty
+    const mix = {};
+    segs.forEach(sg=>{ let d = 0; for(let k=sg.from+1; k<=sg.to; k++) d += distKm(co[k-1], co[k]); const key = sg.wc ? sg.wc.k : "forst"; mix[key] = (mix[key]||0) + d; });
+    // draw: a soft halo marks the route, the line itself shows the difficulty of each stretch
     if(routeLayer) routeLayer.remove();
     routeLayer = L.layerGroup().addTo(map);
     const ll = co.map(c=>[c[0],c[1]]);
-    L.polyline(ll, {color:"#ffffff", weight:11, opacity:.95, interactive:false}).addTo(routeLayer);
-    L.polyline(ll, {color:css("--accent"), weight:8, opacity:.55, interactive:false}).addTo(routeLayer);
-    segs.forEach(sg=>{ if(sg.to <= sg.from) return; const c = sg.wc ? sg.wc.cls.c : css("--accent");
-      L.polyline(ll.slice(sg.from, sg.to+1), {color:c, weight:4, opacity:1, dashArray: sg.wc && sg.wc.cls.k===5 ? "9 6" : null}).addTo(routeLayer); });
-    L.circleMarker(ll[0], {radius:7, color:"#fff", weight:3, fillColor:css("--accent"), fillOpacity:1}).bindTooltip("Start").addTo(routeLayer);
+    L.polyline(ll, {color:css("--accent"), weight:16, opacity:.28, interactive:false, lineCap:"round", lineJoin:"round"}).addTo(routeLayer);
+    segs.forEach(sg=>{ if(sg.to <= sg.from) return; const w = 5.5;
+      const [cs, ls] = sg.wc ? wayStyles(sg.wc, {}, w) : [{color:"#fff", weight:w+3.5, interactive:false}, {color:css("--accent"), weight:w}];
+      L.polyline(ll.slice(sg.from, sg.to+1), Object.assign({}, cs, {interactive:false})).addTo(routeLayer);
+      L.polyline(ll.slice(sg.from, sg.to+1), Object.assign({}, ls, {interactive:false})).addTo(routeLayer); });
+    L.circleMarker(ll[0], {radius:8, color:"#fff", weight:3, fillColor:css("--climbed"), fillOpacity:1}).bindTooltip("Start: "+s.name).addTo(routeLayer);
     peaksToFront();
     fitAbovePanel(L.latLngBounds(ll).pad(.1));
     const min = walkTime(km, up, down);
-    wp.route = {co, km, up, down, min, maxRank, maxTxt, start:s, prof};
+    wp.route = {co, km, up, down, min, maxRank, maxTxt, start:s, prof, mix};
     $("wpStats").innerHTML = '<b>'+fmt1(km)+' km</b><span>Strecke</span><b>'+fmtHm(Math.round(up))+'</b><span>Aufstieg</span><b>'+fmtMin(Math.round(min))+'</b><span>Gehzeit hinauf</span>';
-    $("wpDiff").textContent = maxRank>0 ? "Schwierigste Stelle: "+maxTxt+"." : msgs.length>1 ? "Keine Schwierigkeitsangaben für diesen Weg vorhanden." : "";
+    $("wpDiff").textContent = (wp.alt ? "Variante "+(wp.alt+1)+". " : "") + (maxRank>0 ? "Schwierigste Stelle: "+maxTxt+"." : msgs.length>1 ? "Keine Schwierigkeitsangaben für diesen Weg vorhanden." : "");
+    renderMix(mix);
+    const warns = [];
+    if(mix.kst) warns.push("Die Route führt über einen Klettersteig: Klettersteigset, Helm und Erfahrung nötig.");
+    if(mix.t56) warns.push("Abschnitte mit T5–T6: oft weglos, ausgesetzt, mit Kletterstellen. Nur mit viel Erfahrung, Trittsicherheit und Schwindelfreiheit.");
+    else if(mix.t4) warns.push("Abschnitte mit T4: Trittsicherheit und Schwindelfreiheit nötig, teils Hände zur Hilfe.");
+    if(maxRank > lim && maxRank < 7) warns.push("Die Route ist schwieriger als dein gewähltes Limit, weil es hier keinen leichteren Weg gibt.");
+    $("wpWarn").textContent = warns.join(" "); $("wpWarn").hidden = !warns.length;
     $("wpRes").hidden = false; drawProfile(); wpMsg("");
   }catch(e){
-    wpMsg(e.message==="noroute" ? "Zwischen Start und Gipfel wurde kein Weg gefunden. Versuch einen anderen Startpunkt." : "Der Routendienst ist gerade nicht erreichbar. Später noch einmal versuchen.");
-  }finally{ $("wpGo").disabled = false; }
+    if(wp.alt && e.message==="noroute"){ wp.alt = 0; wpMsg("Keine weitere Variante gefunden."); }
+    else wpMsg(e.message==="noroute" ? "Zwischen Start und Gipfel wurde kein Weg gefunden. Versuch einen anderen Startpunkt oder erlaube schwierigere Wege." : "Der Routendienst ist gerade nicht erreichbar. Später noch einmal versuchen.");
+  }finally{ $("wpGo").disabled = false; $("wpAlt").disabled = false; }
 }
 function drawProfile(){
   const r = wp.route, cv = $("wpProf"); if(!r) return;
@@ -1728,7 +1925,17 @@ function drawProfile(){
   g.globalAlpha = .25; g.fillStyle = css("--climbed"); g.fill(); g.globalAlpha = 1;
   g.beginPath(); pts.forEach(([d,e],i)=>i?g.lineTo(X(d),Yp(e)):g.moveTo(X(d),Yp(e))); g.strokeStyle = css("--climbed"); g.lineWidth = 2; g.stroke();
 }
-$("wpGo").addEventListener("click", calcRoute);
+$("wpGo").addEventListener("click", ()=>{ wp.alt = 0; calcRoute(); });
+$("wpAlt").addEventListener("click", ()=>{ wp.alt = ((wp.alt||0) + 1) % 4; calcRoute(); });
+$("wpMax").value = String(lsGet("gipfelbuch-hallein-maxsac", 3));
+$("wpMax").addEventListener("change", ()=>{ lsSet("gipfelbuch-hallein-maxsac", +$("wpMax").value); wp.alt = 0; });
+function renderMix(mix){
+  const tot = Object.values(mix).reduce((a,b)=>a+b, 0); if(!tot){ $("wpMix").replaceChildren(); return; }
+  const keys = DIFF_ORDER.filter(k=>mix[k] > 0.005);
+  const fill = k => k==="t56" ? "repeating-linear-gradient(90deg,#111 0 3px,#fff 3px 5px)" : DIFF[k].c;
+  $("wpMix").innerHTML = '<div class="mixbar">'+keys.map(k=>'<i style="width:'+(mix[k]/tot*100).toFixed(1)+'%;background:'+fill(k)+'"></i>').join("")+'</div>'+
+    '<div class="mixchips">'+keys.map(k=>'<span><i style="background:'+fill(k)+'"></i>'+SHORT[k]+' '+fmt1(mix[k])+' km</span>').join("")+'</div>';
+}
 $("wpGpx").addEventListener("click", ()=>{
   const r = wp.route, p = byId[wp.peak]; if(!r || !p) return;
   const x = s => String(s).replace(/[<&>"]/g, c=>({"<":"&lt;","&":"&amp;",">":"&gt;",'"':"&quot;"}[c]));
@@ -2572,7 +2779,7 @@ function showTab(t){
   tab = t;
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.tab===t)));
   $("listView").hidden = t!=="list"; $("panoView").hidden = t!=="pano"; $("statsView").hidden = t!=="stats";
-  if(t!=="map"){ closeMapSearch(); if(!$("found").hidden) closeFound(); }
+  if(t!=="map"){ closeMapSearch(); if(!$("found").hidden) closeFound(); closeLayersPanel(); }
   $("legend").hidden = t!=="map" || !$("wpPanel").hidden || !$("found").hidden; $("layers").hidden = t!=="map" || !$("mSearch").hidden; $("wpPanel").style.display = t==="map" ? "" : "none"; if(t!=="map"){ $("banner").hidden = true; layerMsg(""); }
   $("map").style.visibility = t==="map" ? "" : "hidden";
   if(t==="map" && map) setTimeout(()=>map.invalidateSize(),0);

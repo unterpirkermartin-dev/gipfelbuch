@@ -1,5 +1,5 @@
 // Gipfelbuch Hallein – offline support
-const APP = "gipfelbuch-app-v7";
+const APP = "gipfelbuch-app-v8";
 const TILES = "gipfelbuch-tiles-v1";       // map tiles seen while browsing (trimmed)
 const OFFLINE = "gipfelbuch-offline";      // areas saved on purpose (never trimmed)
 const DEM = "gipfelbuch-dem";              // terrain tiles for panorama / peak finder
@@ -24,7 +24,7 @@ self.addEventListener("fetch", e => {
     return;
   }
   // Map tiles, terrain tiles and fonts: saved copy first (from any cache), otherwise load and keep it.
-  const isTile = url.hostname.endsWith("tile.opentopomap.org") || url.hostname === "tile.waymarkedtrails.org" || url.hostname === "s3.amazonaws.com" && url.pathname.startsWith("/elevation-tiles-prod/");
+  const isTile = url.hostname.endsWith("tile.opentopomap.org") || url.hostname === "tile.waymarkedtrails.org" || url.hostname === "mapsneu.wien.gv.at" || url.hostname.endsWith(".bayernwolke.de") || url.hostname === "s3.amazonaws.com" && url.pathname.startsWith("/elevation-tiles-prod/");
   if (isTile || url.hostname.endsWith("gstatic.com") || url.hostname === "fonts.googleapis.com") {
     e.respondWith(caches.match(req.url).then(hit => hit || fetch(req).then(res => {
       // requests made by the app's own code (saving areas, terrain) are stored by the app itself
