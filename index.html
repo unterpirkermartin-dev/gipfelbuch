@@ -753,9 +753,24 @@ nav button[aria-selected="true"]{color:var(--ink);border-top-color:var(--accent)
 .legend{position:absolute;left:10px;bottom:10px;z-index:500;display:flex;flex-wrap:wrap;gap:4px 12px;background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.78rem;color:var(--muted);max-width:calc(100% - 20px)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend .hint-lp{flex-basis:100%;font-size:.72rem}
-.banner{position:absolute;top:10px;left:56px;right:10px;z-index:900;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gps);border-radius:8px;padding:10px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+.banner{position:absolute;top:96px;left:56px;right:10px;z-index:900;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gps);border-radius:8px;padding:10px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
 .banner p{margin:0}
 .banner .row{display:flex;gap:8px;flex-wrap:wrap}
+.layers{position:absolute;right:10px;top:10px;z-index:800;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.layers button{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:2px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-size:.82rem;font-weight:600;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.layers button[aria-pressed="true"]{border-color:var(--ink)}
+.ico{display:inline-grid;place-items:center;width:18px;height:18px;flex:none;font-style:normal;font-weight:700;font-size:12px;line-height:1;color:#fff;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.ico.hut{background:#8A4B2A;border-radius:3px;clip-path:polygon(50% 0,100% 45%,100% 100%,0 100%,0 45%)}
+.ico.park{background:#2F6AD0;border-radius:4px}
+.poi-icon .ico{width:20px;height:20px}
+.layer-msg{position:absolute;right:10px;top:92px;z-index:800;max-width:220px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.78rem;color:var(--muted)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--ink)}
+.leaflet-popup-content{margin:12px 14px;font-family:var(--f-body);font-size:.88rem;line-height:1.4}
+.leaflet-popup-content h4{margin:0 0 4px;font-size:1rem}
+.leaflet-popup-content p{margin:0 0 6px;color:var(--muted)}
+.leaflet-popup-content .links{margin-top:6px}
+.leaflet-popup-content .links a{font-size:.8rem;padding:5px 9px}
+.leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
 .nomap{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
 
 /* Panorama */
@@ -763,6 +778,7 @@ nav button[aria-selected="true"]{color:var(--ink);border-top-color:var(--accent)
 .pano-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
 .pano-head p{margin:0;font-size:.8rem;color:var(--muted);min-width:0}
 .zoom{display:flex;gap:4px}
+.zoom .primary{width:auto;padding:0 12px;border:0;font-size:.9rem}
 .zoom button{width:34px;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer;font-size:1.1rem}
 .pano-wrap{position:relative;flex:1;min-height:0;touch-action:none;cursor:grab}
 #pano{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -804,6 +820,13 @@ h2.sec{margin:8px 0 0;font-family:var(--f-display);font-weight:700;font-size:1.1
 .ascents li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-family:var(--f-mono);font-size:.85rem}
 .ascents li button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1;padding:2px 6px}
 .addrow{display:flex;gap:8px;flex-wrap:wrap}
+.ascents li.asc{padding:0;border:0;background:transparent;display:block}
+.ascents li.asc button{width:100%;text-align:left;display:flex;flex-direction:column;gap:1px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer;font:inherit;color:var(--ink)}
+.ascents li.asc b{font-weight:600;font-size:.9rem}
+.ascents li.asc span{font-family:var(--f-mono);font-size:.76rem;color:var(--muted)}
+.ascents li.asc.editing button{border-color:var(--accent)}
+.ascform{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.ascform label.fl input,.ascform label.fl select{background:var(--surface)}
 .addrow input{flex:1 1 140px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
 label.fl{display:flex;flex-direction:column;gap:5px;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 label.fl input,label.fl textarea,label.fl select{text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink);padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);min-width:0}
@@ -835,6 +858,24 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
 .viewer .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .viewer .secondary{background:#1c2421;color:#eee;border-color:#3a4642}
 .viewer .danger{color:#ff8a73;border-color:#ff8a73}
+/* Peak finder camera */
+.ar{position:fixed;inset:0;z-index:2000;background:#000;color:#fff;overflow:hidden;touch-action:none}
+.ar video,.ar canvas{position:absolute;inset:0;width:100%;height:100%}
+.ar video{object-fit:cover}
+.ar-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;background:linear-gradient(rgba(0,0,0,.55),transparent)}
+.ar-btn{width:42px;height:42px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;font-size:1.3rem;cursor:pointer;flex:none}
+.ar-read{flex:1;text-align:center;font-family:var(--f-mono);font-size:.82rem;text-shadow:0 1px 3px #000;min-width:0}
+.ar-set{position:absolute;top:calc(env(safe-area-inset-top,0px) + 64px);right:12px;left:12px;max-width:360px;margin-left:auto;background:rgba(15,20,18,.92);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:.88rem}
+.ar-set label{display:flex;flex-direction:column;gap:4px}
+.ar-set label.chk{flex-direction:row;align-items:center;gap:8px}
+.ar-set output{font-family:var(--f-mono);color:#F2C230}
+.ar-set p{margin:0;color:#c9d2ce;font-size:.8rem}
+.ar-msg{position:absolute;left:16px;right:16px;top:45%;transform:translateY(-50%);background:rgba(15,20,18,.9);border-radius:12px;padding:14px 16px;text-align:center;font-size:.95rem;line-height:1.45}
+.ar-card{position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);background:rgba(15,20,18,.92);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:12px}
+.ar-card div{flex:1;min-width:0;display:flex;flex-direction:column}
+.ar-card b{font-family:var(--f-display);font-size:1.3rem;text-transform:uppercase;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ar-card span{font-family:var(--f-mono);font-size:.78rem;color:#c9d2ce}
+.layers .cam{border-color:var(--ink)}
 @media (min-width:760px){.sheet{left:auto;right:16px;bottom:16px;width:400px;border-radius:14px;border:1px solid var(--line)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -853,6 +894,12 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
   <main>
     <div class="view" id="map" role="region" aria-label="Karte der Gipfel"></div>
     <div class="legend" id="legend"><span><i class="dot on"></i>Bestiegen</span><span><i class="dot goal"></i>Ziel</span><span><i class="dot"></i>Offen</span><span class="hint-lp">Lange auf die Karte drücken, um einen Gipfel hinzuzufügen.</span></div>
+    <div class="layers" id="layers" role="group" aria-label="Zusatzebenen">
+      <button type="button" id="lyHut" aria-pressed="false"><i class="ico hut"></i>Hütten</button>
+      <button type="button" id="lyPark" aria-pressed="false"><i class="ico park">P</i>Parkplätze</button>
+      <button type="button" id="arOpen1" class="cam"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg>Gipfel-Erkenner</button>
+    </div>
+    <div class="layer-msg" id="layerMsg" hidden></div>
     <div class="banner" id="banner" hidden role="status">
       <p id="bannerText"></p>
       <div class="row"><button type="button" class="primary" id="bannerYes">Besteigung eintragen</button><button type="button" class="secondary" id="bannerNo">Nein danke</button></div>
@@ -883,7 +930,7 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
     <section class="view" id="panoView" hidden>
       <div class="pano-head">
         <p id="panoNote">Rundblick von Hallein (447 m). Wischen zum Drehen, Gipfel antippen.</p>
-        <div class="zoom"><button type="button" id="pzOut" aria-label="Weiter weg">−</button><button type="button" id="pzIn" aria-label="Näher heran">+</button></div>
+        <div class="zoom"><button type="button" class="primary" id="arOpen2">Gipfel-Erkenner</button><button type="button" id="pzOut" aria-label="Weiter weg">−</button><button type="button" id="pzIn" aria-label="Näher heran">+</button></div>
       </div>
       <div class="pano-wrap" id="panoWrap"><canvas id="pano" aria-label="Rundblick mit Gipfeln"></canvas></div>
     </section>
@@ -909,7 +956,23 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
       <div class="block">
         <h3>Tourenbuch</h3>
         <ul class="ascents" id="sAsc"></ul>
-        <div class="addrow"><input type="date" id="sAscDate" aria-label="Datum der Besteigung"><button type="button" class="secondary" id="sAscAdd">Besteigung eintragen</button></div>
+        <button type="button" class="secondary" id="sAscNew">+ Besteigung eintragen</button>
+        <form class="ascform" id="ascForm" hidden>
+          <div class="two">
+            <label class="fl">Datum<input type="date" id="fDate" required></label>
+            <label class="fl">Art<select id="fArt"></select></label>
+            <label class="fl">Höhenmeter<input type="number" id="fHm" inputmode="numeric" min="0" step="10" placeholder="z. B. 1200"></label>
+            <label class="fl">Gehzeit (h:mm)<input type="text" id="fTime" inputmode="numeric" placeholder="z. B. 3:30"></label>
+          </div>
+          <label class="fl">Mit wem<input type="text" id="fMit" list="mitList" placeholder="z. B. Anna, Peter" autocomplete="off"></label>
+          <datalist id="mitList"></datalist>
+          <p class="hint" id="fMsg"></p>
+          <div class="addrow">
+            <button type="submit" class="primary" id="fSave">Speichern</button>
+            <button type="button" class="secondary" id="fCancel">Abbrechen</button>
+            <button type="button" class="danger" id="fDel" hidden>Löschen</button>
+          </div>
+        </form>
       </div>
       <label class="fl">Notizen<textarea id="sNote" placeholder="Route, Wetter, mit wem, Gipfelkreuz …"></textarea></label>
       <div class="block">
@@ -968,6 +1031,27 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
     </div>
   </main>
 
+  <div class="ar" id="ar" hidden aria-label="Gipfel-Erkenner">
+    <video id="arVideo" playsinline muted autoplay></video>
+    <canvas id="arCanvas"></canvas>
+    <div class="ar-top">
+      <button type="button" class="ar-btn" id="arClose" aria-label="Gipfel-Erkenner schließen">×</button>
+      <div class="ar-read" id="arRead">Starte …</div>
+      <button type="button" class="ar-btn" id="arSetBtn" aria-label="Einstellungen">⚙</button>
+    </div>
+    <div class="ar-set" id="arSet" hidden>
+      <label>Kompass korrigieren <output id="arOffOut">0°</output><input type="range" id="arOff" min="-30" max="30" step="1" value="0"></label>
+      <label>Bildwinkel der Kamera <output id="arFovOut">66°</output><input type="range" id="arFov" min="40" max="95" step="1" value="66"></label>
+      <label class="chk"><input type="checkbox" id="arAll"> Auch verdeckte Gipfel zeigen</label>
+      <p>Stimmen die Namen nicht mit den Bergen überein? Ziehe mit dem Finger seitlich über das Bild oder stell den Kompass hier nach. Liegen die Namen zu weit auseinander oder zu eng beisammen, ändere den Bildwinkel. Bei großem Versatz das Handy einmal in Form einer Acht bewegen, das kalibriert den Kompass.</p>
+    </div>
+    <div class="ar-msg" id="arMsg" hidden></div>
+    <div class="ar-card" id="arCard" hidden>
+      <div><b id="arCName"></b><span id="arCMeta"></span></div>
+      <button type="button" class="primary" id="arCOpen">Details</button>
+    </div>
+  </div>
+
   <nav role="tablist">
     <button role="tab" data-tab="map" aria-selected="true">Karte</button>
     <button role="tab" data-tab="list" aria-selected="false">Liste</button>
@@ -1010,9 +1094,19 @@ function slug(s){ return s.replace(/ß/g,"ss").normalize("NFKD").replace(/[̀-ͯ
 /* ---------- data ---------- */
 let custom = lsGet(LS.custom, []);              // [{id,name,lat,lon,t}]
 let ele = lsGet(LS.ele, {});                    // id -> {h, src:"osm"|"dem"}
-let state = lsGet(LS.state, {});                // id -> {s:0|1|2, a:[dates], n, t}
+let state = lsGet(LS.state, {});                // id -> {s:0|1|2, a:[{id,d,art,hm,min,mit}], n, t}
 // migrate older entries (single date "d") to the tour log
-Object.keys(state).forEach(id=>{ const r=state[id]; if(!r || typeof r!=="object"){ delete state[id]; return; } if(!Array.isArray(r.a)) r.a = r.d ? [r.d] : []; delete r.d; r.s = +r.s||0; r.n = r.n||""; });
+const ART = ["Wanderung","Skitour","Schneeschuh","Klettersteig","Klettern","Mountainbike","Trailrun","Sonstiges"];
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function normAsc(x){
+  if(typeof x === "string") return {id:uid(), d:x};
+  if(!x || typeof x!=="object") return null;
+  const o = {id:String(x.id||uid()), d:String(x.d||"")};
+  if(x.art) o.art = String(x.art); if(isFinite(+x.hm) && +x.hm>0) o.hm = Math.round(+x.hm);
+  if(isFinite(+x.min) && +x.min>0) o.min = Math.round(+x.min); if(x.mit) o.mit = String(x.mit);
+  return o;
+}
+Object.keys(state).forEach(id=>{ const r=state[id]; if(!r || typeof r!=="object"){ delete state[id]; return; } r.a = (Array.isArray(r.a) ? r.a : (r.d ? [r.d] : [])).map(normAsc).filter(Boolean); delete r.d; r.s = +r.s||0; r.n = r.n||""; });
 
 let PEAKS = [], byId = {};
 function makePeak(id,name,lat,lon,star,isCustom){
@@ -1156,6 +1250,9 @@ function initMap(){
   const labels = ()=> el.classList.toggle("hide-labels", map.getZoom() < 12);
   map.on("zoomend", labels); labels();
   map.on("contextmenu", e=>openAdd(e.latlng.lat, e.latlng.lng));
+  map.on("moveend", ()=>{ clearTimeout(poiTimer); poiTimer = setTimeout(loadPoi, 400); });
+  const lastLayers = lsGet("gipfelbuch-hallein-layers", {});
+  setTimeout(()=>{ if(lastLayers.hut) togglePoi("hut"); if(lastLayers.park) togglePoi("park"); }, 0);
   // locate button
   const Loc = L.Control.extend({options:{position:"topleft"}, onAdd(){
     const b = L.DomUtil.create("button","map-btn"); b.type="button"; b.id="locBtn"; b.title="Mein Standort"; b.setAttribute("aria-label","Mein Standort"); b.setAttribute("aria-pressed","false");
@@ -1167,6 +1264,85 @@ function restyle(id){ if(!map) return; (id?[byId[id]].filter(Boolean):PEAKS).for
 const themeChanged = ()=>setTimeout(()=>{ restyle(); if(!$("panoView").hidden) drawPano(); },0);
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeChanged);
 new MutationObserver(themeChanged).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+/* ---------- huts & parking from OpenStreetMap ---------- */
+const POI_LS = "gipfelbuch-hallein-poi";
+let poiCache = lsGet(POI_LS, {});         // key -> {t, items:[{id,k,lat,lon,tags}]}
+const poiLayers = {hut:null, park:null}, poiOn = {hut:false, park:false}, poiSeen = {hut:new Set(), park:new Set()};
+const POI_MAX_AGE = 30*24*3600*1000;
+const CELL = {hut:.2, park:.05};
+function cellsFor(b, c){ const out=[]; for(let la=Math.floor(b.getSouth()/c); la<=Math.floor(b.getNorth()/c); la++) for(let lo=Math.floor(b.getWest()/c); lo<=Math.floor(b.getEast()/c); lo++) out.push([la,lo]); return out; }
+function poiIcon(kind){ return L.divIcon({className:"poi-icon", html: kind==="hut" ? '<i class="ico hut"></i>' : '<i class="ico park">P</i>', iconSize:[20,20], iconAnchor:[10,10], popupAnchor:[0,-10]}); }
+const escH = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function poiPopup(it){
+  const t = it.tags||{}, isHut = it.k==="hut";
+  const name = t.name || (isHut ? (t.tourism==="wilderness_hut" ? "Biwak / Notunterkunft" : "Hütte") : "Parkplatz");
+  const info = [];
+  if(isHut){ if(t.ele) info.push(t.ele+" m"); if(t.tourism==="wilderness_hut") info.push("unbewirtschaftet"); if(t.operator) info.push(t.operator); if(t.opening_hours) info.push("Geöffnet: "+t.opening_hours); if(t.beds) info.push(t.beds+" Betten"); if(t.phone) info.push("Tel. "+t.phone); }
+  else { if(t.fee==="yes") info.push("gebührenpflichtig"); else if(t.fee==="no") info.push("kostenlos"); if(t.capacity) info.push(t.capacity+" Plätze"); if(t.surface==="gravel"||t.surface==="unpaved"||t.surface==="ground") info.push("unbefestigt"); if(t.access && t.access!=="yes") info.push("Zugang: "+t.access); }
+  const q = it.lat.toFixed(5)+","+it.lon.toFixed(5);
+  const web = t.website || t["contact:website"];
+  const near = PEAKS.map(p=>({p, d:distKm([it.lat,it.lon],[p.lat,p.lon])})).sort((a,b)=>a.d-b.d).slice(0,2).filter(o=>o.d<4);
+  return '<h4>'+escH(name)+'</h4>'+(info.length?'<p>'+escH(info.join(" · "))+'</p>':'')+
+    (near.length?'<p>Nahe: '+near.map(o=>escH(o.p.name)+" ("+fmt1(o.d)+" km)").join(", ")+'</p>':'')+
+    '<div class="links"><a href="https://www.google.com/maps/dir/?api=1&destination='+q+'" target="_blank" rel="noopener">Navigation</a><a href="geo:'+q+'?q='+q+'">Karten-App</a>'+
+    (web && /^https?:\/\//.test(web) ? '<a href="'+escH(web)+'" target="_blank" rel="noopener">Webseite</a>' : '')+'</div>';
+}
+function showPoiItems(kind, items){
+  const lay = poiLayers[kind]; if(!lay) return;
+  items.forEach(it=>{ if(poiSeen[kind].has(it.id)) return; poiSeen[kind].add(it.id); L.marker([it.lat,it.lon],{icon:poiIcon(kind), keyboard:false}).bindPopup(()=>poiPopup(it),{maxWidth:260}).addTo(lay); });
+}
+function layerMsg(t){ const el=$("layerMsg"); el.textContent = t||""; el.hidden = !t; }
+let poiBusy = false, poiTimer = null;
+async function loadPoi(){
+  if(!map) return;
+  const kinds = ["hut","park"].filter(k=>poiOn[k]); if(!kinds.length){ layerMsg(""); return; }
+  const z = map.getZoom();
+  const need = []; const now = Date.now();
+  if(poiOn.park && z < 12){ layerMsg("Zum Anzeigen der Parkplätze weiter hineinzoomen."); }
+  else layerMsg("");
+  const kindsHere = kinds.filter(k=> k==="hut" ? z>=9 : z>=12);
+  if(z < 9 && poiOn.hut) layerMsg("Zum Anzeigen der Hütten weiter hineinzoomen.");
+  kindsHere.forEach(k=>{ const cells = cellsFor(map.getBounds().pad(.1), CELL[k]); if(cells.length > 120) return;
+    cells.forEach(([a,b])=>{ const key=k+":"+a+":"+b, c=poiCache[key]; if(c && now-c.t < POI_MAX_AGE) showPoiItems(k, c.items); else need.push([k,a,b,key]); }); });
+  if(!need.length || poiBusy || !navigator.onLine) return;
+  poiBusy = true; layerMsg("Lade "+(need.some(n=>n[0]==="hut")?"Hütten":"Parkplätze")+" …");
+  try{
+    const sw = need.map(n=>[n[1]*CELL[n[0]], n[2]*CELL[n[0]]]), ne = need.map(n=>[(n[1]+1)*CELL[n[0]], (n[2]+1)*CELL[n[0]]]);
+    const bb = [Math.min(...sw.map(x=>x[0])), Math.min(...sw.map(x=>x[1])), Math.max(...ne.map(x=>x[0])), Math.max(...ne.map(x=>x[1]))].map(v=>v.toFixed(3)).join(",");
+    const wantHut = need.some(n=>n[0]==="hut"), wantPark = need.some(n=>n[0]==="park");
+    const q = '[out:json][timeout:30];('+(wantHut?'nwr["tourism"~"^(alpine_hut|wilderness_hut)$"]('+bb+');':'')+(wantPark?'nwr["amenity"="parking"]["access"!~"^(private|customers|no|permissive_no)$"]('+bb+');':'')+');out center tags;';
+    const r = await fetch("https://overpass-api.de/api/interpreter",{method:"POST", body:"data="+encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}});
+    if(!r.ok) throw new Error("http");
+    const js = await r.json(); const byCell = {};
+    need.forEach(n=>byCell[n[3]] = []);
+    (js.elements||[]).forEach(e=>{
+      const lat = e.lat ?? (e.center&&e.center.lat), lon = e.lon ?? (e.center&&e.center.lon); if(lat==null) return;
+      const t = e.tags||{}; const k = t.amenity==="parking" ? "park" : "hut";
+      if(k==="park" && (t.parking==="underground" || t.parking==="multi-storey" || t.parking==="rooftop")) return;
+      const key = k+":"+Math.floor(lat/CELL[k])+":"+Math.floor(lon/CELL[k]);
+      if(!byCell[key]) return;
+      const keep = {}; ["name","ele","tourism","operator","opening_hours","beds","phone","fee","capacity","surface","access","website","contact:website","amenity","parking"].forEach(f=>{ if(t[f]) keep[f]=t[f]; });
+      byCell[key].push({id:e.type+e.id, k, lat, lon, tags:keep});
+    });
+    Object.entries(byCell).forEach(([key,items])=>{ poiCache[key] = {t:now, items}; showPoiItems(key.split(":")[0], items); });
+    // keep the cache from growing without limit
+    const keys = Object.keys(poiCache); if(keys.length > 600) keys.sort((a,b)=>poiCache[a].t-poiCache[b].t).slice(0, keys.length-600).forEach(k=>delete poiCache[k]);
+    lsSet(POI_LS, poiCache);
+    layerMsg("");
+  }catch(err){ layerMsg("Hütten/Parkplätze gerade nicht abrufbar. Später noch einmal versuchen."); }
+  finally{ poiBusy = false; }
+}
+function togglePoi(kind){
+  if(!map) return;
+  poiOn[kind] = !poiOn[kind];
+  $(kind==="hut"?"lyHut":"lyPark").setAttribute("aria-pressed", String(poiOn[kind]));
+  if(poiOn[kind]){ poiLayers[kind] = L.layerGroup().addTo(map); poiSeen[kind] = new Set(); loadPoi(); }
+  else { if(poiLayers[kind]) poiLayers[kind].remove(); poiLayers[kind] = null; loadPoi(); }
+  lsSet("gipfelbuch-hallein-layers", poiOn);
+}
+$("lyHut").addEventListener("click", ()=>togglePoi("hut"));
+$("lyPark").addEventListener("click", ()=>togglePoi("park"));
 
 /* ---------- GPS: where am I, summit check-in ---------- */
 let watchId = null, me = null, meMarker = null, meCircle = null, firstFix = true;
@@ -1196,14 +1372,14 @@ function onPos(pos){
   let near = null, nd = 1e9;
   PEAKS.forEach(p=>{ const d = distKm([la,lo],[p.lat,p.lon])*1000; if(d<nd){ nd=d; near=p; } });
   setSave(near ? "Standort ±"+Math.round(acc)+" m · nächster Gipfel: "+near.name+" ("+fmtInt(nd)+" m)" : "Standort gefunden");
-  if(near && nd <= 150 && acc <= 120 && !asked.has(near.id) && !(rec(near.id).a||[]).includes(today())){
+  if(near && nd <= 150 && acc <= 120 && !asked.has(near.id) && !(rec(near.id).a||[]).some(x=>x.d===today())){
     asked.add(near.id); checkinPeak = near.id;
     $("bannerText").textContent = "Du bist am Gipfel: "+near.name+" ("+fmtInt(nd)+" m entfernt). Heutige Besteigung eintragen?";
     $("banner").hidden = false; showTab("map");
   }
 }
 let checkinPeak = null;
-$("bannerYes").addEventListener("click", ()=>{ if(checkinPeak){ addAscent(checkinPeak, today()); openSheet(checkinPeak); } $("banner").hidden = true; });
+$("bannerYes").addEventListener("click", ()=>{ if(checkinPeak){ const aid = addAscent(checkinPeak, today()); openSheet(checkinPeak); openAscForm(aid); } $("banner").hidden = true; });
 $("bannerNo").addEventListener("click", ()=>{ $("banner").hidden = true; });
 
 /* ---------- list ---------- */
@@ -1268,14 +1444,7 @@ function fillSheet(){
   $("sGrp").textContent = p.grp;
   $("sPos").textContent = fmt4(p.lat)+"° N · "+fmt4(p.lon)+"° E";
   [["bOpen",0],["bGoal",2],["bDone",1]].forEach(([id,s])=>$(id).setAttribute("aria-pressed", String(r.s===s)));
-  const asc = (r.a||[]).slice().sort().reverse();
-  $("sAsc").replaceChildren(...(asc.length ? asc.map(d=>{
-    const li=document.createElement("li"); const sp=document.createElement("span"); sp.textContent=fmtDate(d);
-    const x=document.createElement("button"); x.type="button"; x.textContent="×"; x.setAttribute("aria-label","Besteigung vom "+fmtDate(d)+" entfernen");
-    x.addEventListener("click",()=>{ const a=(rec(p.id).a||[]).slice(); const i=a.indexOf(d); if(i>=0) a.splice(i,1); update(p.id,{a}); });
-    li.append(sp,x); return li;
-  }) : [Object.assign(document.createElement("li"),{textContent: r.s===1 ? "Bestiegen, Datum unbekannt" : "Noch keine Besteigung eingetragen"})]));
-  if(!$("sAscDate").value) $("sAscDate").value = today();
+  renderAscents(p, r);
   if(document.activeElement!==$("sNote")) $("sNote").value = r.n||"";
   $("sTag").textContent = p.star ? "★ In PeakFinder markiert" : p.custom ? "Von dir hinzugefügt" : "";
   const q = p.lat.toFixed(5)+","+p.lon.toFixed(5);
@@ -1324,7 +1493,7 @@ async function fillWeather(){
 function openSheet(id){
   flushNote(); closeAllSheets();
   const prev = selected; selected = id; sheet.hidden = false; sheet.scrollTop = 0;
-  $("sAscDate").value = today(); $("delAsk").hidden = false; $("delConfirm").hidden = true;
+  closeAscForm(); $("delAsk").hidden = false; $("delConfirm").hidden = true;
   fillSheet(); fillPhotos(); fillWeather();
   if(prev) restyle(prev); restyle(id);
   if(markers[id]) markers[id].bringToFront();
@@ -1336,8 +1505,7 @@ function setStatus(s){ if(!selected) return; update(selected,{s}); }
 $("bOpen").addEventListener("click", ()=>setStatus(0));
 $("bGoal").addEventListener("click", ()=>setStatus(2));
 $("bDone").addEventListener("click", ()=>setStatus(1));
-function addAscent(id, d){ const a=(rec(id).a||[]).slice(); if(d && !a.includes(d)) a.push(d); update(id,{a, s:1}); }
-$("sAscAdd").addEventListener("click", ()=>{ if(selected) addAscent(selected, $("sAscDate").value || today()); });
+function addAscent(id, d){ const a=(rec(id).a||[]).slice(); const x = {id:uid(), d}; a.push(x); update(id,{a, s:1}); return x.id; }
 function flushNote(){ if(noteTimer){ clearTimeout(noteTimer); noteTimer=null; if(selected && $("sNote").value!==(rec(selected).n||"")) update(selected,{n:$("sNote").value}); } }
 $("sNote").addEventListener("input", ()=>{ setSave("Ungespeicherte Notiz …"); clearTimeout(noteTimer); noteTimer=setTimeout(flushNote, 900); });
 $("sNote").addEventListener("blur", flushNote);
@@ -1361,6 +1529,57 @@ $("sDelYes").addEventListener("click", async ()=>{
   delete state[id]; delete ele[id]; lsSet(LS.ele, ele); persist();
   if(markers[id]){ markers[id].remove(); delete markers[id]; }
   selected = null; sheet.hidden = true; rebuildPeaks(); fillGroupSelect(); renderAll(); setSave("Gipfel gelöscht");
+});
+
+/* ---------- tour log ---------- */
+const fmtHm = n => (n>=1000 ? Math.floor(n/1000)+"."+String(n%1000).padStart(3,"0") : String(n))+" hm";
+const fmtMin = m => Math.floor(m/60)+":"+String(m%60).padStart(2,"0")+" h";
+function parseTime(t){ t=(t||"").trim(); if(!t) return 0; let m = t.match(/^(\d{1,2})[:.,h ]\s*(\d{1,2})?\s*h?$/i); if(m) return (+m[1])*60 + (+(m[2]||0)); m = t.match(/^(\d+)\s*(min)?$/i); if(m) return m[2] ? +m[1] : (+m[1])*60; return NaN; }
+$("fArt").append(new Option("– Art wählen –",""), ...ART.map(a=>new Option(a,a)));
+let editAsc = null;   // id of the ascent being edited, or "new"
+function renderAscents(p, r){
+  const asc = (r.a||[]).slice().sort((x,y)=>(y.d||"").localeCompare(x.d||""));
+  if(!asc.length){ $("sAsc").replaceChildren(Object.assign(document.createElement("li"),{textContent: r.s===1 ? "Bestiegen, Datum unbekannt" : "Noch keine Besteigung eingetragen"})); return; }
+  $("sAsc").replaceChildren(...asc.map(x=>{
+    const li=document.createElement("li"); li.className="asc"+(editAsc===x.id?" editing":"");
+    const b=document.createElement("button"); b.type="button";
+    const t=document.createElement("b"); t.textContent = (x.d ? fmtDate(x.d) : "Ohne Datum") + (x.art ? " · "+x.art : "");
+    const parts = []; if(x.hm) parts.push(fmtHm(x.hm)); if(x.min) parts.push(fmtMin(x.min)); if(x.mit) parts.push("mit "+x.mit);
+    const m=document.createElement("span"); m.textContent = parts.length ? parts.join(" · ") : "Antippen, um Details zu ergänzen";
+    b.append(t,m); b.addEventListener("click",()=>openAscForm(x.id)); li.appendChild(b); return li;
+  }));
+}
+function companions(){ const c = {}; PEAKS.forEach(p=>(rec(p.id).a||[]).forEach(x=>splitMit(x.mit).forEach(n=>c[n]=(c[n]||0)+1))); return c; }
+function splitMit(s){ return (s||"").split(/,|;|\bund\b|&|\+/i).map(x=>x.trim()).filter(Boolean); }
+function openAscForm(id){
+  const p = byId[selected]; if(!p) return;
+  const x = id && id!=="new" ? (rec(p.id).a||[]).find(a=>a.id===id) : null;
+  editAsc = x ? x.id : "new";
+  $("fDate").value = x ? (x.d||"") : today(); $("fArt").value = x ? (x.art||"") : "";
+  $("fHm").value = x && x.hm ? x.hm : ""; $("fTime").value = x && x.min ? Math.floor(x.min/60)+":"+String(x.min%60).padStart(2,"0") : ""; $("fMit").value = x ? (x.mit||"") : "";
+  $("fDel").hidden = !x; $("fDel").textContent = "Löschen"; delete $("fDel").dataset.armed; $("fMsg").textContent = "";
+  $("fSave").textContent = x ? "Änderungen speichern" : "Besteigung speichern";
+  $("mitList").replaceChildren(...Object.entries(companions()).sort((a,b)=>b[1]-a[1]).slice(0,20).map(([n])=>new Option(n)));
+  $("ascForm").hidden = false; $("sAscNew").hidden = true; renderAscents(p, rec(p.id));
+  setTimeout(()=>$("ascForm").scrollIntoView({block:"nearest", behavior:"smooth"}), 30);
+}
+function closeAscForm(){ editAsc = null; $("ascForm").hidden = true; $("sAscNew").hidden = false; }
+$("sAscNew").addEventListener("click", ()=>openAscForm("new"));
+$("fCancel").addEventListener("click", ()=>{ closeAscForm(); fillSheet(); });
+$("ascForm").addEventListener("submit", e=>{
+  e.preventDefault(); const id = selected; if(!id) return;
+  const min = parseTime($("fTime").value);
+  if(isNaN(min)){ $("fMsg").textContent = "Gehzeit bitte als Stunden:Minuten eingeben, z. B. 3:30."; return; }
+  const hm = parseInt($("fHm").value, 10);
+  const x = {id: editAsc && editAsc!=="new" ? editAsc : uid(), d: $("fDate").value || today()};
+  if($("fArt").value) x.art = $("fArt").value; if(hm>0) x.hm = hm; if(min>0) x.min = min; if($("fMit").value.trim()) x.mit = $("fMit").value.trim();
+  const a = (rec(id).a||[]).filter(y=>y.id!==x.id); a.push(x);
+  closeAscForm(); update(id, {a, s:1}); setSave("Besteigung gespeichert");
+});
+$("fDel").addEventListener("click", ()=>{
+  const b = $("fDel"); if(!b.dataset.armed){ b.dataset.armed = "1"; b.textContent = "Wirklich löschen?"; return; }
+  const id = selected, aid = editAsc; closeAscForm();
+  if(id && aid) update(id, {a:(rec(id).a||[]).filter(y=>y.id!==aid)});
 });
 
 /* ---------- photo viewer ---------- */
@@ -1404,6 +1623,8 @@ $("aSave").addEventListener("click", ()=>{
 const pano = $("pano"), wrap = $("panoWrap");
 let pxDeg = 9, offset = 135, panoHits = [];
 const VEX = 3;    // vertical exaggeration
+// rough footprint of a mountain: the higher above the valley, the wider its base (about 25° average slope)
+function baseR(p){ const e = eleOf(p); return Math.max(600, Math.min(6000, ((e ? e.h : 1000) - H0) * 2.2)); }
 function panoPeaks(){
   return PEAKS.map(p=>{ const e = eleOf(p); if(!e) return null; const d = p.km*1000;
     const drop = d*d/(2*6371000)*0.87; const a = deg(Math.atan2(e.h - H0 - drop, d)); return {p, a, d}; }).filter(Boolean);
@@ -1428,7 +1649,7 @@ function drawPano(){
   bands.forEach(([lo,hi,al])=>{
     const ps = list.filter(o=>o.p.km>=lo && o.p.km<hi); if(!ps.length) return;
     const step = 1/pxDeg*2, n = Math.ceil(360/step), prof = new Float32Array(n).fill(-1);
-    ps.forEach(o=>{ const hw = Math.max(.8, deg(Math.atan2(2600, o.d))); const c = o.p.brg;
+    ps.forEach(o=>{ const hw = Math.max(.8, deg(Math.atan2(baseR(o.p), o.d))); const c = o.p.brg;
       for(let db=-hw; db<=hw; db+=step){ const k = Math.floor((((c+db)%360)+360)%360/step)%n; const v = Math.max(0, o.a)*(1-Math.abs(db)/hw) + (o.a<0?o.a:0); if(v>prof[k]) prof[k]=v; } });
     g.globalAlpha = al; g.fillStyle = ink; g.beginPath(); g.moveTo(0, baseY);
     for(let x=0; x<=W; x+=2){ const b = offset + x/pxDeg; const k = Math.floor(((b%360)+360)%360/step)%n; const v = prof[k]; g.lineTo(x, baseY - Math.max(0,v)*vs); }
@@ -1489,6 +1710,8 @@ function renderStats(){
   const box = $("statsView"); const {done, goal} = counts();
   const climbed = PEAKS.filter(p=>rec(p.id).s===1);
   const tours = PEAKS.reduce((n,p)=>n+(rec(p.id).a||[]).length, 0);
+  let totHm = 0, totMin = 0; const arts = {};
+  PEAKS.forEach(p=>(rec(p.id).a||[]).forEach(x=>{ totHm += x.hm||0; totMin += x.min||0; if(x.art) arts[x.art]=(arts[x.art]||0)+1; }));
   const hi = climbed.filter(eleOf).sort((a,b)=>eleOf(b).h-eleOf(a).h)[0];
   const far = climbed.slice().sort((a,b)=>b.km-a.km)[0];
   const tile = (v,l)=>'<div class="tile"><b>'+v+'</b><span>'+l+'</span></div>';
@@ -1499,7 +1722,12 @@ function renderStats(){
     tile(tours, "Touren im Tourenbuch")+
     tile(hi ? fmtInt(eleOf(hi).h)+" m" : "–", hi ? "Höchster: "+esc(hi.name) : "Höchster Gipfel (Höhen fehlen noch)")+
     tile(far ? fmt1(far.km)+" km" : "–", far ? "Am weitesten weg: "+esc(far.name) : "Am weitesten weg")+
+    tile(totHm ? fmtHm(totHm) : "–", "Höhenmeter im Tourenbuch")+
+    tile(totMin ? fmtMin(totMin) : "–", "Gehzeit im Tourenbuch")+
     '</div>';
+  if(Object.keys(arts).length){ const mx = Math.max(...Object.values(arts)); h += '<h2 class="sec">Nach Tourenart</h2><div class="bars">'+Object.entries(arts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div class="brow"><span class="lbl">'+esc(k)+'</span><span class="track"><i style="width:'+(v/mx*100)+'%"></i></span><span class="num">'+v+'</span></div>').join("")+'</div>'; }
+  const comp = Object.entries(companions()).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  if(comp.length){ const mx = comp[0][1]; h += '<h2 class="sec">Unterwegs mit</h2><div class="bars">'+comp.map(([k,v])=>'<div class="brow"><span class="lbl">'+esc(k)+'</span><span class="track"><i style="width:'+(v/mx*100)+'%"></i></span><span class="num">'+v+'×</span></div>').join("")+'</div>'; }
   const barRow = (lbl, d, g, tot)=>'<div class="brow"><span class="lbl" title="'+esc(lbl)+'">'+esc(lbl)+'</span><span class="track"><i style="width:'+(tot?d/tot*100:0)+'%"></i><i class="g" style="width:'+(tot?g/tot*100:0)+'%"></i></span><span class="num">'+d+" / "+tot+'</span></div>';
   // by group
   const byG = {}; PEAKS.forEach(p=>{ const o = byG[p.grp] = byG[p.grp] || {d:0,g:0,t:0}; o.t++; const s=rec(p.id).s; if(s===1) o.d++; else if(s===2) o.g++; });
@@ -1512,10 +1740,10 @@ function renderStats(){
     h += '<h2 class="sec">Nach Höhe</h2><div class="bars">'+bandsH.map(([a,b,l])=>{ const ps = known.filter(p=>eleOf(p).h>=a && eleOf(p).h<b); return barRow(l, ps.filter(p=>rec(p.id).s===1).length, ps.filter(p=>rec(p.id).s===2).length, ps.length); }).join("")+'</div>';
   } else h += '<h2 class="sec">Nach Höhe</h2><p class="note">Die Gipfelhöhen werden geladen, sobald die App online ist.</p>';
   // by year
-  const years = {}; PEAKS.forEach(p=>(rec(p.id).a||[]).forEach(d=>{ const y = d.slice(0,4); years[y]=(years[y]||0)+1; }));
+  const years = {}; const yhm = {}; PEAKS.forEach(p=>(rec(p.id).a||[]).forEach(x=>{ const y = (x.d||"").slice(0,4); if(!y) return; years[y]=(years[y]||0)+1; yhm[y]=(yhm[y]||0)+(x.hm||0); }));
   const ys = Object.keys(years).sort().reverse();
   h += '<h2 class="sec">Touren pro Jahr</h2>';
-  if(ys.length){ const mx = Math.max(...Object.values(years)); h += '<div class="bars">'+ys.map(y=>'<div class="brow"><span class="lbl">'+y+'</span><span class="track"><i style="width:'+(years[y]/mx*100)+'%"></i></span><span class="num">'+years[y]+'</span></div>').join("")+'</div>'; }
+  if(ys.length){ const mx = Math.max(...Object.values(years)); h += '<div class="bars">'+ys.map(y=>'<div class="brow"><span class="lbl">'+y+'</span><span class="track"><i style="width:'+(years[y]/mx*100)+'%"></i></span><span class="num">'+years[y]+(yhm[y]?' · '+fmtHm(yhm[y]):'')+'</span></div>').join("")+'</div>'; }
   else h += '<p class="note">Sobald du Besteigungen mit Datum einträgst, siehst du hier deine Jahre.</p>';
   box.innerHTML = h;
 }
@@ -1530,7 +1758,7 @@ function mergeBackup(obj){
   lsSet(LS.custom, custom); rebuildPeaks();
   Object.keys(src).forEach(id=>{
     const r = src[id]; if(!byId[id] || !r || typeof r!=="object") return;
-    const a = Array.isArray(r.a) ? r.a.map(String) : (r.d ? [String(r.d)] : []);
+    const a = (Array.isArray(r.a) ? r.a : (r.d ? [r.d] : [])).map(normAsc).filter(Boolean);
     const cur = state[id];
     if(!cur || (r.t||0) > (cur.t||0)){ const nr = {s:+r.s||0, a, n:String(r.n||""), t:r.t||Date.now()}; if(isEmpty(nr)) delete state[id]; else state[id] = nr; n++; }
   });
@@ -1557,13 +1785,165 @@ $("bkApply").addEventListener("click", ()=>{
   try{ const n = mergeBackup(JSON.parse(t)); bkMsg.textContent = n+" Einträge übernommen."; $("bkPaste").value = ""; }catch(err){ bkMsg.textContent = "Der eingefügte Text ist keine Gipfelbuch-Sicherung. Kopiere ihn bitte noch einmal vollständig."; }
 });
 
+/* ---------- peak finder camera ---------- */
+const AR = {on:false, stream:null, heading:null, pitch:0, roll:0, pos:null, alt:null, altSrc:"", watch:null, raf:0, hits:[], sel:null, drag:null, gotAbs:false};
+const arSettings = Object.assign({off:0, fov:66, all:false}, lsGet("gipfelbuch-hallein-ar", {}));
+function arSave(){ lsSet("gipfelbuch-hallein-ar", arSettings); }
+function arMsg(t){ const el=$("arMsg"); el.textContent = t||""; el.hidden = !t; }
+function angDiff(a,b){ return ((a-b+540)%360)-180; }
+function onOrient(e, absolute){
+  let heading = null, pitch, roll;
+  const a = rad(e.alpha||0), b = rad(e.beta||0), g = rad(e.gamma||0);
+  // direction the back camera looks at (device -Z axis), in east/north/up
+  const x = -Math.cos(a)*Math.sin(g) - Math.sin(a)*Math.sin(b)*Math.cos(g);
+  const y = -Math.sin(a)*Math.sin(g) + Math.cos(a)*Math.sin(b)*Math.cos(g);
+  const z = -Math.cos(b)*Math.cos(g);
+  pitch = deg(Math.asin(Math.max(-1,Math.min(1,z))));
+  roll = deg(Math.asin(Math.max(-1,Math.min(1,-Math.cos(b)*Math.sin(g)))));
+  if(typeof e.webkitCompassHeading === "number" && isFinite(e.webkitCompassHeading)) heading = e.webkitCompassHeading;
+  else if(absolute && e.alpha!=null) heading = (deg(Math.atan2(x, y))+360)%360;
+  if(heading===null) return;
+  // smooth
+  if(AR.heading===null) AR.heading = heading; else AR.heading = (AR.heading + angDiff(heading, AR.heading)*0.25 + 360)%360;
+  AR.pitch += (pitch - AR.pitch)*0.25; AR.roll += (roll - AR.roll)*0.25;
+}
+const onAbs = e=>{ AR.gotAbs = true; onOrient(e, true); };
+const onRel = e=>{ if(typeof e.webkitCompassHeading === "number") onOrient(e, false); else if(e.absolute && !AR.gotAbs) onOrient(e, true); };
+async function arStart(){
+  closeAllSheets(); $("ar").hidden = false; AR.on = true; AR.heading = null; AR.sel = null; $("arCard").hidden = true; $("arSet").hidden = true;
+  $("arOff").value = arSettings.off; $("arFov").value = arSettings.fov; $("arAll").checked = arSettings.all; arSyncOut();
+  arMsg("Kamera, Standort und Kompass werden gestartet …");
+  if(!PEAKS.some(eleOf)){ arMsg("Für den Gipfel-Erkenner braucht die App die Gipfelhöhen. Öffne sie einmal mit Internet und warte, bis „Gipfelhöhen geladen“ erscheint."); }
+  // motion permission (needed on iPhone, harmless on Android)
+  try{ if(typeof DeviceOrientationEvent!=="undefined" && typeof DeviceOrientationEvent.requestPermission==="function"){ const st = await DeviceOrientationEvent.requestPermission(); if(st!=="granted"){ arMsg("Ohne Zugriff auf den Kompass kann die App die Gipfel nicht zuordnen."); } } }catch(e){}
+  window.addEventListener("deviceorientationabsolute", onAbs);
+  window.addEventListener("deviceorientation", onRel);
+  try{ if(screen.orientation && screen.orientation.lock) screen.orientation.lock("portrait").catch(()=>{}); }catch(e){}
+  // camera
+  try{
+    AR.stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
+    const v = $("arVideo"); v.srcObject = AR.stream; await v.play().catch(()=>{});
+  }catch(e){ arMsg(e && e.name==="NotAllowedError" ? "Die Kamera ist nicht erlaubt. Erlaube sie in den Einstellungen von Chrome für diese Seite und öffne den Gipfel-Erkenner noch einmal." : "Die Kamera lässt sich nicht starten. Die Gipfel werden trotzdem über schwarzem Hintergrund angezeigt."); }
+  // position
+  if(navigator.geolocation){
+    AR.watch = navigator.geolocation.watchPosition(p=>{
+      const first = !AR.pos; AR.pos = {lat:p.coords.latitude, lon:p.coords.longitude, acc:p.coords.accuracy};
+      if(first) arAltitude(p.coords.altitude);
+    }, err=>{ if(!AR.pos){ AR.pos = {lat:HALLEIN[0], lon:HALLEIN[1], acc:0, fallback:true}; AR.alt = H0; AR.altSrc = "Hallein"; } }, {enableHighAccuracy:true, maximumAge:10000, timeout:20000});
+  } else { AR.pos = {lat:HALLEIN[0], lon:HALLEIN[1], acc:0, fallback:true}; AR.alt = H0; AR.altSrc = "Hallein"; }
+  cancelAnimationFrame(AR.raf); AR.raf = requestAnimationFrame(arLoop);
+}
+async function arAltitude(gpsAlt){
+  const p = AR.pos; AR.alt = isFinite(gpsAlt) && gpsAlt ? gpsAlt + 1.6 : 450; AR.altSrc = isFinite(gpsAlt) && gpsAlt ? "GPS" : "geschätzt";
+  try{ const r = await fetch("https://api.open-meteo.com/v1/elevation?latitude="+p.lat.toFixed(5)+"&longitude="+p.lon.toFixed(5)); if(r.ok){ const js = await r.json(); const h = js.elevation && js.elevation[0]; if(isFinite(h)){ AR.alt = h + 1.6; AR.altSrc = "Gelände"; } } }catch(e){}
+}
+function arStop(){
+  AR.on = false; cancelAnimationFrame(AR.raf);
+  window.removeEventListener("deviceorientationabsolute", onAbs); window.removeEventListener("deviceorientation", onRel);
+  if(AR.stream){ AR.stream.getTracks().forEach(t=>t.stop()); AR.stream = null; }
+  if(AR.watch!==null && navigator.geolocation){ navigator.geolocation.clearWatch(AR.watch); AR.watch = null; }
+  AR.pos = null; $("ar").hidden = true;
+  try{ if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); }catch(e){}
+}
+function arSyncOut(){ $("arOffOut").textContent = (arSettings.off>0?"+":"")+arSettings.off+"°"; $("arFovOut").textContent = arSettings.fov+"°"; }
+$("arOff").addEventListener("input", e=>{ arSettings.off = +e.target.value; arSyncOut(); arSave(); });
+$("arFov").addEventListener("input", e=>{ arSettings.fov = +e.target.value; arSyncOut(); arSave(); });
+$("arAll").addEventListener("change", e=>{ arSettings.all = e.target.checked; arSave(); });
+$("arSetBtn").addEventListener("click", ()=>{ $("arSet").hidden = !$("arSet").hidden; });
+$("arClose").addEventListener("click", arStop);
+$("arOpen1").addEventListener("click", arStart);
+$("arOpen2").addEventListener("click", arStart);
+$("arCOpen").addEventListener("click", ()=>{ const id = AR.sel; arStop(); if(id){ showTab("map"); openSheet(id); } });
+// drag sideways to fine-tune the compass, tap to pick a peak
+const arEl = $("ar");
+arEl.addEventListener("pointerdown", e=>{ if(e.target.closest(".ar-top,.ar-set,.ar-card")) return; AR.drag = {x:e.clientX, y:e.clientY, off:arSettings.off, moved:false}; });
+arEl.addEventListener("pointermove", e=>{ if(!AR.drag) return; const dx = e.clientX-AR.drag.x; if(Math.abs(dx)>8) AR.drag.moved = true;
+  if(AR.drag.moved){ const W = arEl.clientWidth; arSettings.off = Math.max(-30, Math.min(30, Math.round(AR.drag.off - deg(Math.atan(dx/(AR.fx||W)))))); $("arOff").value = arSettings.off; arSyncOut(); } });
+arEl.addEventListener("pointerup", e=>{
+  const d = AR.drag; AR.drag = null; if(!d) return; if(d.moved){ arSave(); return; }
+  let best=null, bd=36; AR.hits.forEach(h=>{ const dd = Math.hypot(h.x-e.clientX, h.y-e.clientY); if(dd<bd){ bd=dd; best=h; } });
+  AR.sel = best ? best.id : null; arCard();
+});
+function arCard(){
+  const p = AR.sel && byId[AR.sel]; if(!p){ $("arCard").hidden = true; return; }
+  const e = eleOf(p), d = AR.pos ? distKm([AR.pos.lat,AR.pos.lon],[p.lat,p.lon]) : p.km, s = rec(p.id).s;
+  $("arCName").textContent = p.name;
+  $("arCMeta").textContent = [e ? fmtInt(e.h)+" m" : null, fmt1(d)+" km", s===1 ? "bestiegen" : s===2 ? "Ziel" : "offen"].filter(Boolean).join(" · ");
+  $("arCard").hidden = false;
+}
+function arLoop(){
+  if(!AR.on) return;
+  AR.raf = requestAnimationFrame(arLoop);
+  const cv = $("arCanvas"), dpr = window.devicePixelRatio||1, W = cv.clientWidth, H = cv.clientHeight;
+  if(cv.width !== Math.round(W*dpr) || cv.height !== Math.round(H*dpr)){ cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr); }
+  const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  if(AR.heading===null){ $("arRead").textContent = "Warte auf Kompass …"; return; }
+  if(!AR.pos){ $("arRead").textContent = "Warte auf Standort …"; return; }
+  if(!$("arMsg").hidden && $("arMsg").textContent.startsWith("Kamera, Standort")) arMsg("");
+  const head = (AR.heading + arSettings.off + 360)%360, pitch = AR.pitch;
+  $("arRead").textContent = DIRS[Math.round(head/22.5)%16]+" "+Math.round(head)+"° · Neigung "+(pitch>0?"+":"")+Math.round(pitch)+"°"+(AR.pos.fallback?" · Standort: Hallein":" · ±"+Math.round(AR.pos.acc)+" m");
+  // focal length in screen pixels: the setting is the camera's angle across its long side; the video is shown cropped to fill the screen
+  const v = $("arVideo"); let fx;
+  if(v.videoWidth && v.videoHeight){ const Lp = Math.max(v.videoWidth, v.videoHeight); fx = (Lp/2)/Math.tan(rad(arSettings.fov)/2) * Math.max(W/v.videoWidth, H/v.videoHeight); }
+  else fx = (Math.max(W,H)/2)/Math.tan(rad(arSettings.fov)/2);
+  const fy = fx, hf = Math.atan((W/2)/fx); AR.fx = fx;
+  const obs = [AR.pos.lat, AR.pos.lon], H0o = AR.alt || 450;
+  // project all peaks with known height
+  const pts = [];
+  PEAKS.forEach(p=>{
+    const e = eleOf(p); if(!e) return;
+    const dkm = distKm(obs, [p.lat,p.lon]); if(dkm < 0.05 || dkm > 120) return;
+    const d = dkm*1000, drop = d*d/(2*6371000)*0.87;
+    const el = deg(Math.atan2(e.h - H0o - drop, d)), az = bearing(obs, [p.lat,p.lon]);
+    pts.push({p, el, az, d});
+  });
+  // simple terrain mask from nearer peaks (each peak treated as a cone ~2.6 km wide at its base)
+  const vis = pts.filter(o=>{
+    if(arSettings.all) return true;
+    return !pts.some(q=>{ if(q===o || q.d >= o.d*0.92) return false; const hw = Math.max(.6, deg(Math.atan2(baseR(q.p), q.d))); const da = Math.abs(angDiff(o.az, q.az)); if(da >= hw) return false; return q.el*(1-da/hw) + (q.el<0?0:0) > o.el + 0.15; });
+  });
+  // rotate the overlay against the phone's roll so labels stay upright
+  g.save(); g.translate(W/2, H/2); g.rotate(rad(-AR.roll)); g.translate(-W/2, -H/2);
+  const proj = vis.map(o=>{ const da = rad(angDiff(o.az, head)); if(Math.abs(da) > hf + rad(4)) return null;
+    const x = W/2 + Math.tan(da)*fx; const y = H/2 - Math.tan(rad(o.el - pitch))*fy; return Object.assign({x,y}, o); }).filter(Boolean);
+  // horizon line
+  const hy = H/2 + Math.tan(rad(pitch))*fy;
+  g.strokeStyle = "rgba(255,255,255,.35)"; g.setLineDash([6,6]); g.beginPath(); g.moveTo(-W, hy); g.lineTo(2*W, hy); g.stroke(); g.setLineDash([]);
+  // labels: nearest/selected/goals first, avoid overlaps
+  proj.sort((a,b)=>{ const pr = o => (o.p.id===AR.sel?1e6:0) + (rec(o.p.id).s===2?5000:0) + (o.p.star?2000:0) - o.d/100 + o.el*50; return pr(b)-pr(a); });
+  const taken = []; AR.hits = [];
+  g.font = "600 14px "+css("--f-body"); g.textBaseline = "middle";
+  proj.forEach(o=>{
+    const s = rec(o.p.id).s, sel = o.p.id===AR.sel;
+    const col = s===1 ? "#5DBA82" : s===2 ? "#F2C230" : "#FFFFFF";
+    const free = !taken.some(t=>Math.abs(t-o.x) < 20);
+    g.beginPath(); g.arc(o.x, o.y, sel?7:5, 0, Math.PI*2); g.fillStyle = col; g.fill(); g.lineWidth = 2; g.strokeStyle = sel ? "#EC6C52" : "rgba(0,0,0,.6)"; g.stroke();
+    if(free || sel){
+      taken.push(o.x);
+      const ly = o.y - 14;
+      g.strokeStyle = sel ? "#EC6C52" : "rgba(255,255,255,.75)"; g.lineWidth = sel?2:1; g.beginPath(); g.moveTo(o.x, o.y-6); g.lineTo(o.x, ly); g.stroke();
+      g.save(); g.translate(o.x, ly); g.rotate(-Math.PI/2);
+      const txt = o.p.name + "  " + (eleOf(o.p)?eleOf(o.p).h+" m":"") + "  " + fmt1(o.d/1000)+" km";
+      g.lineWidth = 4; g.strokeStyle = "rgba(0,0,0,.7)"; g.strokeText(txt, 4, 0);
+      g.fillStyle = sel ? "#FFB4A3" : col; g.fillText(txt, 4, 0); g.restore();
+    }
+    // hit point in screen coordinates (account for roll)
+    const c = Math.cos(rad(-AR.roll)), sn = Math.sin(rad(-AR.roll)), dx = o.x-W/2, dy = o.y-H/2;
+    AR.hits.push({id:o.p.id, x: W/2 + dx*c - dy*sn, y: H/2 + dx*sn + dy*c});
+  });
+  g.restore();
+  if(!proj.length && $("arMsg").hidden) $("arRead").textContent += " · keine Gipfel in dieser Richtung";
+  if(AR.sel) arCard();
+}
+document.addEventListener("visibilitychange", ()=>{ if(document.hidden && AR.on) arStop(); });
+
 /* ---------- tabs ---------- */
 let tab = "map";
 function showTab(t){
   tab = t;
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.tab===t)));
   $("listView").hidden = t!=="list"; $("panoView").hidden = t!=="pano"; $("statsView").hidden = t!=="stats";
-  $("legend").hidden = t!=="map"; if(t!=="map") $("banner").hidden = true;
+  $("legend").hidden = t!=="map"; $("layers").hidden = t!=="map"; if(t!=="map"){ $("banner").hidden = true; layerMsg(""); }
   $("map").style.visibility = t==="map" ? "" : "hidden";
   if(t==="map" && map) setTimeout(()=>map.invalidateSize(),0);
   if(t==="list") renderList();
