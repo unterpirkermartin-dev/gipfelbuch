@@ -771,14 +771,33 @@ nav button[aria-selected="true"]{color:var(--ink);border-top-color:var(--accent)
 .leaflet-popup-content .links{margin-top:6px}
 .leaflet-popup-content .links a{font-size:.8rem;padding:5px 9px}
 .leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
+.ico.trail{background:#D23A2A;border-radius:50%;width:16px;height:16px}
+.wpanel{position:absolute;left:10px;right:10px;bottom:10px;z-index:850;max-height:58%;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+.wp-head{display:flex;align-items:center;gap:10px}
+.wp-head .panel-title{font-size:1.25rem}
+.wp-legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.78rem;color:var(--muted)}
+.wp-legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:20px;height:4px;border-radius:2px;outline:1.5px solid #fff}
+.sw.dash{background-image:linear-gradient(90deg,transparent 50%,var(--surface) 50%)!important;background-size:8px 4px}
+.wpanel select{flex:1 1 160px;min-width:0;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.wp-stats{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-flow:column;grid-template-rows:auto auto;gap:0 10px}
+.wp-stats b{font-family:var(--f-display);font-size:1.35rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.wp-stats span{font-size:.72rem;color:var(--muted)}
+.wp-prof{width:100%;height:90px;display:block}
+#map.picking{cursor:crosshair}
+.as-start{margin-top:6px;padding:6px 10px;border-radius:999px;border:0;background:var(--climbed);color:#fff;font-weight:600;cursor:pointer;font-size:.8rem}
+@media (min-width:760px){.wpanel{right:auto;width:400px}}
 .nomap{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
 
 /* Panorama */
 #panoView{display:flex;flex-direction:column;background:var(--bg);z-index:700}
 .pano-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
-.pano-head p{margin:0;font-size:.8rem;color:var(--muted);min-width:0}
+.pano-head p{margin:0;font-size:.8rem;color:var(--muted);min-width:0;flex-basis:100%;order:3}
+.seg{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px}
+.seg button{border:0;background:transparent;padding:6px 10px;border-radius:5px;cursor:pointer;font-size:.86rem;color:var(--muted);font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .zoom{display:flex;gap:4px}
-.zoom .primary{width:auto;padding:0 12px;border:0;font-size:.9rem}
+.zoom .primary{width:auto;padding:0 12px;border:0;font-size:.9rem;background:var(--climbed);color:#fff}
 .zoom button{width:34px;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer;font-size:1.1rem}
 .pano-wrap{position:relative;flex:1;min-height:0;touch-action:none;cursor:grab}
 #pano{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -848,6 +867,7 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
 .linkbtn{border:0;background:transparent;color:var(--accent);font-weight:600;cursor:pointer;padding:4px 0}
 .linkbtn.small{font-size:.8rem;padding:0;white-space:nowrap}
 .tag{font-size:.75rem;color:var(--muted)}
+h3.sub{margin:4px 0 0;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .hint{margin:0;color:var(--muted);font-size:.88rem;max-width:60ch}
 .primary,.secondary,.danger{padding:10px 14px;border-radius:8px;font-weight:600;cursor:pointer}
 .primary{border:0;background:var(--climbed);color:#fff}
@@ -894,9 +914,24 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
   <main>
     <div class="view" id="map" role="region" aria-label="Karte der Gipfel"></div>
     <div class="legend" id="legend"><span><i class="dot on"></i>Bestiegen</span><span><i class="dot goal"></i>Ziel</span><span><i class="dot"></i>Offen</span><span class="hint-lp">Lange auf die Karte drücken, um einen Gipfel hinzuzufügen.</span></div>
+    <section class="wpanel" id="wpPanel" hidden aria-label="Wege und Route">
+      <div class="wp-head"><h2 class="panel-title" id="wpTitle">–</h2><button class="close" id="wpClose" aria-label="Wege und Route ausblenden">×</button></div>
+      <div class="wp-legend" id="wpLegend"></div>
+      <p class="hint" id="wpMsg" hidden></p>
+      <div class="addrow"><select id="wpStart" aria-label="Startpunkt"></select><button type="button" class="primary" id="wpGo">Route berechnen</button></div>
+      <div id="wpRes" hidden>
+        <div class="wp-stats" id="wpStats"></div>
+        <p class="hint" id="wpDiff"></p>
+        <canvas class="wp-prof" id="wpProf" aria-label="Höhenprofil"></canvas>
+        <div class="addrow"><button type="button" class="secondary" id="wpGpx">Als GPX speichern</button><button type="button" class="secondary" id="wpClear">Route ausblenden</button></div>
+      </div>
+      <p class="note">Wege und Routen stammen aus OpenStreetMap und werden automatisch berechnet. Vor der Tour mit Karte, Wetter und Verhältnissen vor Ort prüfen; Schnee und Sperren kennt die App nicht.</p>
+    </section>
     <div class="layers" id="layers" role="group" aria-label="Zusatzebenen">
       <button type="button" id="lyHut" aria-pressed="false"><i class="ico hut"></i>Hütten</button>
       <button type="button" id="lyPark" aria-pressed="false"><i class="ico park">P</i>Parkplätze</button>
+      <button type="button" id="lyTrail" aria-pressed="false"><i class="ico trail"></i>Wanderwege</button>
+      <button type="button" id="offOpen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Offline</button>
       <button type="button" id="arOpen1" class="cam"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg>Gipfel-Erkenner</button>
     </div>
     <div class="layer-msg" id="layerMsg" hidden></div>
@@ -929,7 +964,8 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
 
     <section class="view" id="panoView" hidden>
       <div class="pano-head">
-        <p id="panoNote">Rundblick von Hallein (447 m). Wischen zum Drehen, Gipfel antippen.</p>
+        <div class="seg" id="panoSeg" role="group" aria-label="Standpunkt"><button type="button" data-mode="hallein" aria-pressed="true">Hallein</button><button type="button" data-mode="me" aria-pressed="false">Mein Standort</button></div>
+        <p id="panoNote">Rundblick wird vorbereitet …</p>
         <div class="zoom"><button type="button" class="primary" id="arOpen2">Gipfel-Erkenner</button><button type="button" id="pzOut" aria-label="Weiter weg">−</button><button type="button" id="pzIn" aria-label="Näher heran">+</button></div>
       </div>
       <div class="pano-wrap" id="panoWrap"><canvas id="pano" aria-label="Rundblick mit Gipfeln"></canvas></div>
@@ -987,12 +1023,36 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
       <div class="block">
         <h3>Route planen</h3>
         <div class="links">
+          <button type="button" id="sWege">Wege mit Schwierigkeit</button>
+          <button type="button" id="sRoute">Route berechnen</button>
           <button type="button" id="sShow">Auf Karte zeigen</button>
           <a id="lGeo" href="#">Karten-App</a>
           <a id="lGoogle" href="#" target="_blank" rel="noopener">Google Maps</a>
           <a id="lOsm" href="#" target="_blank" rel="noopener">OpenStreetMap</a>
           <a id="lOa" href="#" target="_blank" rel="noopener">Outdooractive</a>
         </div>
+      </div>
+      <div class="block">
+        <h3>Gipfeldaten</h3>
+        <button type="button" class="secondary" id="eOpen">Name, Höhe, Gebiet oder Lage korrigieren</button>
+        <form class="ascform" id="eForm" hidden>
+          <label class="fl">Name<input type="text" id="eName" autocomplete="off"></label>
+          <div class="two">
+            <label class="fl">Höhe (m)<input type="number" id="eEle" inputmode="numeric" min="0" max="9000" step="1"></label>
+            <label class="fl">Gebiet<select id="eGrp"></select></label>
+          </div>
+          <label class="fl" id="eGrpNewWrap" hidden>Name des neuen Gebiets<input type="text" id="eGrpNew" autocomplete="off"></label>
+          <div class="two">
+            <label class="fl">Breite (N)<input type="text" id="eLat" inputmode="decimal"></label>
+            <label class="fl">Länge (E)<input type="text" id="eLon" inputmode="decimal"></label>
+          </div>
+          <p class="hint" id="eMsg"></p>
+          <div class="addrow">
+            <button type="submit" class="primary">Speichern</button>
+            <button type="button" class="secondary" id="eCancel">Abbrechen</button>
+            <button type="button" class="danger" id="eReset" hidden>Original wiederherstellen</button>
+          </div>
+        </form>
       </div>
       <div class="block" id="customBlock" hidden>
         <h3>Eigener Gipfel</h3>
@@ -1012,6 +1072,24 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
       <div class="addrow"><button type="button" class="secondary" id="aHere">Meinen Standort nehmen</button></div>
       <p class="hint" id="aMsg"></p>
       <button type="button" class="primary" id="aSave">Gipfel speichern</button>
+    </aside>
+
+    <aside class="sheet" id="offSheet" hidden aria-label="Karte offline speichern">
+      <div class="sheet-top"><h2 class="panel-title">Karte offline</h2><button class="close" id="offClose" aria-label="Schließen">×</button></div>
+      <p class="hint">Speichert den Kartenausschnitt, den du gerade siehst, samt Geländedaten für Rundblick und Gipfel-Erkenner (und die Wanderwege, wenn sie eingeschaltet sind). Dann funktioniert alles auch ohne Netz am Berg. Am besten im WLAN machen.</p>
+      <label class="fl">Detailstufe<select id="offZoom">
+        <option value="13">Übersicht (bis Zoomstufe 13)</option>
+        <option value="14">Wandern (bis Zoomstufe 14)</option>
+        <option value="15" selected>Wandern genau (bis Zoomstufe 15)</option>
+        <option value="16">Sehr genau (bis Zoomstufe 16)</option>
+      </select></label>
+      <p class="hint" id="offEst"></p>
+      <div class="bar" id="offBar" hidden><i id="offBarI"></i></div>
+      <div class="addrow"><button type="button" class="primary" id="offGo">Ausschnitt speichern</button><button type="button" class="secondary" id="offStop" hidden>Abbrechen</button></div>
+      <p class="hint" id="offMsg" aria-live="polite"></p>
+      <h3 class="sub">Gespeichert</h3>
+      <p class="hint" id="offStat">–</p>
+      <div class="addrow"><button type="button" class="danger" id="offDel">Gespeicherte Karten löschen</button></div>
     </aside>
 
     <aside class="sheet" id="backup" hidden aria-label="Sicherung">
@@ -1042,7 +1120,7 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
     <div class="ar-set" id="arSet" hidden>
       <label>Kompass korrigieren <output id="arOffOut">0°</output><input type="range" id="arOff" min="-30" max="30" step="1" value="0"></label>
       <label>Bildwinkel der Kamera <output id="arFovOut">66°</output><input type="range" id="arFov" min="40" max="95" step="1" value="66"></label>
-      <label class="chk"><input type="checkbox" id="arAll"> Auch verdeckte Gipfel zeigen</label>
+      <label class="chk"><input type="checkbox" id="arAll"> Auch verdeckte Gipfel zeigen (sonst nur, was laut Geländemodell sichtbar ist)</label>
       <p>Stimmen die Namen nicht mit den Bergen überein? Ziehe mit dem Finger seitlich über das Bild oder stell den Kompass hier nach. Liegen die Namen zu weit auseinander oder zu eng beisammen, ändere den Bildwinkel. Bei großem Versatz das Handy einmal in Form einer Acht bewegen, das kalibriert den Kompass.</p>
     </div>
     <div class="ar-msg" id="arMsg" hidden></div>
@@ -1074,7 +1152,7 @@ label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
 const RAW = [["5-watzmannkind","5. Watzmannkind",47.5528,12.9306,0],["achselhorn","Achselhorn",47.4678,12.8994,0],["ahornbuchsenkopf","Ahornbüchsenkopf",47.6197,13.0817,0],["alpelhorn","Alpelhorn",47.5367,12.85,0],["anzenberghohe","Anzenberghöhe",47.7231,13.2428,0],["arbeskogel","Arbeskogel",47.5692,13.1661,0],["archenkopf","Archenkopf",47.565,12.9696,0],["armkarwand","Armkarwand",47.4964,13.5161,0],["beerwurzkogel","Beerwurzkogel",47.5247,13.5653,0],["bleikogel","Bleikogel",47.5142,13.2983,0],["bodenleiten","Bodenleiten",47.84,13.0284,0],["brettkogel","Brettkogel",47.5147,13.55,0],["brunnerkopfl","Brunnerköpfl",47.6411,13.2417,0],["brandlberg","Brändlberg",47.6653,13.0478,0],["buchberg","Buchberg",47.9346,12.8839,0],["buchberg-2","Buchberg",47.9536,13.1086,0],["bareck","Bäreck",47.5342,13.2025,0],["burglstein","Bürglstein",47.799,13.0574,0],["drei-docken","Drei Docken",47.4594,12.9022,0],["daumling","Däumling",47.5022,13.5172,0],["durlstein","Dürlstein",47.6658,13.2989,0],["eberstein","Eberstein",47.7242,13.1197,0],["ebnetriedel","Ebnetriedel",47.555,13.2958,0],["einberg","Einberg",47.6183,13.3606,0],["eisberg","Eisberg",47.6258,12.8475,0],["freyaturm","Freyaturm",47.5262,13.484,0],["gamsfeld","Gamsfeld",47.6233,13.4806,0],["gamskarkopfl","Gamskarköpfl",47.5089,12.9206,0],["gemainberg","Gemainberg",47.7347,13.0225,0],["gjaidkopf","Gjaidkopf",47.5164,12.9106,0],["golser-hugel","Golser Hügel",47.7839,13.0915,0],["gossenleieraussicht","Gossenleieraussicht",47.7392,13.0304,0],["grimming","Grimming",47.5206,14.0169,0],["grobriedel","Grobriedel",47.7094,13.2522,0],["grosse-bischofsmutze","Große Bischofsmütze",47.4939,13.5111,0],["grosser-breitstein","Großer Breitstein",47.5333,13.3156,0],["grosser-heubergkopf","Großer Heubergkopf",47.7145,13.0032,0],["grosser-hirsch","Großer Hirsch",47.4981,12.9203,0],["grosser-schneiber","Großer Schneiber",47.5108,12.9117,0],["grosser-schwarzkogel","Großer Schwarzkogel",47.5369,13.5644,0],["grosses-grundubelhorn","Großes Grundübelhorn",47.5928,12.8072,0],["grosses-hauselhorn","Großes Häuselhorn",47.6019,12.7839,0],["grosses-palfenhorn","Großes Palfenhorn",47.5281,12.8628,0],["grosswand","Großwand",47.5031,13.5136,0],["gschirrwand","Gschirrwand",47.605,13.2478,0],["gschlosslkogel","Gschlösslkogel",47.4971,13.5673,0],["gsengriegel","Gsengriegel",47.6063,13.2244,0],["guggenberg","Guggenberg",47.6933,13.1494,0],["gotschenkopf","Götschenkopf",47.6317,12.9339,0],["haarberg","Haarberg",47.5953,13.1897,0],["hachelkopf","Hachelkopf",47.5306,12.9336,0],["hals-kopf","Hals Kopf",47.7017,13.0083,0],["hartberg","Hartberg",48.0406,12.9133,0],["haunsberg","Haunsberg",47.9153,12.9989,0],["hengstberg","Hengstberg",47.76,13.1008,0],["hennenkopfl","Hennenköpfl",47.6265,13.0924,0],["heuberg","Heuberg",47.6953,13.1169,0],["hiefler","Hiefler",47.5003,13.2358,0],["hinkelstein","Hinkelstein",47.485,13.6032,0],["hinterbergkopf","Hinterbergkopf",47.5511,12.8525,0],["hintere-seekarwand","Hintere Seekarwand",47.5333,13.5489,0],["hinteres-freieck","Hinteres Freieck",47.5872,13.1003,0],["hinteres-streitmandl","Hinteres Streitmandl",47.5067,13.2444,0],["hirschberg","Hirschberg",47.5292,13.7367,0],["hirschbergkopf","Hirschbergkopf",47.8061,13.2289,0],["hocheisspitze","Hocheisspitze",47.5467,12.8425,0],["hochgitzen","Hochgitzen",47.8567,13.0344,0],["hochkarfelderkopf","Hochkarfelderkopf",47.5192,13.355,0],["hochkesselkopf","Hochkesselkopf",47.4828,13.5681,0],["hochkogel","Hochkogel",47.5175,13.1933,0],["hochpfeiler","Hochpfeiler",47.5069,13.2208,0],["hochthron","Hochthron",47.6908,13.3331,0],["hochtorl","Hochtörl",47.5509,13.2113,0],["hochwieskopf","Hochwieskopf",47.6406,13.3164,0],["hohe-hosswand","Hohe Hosswand",47.5122,13.5797,0],["hohe-scheibe","Hohe Scheibe",47.5631,13.5844,0],["hohe-schreiberwand","Hohe Schreiberwand",47.4936,13.5925,0],["hohenschnaitberg","Hohenschnaitberg",47.7159,13.166,0],["hoher-ochsenkogel","Hoher Ochsenkogel",47.5024,13.6018,0],["hohes-gerstfeld","Hohes Gerstfeld",47.6121,12.8245,0],["hohes-kreuz","Hohes Kreuz",47.4883,13.6042,0],["jagerhoh","Jagerhöh'",47.7859,13.0953,0],["kamplbrunnspitze","Kamplbrunnspitze",47.4892,13.5094,0],["karolinenhohe","Karolinenhöhe",47.7967,13.0403,0],["kiliansberg","Kiliansberg",47.6527,13.0279,0],["kleines-hauselhorn","Kleines Häuselhorn",47.6039,12.7808,0],["knallstein","Knallstein",47.5444,13.2317,0],["knoglberg","Knoglberg",47.6936,13.1986,0],["kolomansberg","Kolomansberg",47.8769,13.2756,0],["kopf-des-hunds","Kopf des Hunds",47.5736,12.8753,0],["krippenstein","Krippenstein",47.5242,13.6919,0],["kuchlberg","Kuchlberg",47.5578,13.2589,0],["kuhberg","Kühberg",47.8095,13.0856,0],["ladenberg","Ladenberg",47.701,13.2534,0],["lammeregg","Lammeregg",47.5817,13.2108,0],["langwand","Langwand",47.5253,13.3078,0],["lercheck","Lercheck",47.6595,13.0595,0],["lidaunberg","Lidaunberg",47.7953,13.2258,0],["mayerhoferkogel","Mayerhoferkogel",47.5383,13.2365,0],["mehlstein","Mehlstein",47.5953,13.2019,0],["mitterberg","Mitterberg",47.6613,12.8977,0],["mitterspitz","Mitterspitz",47.4756,13.5958,0],["mittlerer-hirlatz","Mittlerer Hirlatz",47.53,13.6303,0],["mittlerer-wieselstein","Mittlerer Wieselstein",47.5383,13.2228,0],["mittleres-streitmandl","Mittleres Streitmandl",47.5025,13.245,0],["mooslahnerkopf","Mooslahnerkopf",47.5606,12.9561,0],["morzger-hugel","Morzger Hügel",47.7669,13.0575,0],["moserstein","Moserstein",47.6651,13.0907,0],["muntigler-hugel","Muntigler Hügel",47.8553,13.0083,0],["muhlbachhohe","Mühlbachhöhe",47.7208,13.2519,0],["muhlstein","Mühlstein",47.7517,13.1269,0],["neureitkopf","Neureitkopf",47.7257,13.1651,0],["niedere-schreiberwand","Niedere Schreiberwand",47.4945,13.5861,0],["niederer-dachstein","Niederer Dachstein",47.4783,13.6067,0],["niederer-rainberg","Niederer Rainberg",47.7954,13.0343,0],["niederes-kreuz","Niederes Kreuz",47.4947,13.6076,0],["niedertorl","Niedertörl",47.5503,13.207,0],["nordlicher-wieselstein","Nördlicher Wieselstein",47.5428,13.2235,0],["ofenauer-berg","Ofenauer Berg",47.5703,13.1786,0],["ofentalhornl","Ofentalhörnl",47.5625,12.8625,0],["plainberg","Plainberg",47.8375,13.0442,0],["plassen","Plassen",47.57,13.6058,0],["platteneck","Platteneck",47.5531,13.2247,0],["rabenstein","Rabenstein",47.5992,13.1762,0],["rainberg","Rainberg",47.7947,13.0364,0],["raspenhohe","Raspenhöhe",47.6604,13.1036,0],["raucheck","Raucheck",47.7347,13.1403,0],["rauheck","Rauheck",47.7055,12.9922,0],["reinsberg","Reinsberg",47.6756,13.2968,0],["rengerberg","Rengerberg",47.6878,13.2082,0],["rettenstein","Rettenstein",47.4575,13.5547,0],["roadberg","Roadberg",47.5722,13.2917,0],["rotwand","Rotwand",47.5494,13.2746,0],["rotwandl","Rotwandl",47.4764,12.9228,0],["sattelberg","Sattelberg",47.5706,13.2403,0],["sattelkopfel","Sattelköpfel",47.6908,13.2561,0],["schafberg","Schafberg",47.7764,13.4339,0],["schafgebirgspitz","Schafgebirgspitz",47.5469,13.1958,0],["schallwand","Schallwand",47.5319,13.3581,0],["schapbachriedel","Schapbachriedel",47.5889,12.9561,0],["schatteck","Schatteck",47.7442,13.1556,0],["scheiblingkogel","Scheiblingkogel",47.5342,13.2722,0],["schneelochturm","Schneelochturm",47.4928,13.5956,0],["schornhohe","Schornhöhe",47.6533,13.1008,0],["schwarzkogel","Schwarzkogel",47.5464,13.3044,0],["schwerwand","Schwerwand",47.5451,13.2828,0],["schonbachkopf","Schönbachkopf",47.584,13.1207,0],["schonwandeck","Schönwandeck",47.5643,12.8678,0],["sendlberg","Sendlberg",47.7367,13.1789,0],["sennberg","Sennberg",47.5958,13.2336,0],["sigeretkopf","Sigeretkopf",47.5297,12.8533,0],["silberkopf","Silberkopf",47.6892,13.0089,0],["simetsberg","Simetsberg",47.5118,12.9449,0],["sommerbichl","Sommerbichl",47.5782,12.9738,0],["sommereckspitze","Sommereckspitze",47.5563,13.2449,0],["stadelhorn","Stadelhorn",47.5928,12.795,0],["stanglahnerkopf","Stanglahnerkopf",47.5794,12.8903,0],["steinberg","Steinberg",47.5873,12.8762,0],["sternkogel","Sternkogel",47.5043,13.5085,0],["strichkogel","Strichkogel",47.5197,13.4872,0],["strumberg","Strumberg",47.7806,13.1939,0],["stuhllochspitz","Stuhllochspitz",47.4969,13.5028,0],["sudlicher-wieselstein","Südlicher Wieselstein",47.5342,13.225,0],["tagweide","Tagweide",47.5269,13.3554,0],["tanzboden","Tanzboden",47.7039,13.1831,0],["torstein","Torstein",47.4747,13.5853,0],["toter-mann","Toter Mann",47.6311,12.9233,0],["traxlspitz","Traxlspitz",47.5993,13.2349,0],["torlkopf","Törlkopf",47.6769,12.8925,0],["viehkogel","Viehkogel",47.4883,12.9325,0],["vorderes-freieck","Vorderes Freieck",47.5867,13.1097,0],["vorderes-streitmandl","Vorderes Streitmandl",47.4996,13.2424,0],["wagendrischelhorn","Wagendrischelhorn",47.5989,12.7917,0],["watzmanngugel","Watzmanngugel",47.5726,12.9238,0],["wimbachschneidspitze","Wimbachschneidspitze",47.5461,12.8475,0],["wirreck","Wirreck",47.5622,13.2078,0],["zwolferhorn","Zwölferhorn",47.7425,13.3514,0],["aulhorn","Äulhorn",47.4633,12.9014,0],["4-watzmannkind","4. Watzmannkind",47.5531,12.9325,1],["bannkopf","Bannkopf",47.6789,12.9733,1],["berchtesgadener-hochthron-untersberg","Berchtesgadener Hochthron (Untersberg)",47.6936,12.9867,1],["bierfasselkopf","Bierfasselkopf",47.7306,13.0086,1],["breithorn","Breithorn",47.4572,12.9025,1],["barenstuhl","Bärenstuhl",47.5886,13.1289,1],["eibleck","Eibleck",47.7428,13.21,1],["faistenauer-schafberg","Faistenauer Schafberg",47.7489,13.3047,1],["falzkopf","Falzkopf",47.5714,12.934,1],["festungsberg","Festungsberg",47.795,13.0469,1],["frunstberg","Frunstberg",47.6564,13.2856,1],["gaisberg","Gaisberg",47.805,13.1128,1],["geiereck-untersberg","Geiereck (Untersberg)",47.7224,13.0087,1],["gennerhorn","Gennerhorn",47.6747,13.3094,1],["gitschenwand","Gitschenwand",47.6344,13.2597,1],["goisberg","Goisberg",47.7264,13.0531,1],["grosser-barmstein","Großer Barmstein",47.6906,13.0758,1],["grosser-donnerkogel","Großer Donnerkogel",47.5242,13.4814,1],["grosser-rauher-kopf","Großer Rauher Kopf",47.6692,12.9765,1],["gruberhorn","Gruberhorn",47.5852,13.1047,1],["grunstein","Grünstein",47.5944,12.965,1],["gurlspitze","Gurlspitze",47.7881,13.1433,1],["gutratberg","Gutratberg",47.7103,13.0569,1],["hellbrunner-berg","Hellbrunner Berg",47.7589,13.0661,1],["hochalpkopf","Hochalpkopf",47.6995,12.9876,1],["hocheck","Hocheck",47.6564,13.1048,1],["hocheck-2","Hocheck",47.5584,12.9238,1],["hochkalter","Hochkalter",47.5697,12.865,1],["hoher-dachstein","Hoher Dachstein",47.4753,13.6058,1],["hoher-first","Hoher First",47.6617,13.2961,1],["hoher-goll","Hoher Göll",47.5939,13.0669,1],["hoher-gotschen","Hoher Götschen",47.6956,13.0644,1],["jagernase","Jägernase",47.6846,13.2099,1],["kallersberg","Kallersberg",47.7363,13.218,1],["kapuzinerberg","Kapuzinerberg",47.805,13.0575,1],["kastenspitz","Kastenspitz",47.5557,13.1851,1],["katzenbarmsteine","Katzenbarmsteine",47.6872,13.0804,1],["kehlstein","Kehlstein",47.6097,13.0456,1],["kleiner-barmstein","Kleiner Barmstein",47.6889,13.0775,1],["kleiner-goll","Kleiner Göll",47.5897,13.1262,1],["kleiner-rauher-kopf","Kleiner Rauher Kopf",47.6668,12.9768,1],["kleiner-watzmann","Kleiner Watzmann",47.5589,12.9425,1],["kleinkalter","Kleinkalter",47.5727,12.8624,1],["kneifelspitze","Kneifelspitze",47.6586,13.0197,1],["kratzspitz","Kratzspitz",47.5628,13.1489,1],["leonhardspitze","Leonhardspitze",47.7253,13.0223,1],["loibersbacher-hohe","Loibersbacher Höhe",47.7403,13.2964,1],["mitterhorn","Mitterhorn",47.4608,12.9003,1],["monchsberg-nord","Mönchsberg Nord",47.8021,13.0367,1],["oberalmberg","Oberalmberg",47.7142,13.1147,1],["ochsenberg","Ochsenberg",47.7486,13.2031,1],["regenspitz","Regenspitz",47.6806,13.2889,1],["rotpalfen","Rotpalfen",47.5786,12.8622,1],["rossfeld","Roßfeld",47.628,13.0956,1],["salzburger-hochthron-untersberg","Salzburger Hochthron (Untersberg)",47.7181,13.0047,1],["schlenken","Schlenken",47.6817,13.2133,1],["schmittenstein","Schmittenstein",47.6831,13.2364,1],["schober","Schober",47.5325,13.3844,1],["schwarzenberg","Schwarzenberg",47.7606,13.1564,1],["schwarzer-berg","Schwarzer Berg",47.6064,13.2369,1],["schartenspitze","Schärtenspitze",47.5819,12.8747,1],["schartenwandkopf","Schärtenwandkopf",47.5841,12.8613,1],["spielberg","Spielberg",47.7264,13.2203,1],["taxhamer-kreuz","Taxhamer Kreuz",47.7279,13.0076,1],["tiroler-kogel","Tiroler Kogel",47.5247,13.2039,1],["trattberg","Trattberg",47.6411,13.2742,1],["watzmann-mittelspitze","Watzmann-Mittelspitze",47.5544,12.9222,1],["watzmann-sudspitze","Watzmann-Südspitze",47.5481,12.9169,1],["wieserhorndl","Wieserhörndl",47.7272,13.2331,1],["wilhelmswand","Wilhelmswand",47.6327,13.24,1],["zinkenkopf","Zinkenkopf",47.6478,13.0864,1]];
 const GROUPS = {"5-watzmannkind":"Watzmann","achselhorn":"Steinernes Meer","ahornbuchsenkopf":"Göll & Roßfeld","alpelhorn":"Hochkalter","anzenberghohe":"Osterhorngruppe","arbeskogel":"Hagengebirge","archenkopf":"Watzmann","armkarwand":"Gosaukamm","beerwurzkogel":"Gosaukamm","bleikogel":"Tennengebirge","bodenleiten":"Salzburg & Vorland","brettkogel":"Gosaukamm","brunnerkopfl":"Osterhorngruppe","brandlberg":"Rund um Hallein","buchberg":"Salzburg & Vorland","buchberg-2":"Salzburg & Vorland","bareck":"Tennengebirge","burglstein":"Salzburg & Vorland","drei-docken":"Steinernes Meer","daumling":"Gosaukamm","durlstein":"Osterhorngruppe","eberstein":"Rund um Hallein","ebnetriedel":"Tennengebirge","einberg":"Osterhorngruppe","eisberg":"Reiter Alm","freyaturm":"Gosaukamm","gamsfeld":"Salzkammergut","gamskarkopfl":"Steinernes Meer","gemainberg":"Untersberg","gjaidkopf":"Steinernes Meer","golser-hugel":"Salzburg & Vorland","gossenleieraussicht":"Untersberg","grimming":"Grimming","grobriedel":"Osterhorngruppe","grosse-bischofsmutze":"Gosaukamm","grosser-breitstein":"Tennengebirge","grosser-heubergkopf":"Untersberg","grosser-hirsch":"Steinernes Meer","grosser-schneiber":"Steinernes Meer","grosser-schwarzkogel":"Gosaukamm","grosses-grundubelhorn":"Reiter Alm","grosses-hauselhorn":"Reiter Alm","grosses-palfenhorn":"Hochkalter","grosswand":"Gosaukamm","gschirrwand":"Osterhorngruppe","gschlosslkogel":"Dachstein","gsengriegel":"Osterhorngruppe","guggenberg":"Osterhorngruppe","gotschenkopf":"Lattengebirge","haarberg":"Osterhorngruppe","hachelkopf":"Steinernes Meer","hals-kopf":"Untersberg","hartberg":"Salzburg & Vorland","haunsberg":"Salzburg & Vorland","hengstberg":"Salzburg & Vorland","hennenkopfl":"Göll & Roßfeld","heuberg":"Rund um Hallein","hiefler":"Tennengebirge","hinkelstein":"Dachstein","hinterbergkopf":"Hochkalter","hintere-seekarwand":"Gosaukamm","hinteres-freieck":"Göll & Roßfeld","hinteres-streitmandl":"Tennengebirge","hirschberg":"Dachstein","hirschbergkopf":"Salzburg & Vorland","hocheisspitze":"Hochkalter","hochgitzen":"Salzburg & Vorland","hochkarfelderkopf":"Tennengebirge","hochkesselkopf":"Dachstein","hochkogel":"Tennengebirge","hochpfeiler":"Tennengebirge","hochthron":"Osterhorngruppe","hochtorl":"Tennengebirge","hochwieskopf":"Osterhorngruppe","hohe-hosswand":"Gosaukamm","hohe-scheibe":"Dachstein","hohe-schreiberwand":"Dachstein","hohenschnaitberg":"Osterhorngruppe","hoher-ochsenkogel":"Dachstein","hohes-gerstfeld":"Reiter Alm","hohes-kreuz":"Dachstein","jagerhoh":"Salzburg & Vorland","kamplbrunnspitze":"Gosaukamm","karolinenhohe":"Salzburg & Vorland","kiliansberg":"Rund um Hallein","kleines-hauselhorn":"Reiter Alm","knallstein":"Tennengebirge","knoglberg":"Osterhorngruppe","kolomansberg":"Salzburg & Vorland","kopf-des-hunds":"Hochkalter","krippenstein":"Dachstein","kuchlberg":"Tennengebirge","kuhberg":"Salzburg & Vorland","ladenberg":"Osterhorngruppe","lammeregg":"Osterhorngruppe","langwand":"Tennengebirge","lercheck":"Rund um Hallein","lidaunberg":"Salzburg & Vorland","mayerhoferkogel":"Tennengebirge","mehlstein":"Osterhorngruppe","mitterberg":"Lattengebirge","mitterspitz":"Dachstein","mittlerer-hirlatz":"Dachstein","mittlerer-wieselstein":"Tennengebirge","mittleres-streitmandl":"Tennengebirge","mooslahnerkopf":"Watzmann","morzger-hugel":"Salzburg & Vorland","moserstein":"Rund um Hallein","muntigler-hugel":"Salzburg & Vorland","muhlbachhohe":"Osterhorngruppe","muhlstein":"Salzburg & Vorland","neureitkopf":"Osterhorngruppe","niedere-schreiberwand":"Dachstein","niederer-dachstein":"Dachstein","niederer-rainberg":"Salzburg & Vorland","niederes-kreuz":"Dachstein","niedertorl":"Tennengebirge","nordlicher-wieselstein":"Tennengebirge","ofenauer-berg":"Hagengebirge","ofentalhornl":"Hochkalter","plainberg":"Salzburg & Vorland","plassen":"Dachstein","platteneck":"Tennengebirge","rabenstein":"Osterhorngruppe","rainberg":"Salzburg & Vorland","raspenhohe":"Rund um Hallein","raucheck":"Salzburg & Vorland","rauheck":"Untersberg","reinsberg":"Osterhorngruppe","rengerberg":"Osterhorngruppe","rettenstein":"Dachstein","roadberg":"Tennengebirge","rotwand":"Tennengebirge","rotwandl":"Steinernes Meer","sattelberg":"Tennengebirge","sattelkopfel":"Osterhorngruppe","schafberg":"Salzkammergut","schafgebirgspitz":"Tennengebirge","schallwand":"Tennengebirge","schapbachriedel":"Watzmann","schatteck":"Salzburg & Vorland","scheiblingkogel":"Tennengebirge","schneelochturm":"Dachstein","schornhohe":"Rund um Hallein","schwarzkogel":"Tennengebirge","schwerwand":"Tennengebirge","schonbachkopf":"Göll & Roßfeld","schonwandeck":"Hochkalter","sendlberg":"Osterhorngruppe","sennberg":"Osterhorngruppe","sigeretkopf":"Hochkalter","silberkopf":"Untersberg","simetsberg":"Steinernes Meer","sommerbichl":"Watzmann","sommereckspitze":"Tennengebirge","stadelhorn":"Reiter Alm","stanglahnerkopf":"Hochkalter","steinberg":"Hochkalter","sternkogel":"Gosaukamm","strichkogel":"Gosaukamm","strumberg":"Salzburg & Vorland","stuhllochspitz":"Gosaukamm","sudlicher-wieselstein":"Tennengebirge","tagweide":"Tennengebirge","tanzboden":"Osterhorngruppe","torstein":"Dachstein","toter-mann":"Lattengebirge","traxlspitz":"Osterhorngruppe","torlkopf":"Lattengebirge","viehkogel":"Steinernes Meer","vorderes-freieck":"Göll & Roßfeld","vorderes-streitmandl":"Tennengebirge","wagendrischelhorn":"Reiter Alm","watzmanngugel":"Watzmann","wimbachschneidspitze":"Hochkalter","wirreck":"Tennengebirge","zwolferhorn":"Osterhorngruppe","aulhorn":"Steinernes Meer","4-watzmannkind":"Watzmann","bannkopf":"Untersberg","berchtesgadener-hochthron-untersberg":"Untersberg","bierfasselkopf":"Untersberg","breithorn":"Steinernes Meer","barenstuhl":"Göll & Roßfeld","eibleck":"Osterhorngruppe","faistenauer-schafberg":"Osterhorngruppe","falzkopf":"Watzmann","festungsberg":"Salzburg & Vorland","frunstberg":"Osterhorngruppe","gaisberg":"Salzburg & Vorland","geiereck-untersberg":"Untersberg","gennerhorn":"Osterhorngruppe","gitschenwand":"Osterhorngruppe","goisberg":"Rund um Hallein","grosser-barmstein":"Rund um Hallein","grosser-donnerkogel":"Gosaukamm","grosser-rauher-kopf":"Untersberg","gruberhorn":"Göll & Roßfeld","grunstein":"Watzmann","gurlspitze":"Salzburg & Vorland","gutratberg":"Rund um Hallein","hellbrunner-berg":"Salzburg & Vorland","hochalpkopf":"Untersberg","hocheck":"Rund um Hallein","hocheck-2":"Watzmann","hochkalter":"Hochkalter","hoher-dachstein":"Dachstein","hoher-first":"Osterhorngruppe","hoher-goll":"Göll & Roßfeld","hoher-gotschen":"Rund um Hallein","jagernase":"Osterhorngruppe","kallersberg":"Osterhorngruppe","kapuzinerberg":"Salzburg & Vorland","kastenspitz":"Hagengebirge","katzenbarmsteine":"Rund um Hallein","kehlstein":"Göll & Roßfeld","kleiner-barmstein":"Rund um Hallein","kleiner-goll":"Göll & Roßfeld","kleiner-rauher-kopf":"Untersberg","kleiner-watzmann":"Watzmann","kleinkalter":"Hochkalter","kneifelspitze":"Rund um Hallein","kratzspitz":"Hagengebirge","leonhardspitze":"Untersberg","loibersbacher-hohe":"Osterhorngruppe","mitterhorn":"Steinernes Meer","monchsberg-nord":"Salzburg & Vorland","oberalmberg":"Rund um Hallein","ochsenberg":"Osterhorngruppe","regenspitz":"Osterhorngruppe","rotpalfen":"Hochkalter","rossfeld":"Göll & Roßfeld","salzburger-hochthron-untersberg":"Untersberg","schlenken":"Osterhorngruppe","schmittenstein":"Osterhorngruppe","schober":"Tennengebirge","schwarzenberg":"Salzburg & Vorland","schwarzer-berg":"Osterhorngruppe","schartenspitze":"Hochkalter","schartenwandkopf":"Hochkalter","spielberg":"Osterhorngruppe","taxhamer-kreuz":"Untersberg","tiroler-kogel":"Tennengebirge","trattberg":"Osterhorngruppe","watzmann-mittelspitze":"Watzmann","watzmann-sudspitze":"Watzmann","wieserhorndl":"Osterhorngruppe","wilhelmswand":"Osterhorngruppe","zinkenkopf":"Göll & Roßfeld"};
 const HALLEIN = [47.6833, 13.0967], H0 = 447 + 2;
-const LS = {state:"gipfelbuch-hallein-v1", stars:"gipfelbuch-hallein-import-stars", custom:"gipfelbuch-hallein-custom", ele:"gipfelbuch-hallein-ele"};
+const LS = {state:"gipfelbuch-hallein-v1", stars:"gipfelbuch-hallein-import-stars", custom:"gipfelbuch-hallein-custom", ele:"gipfelbuch-hallein-ele", edits:"gipfelbuch-hallein-edits"};
 const DIRS = ["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSW","SW","WSW","W","WNW","NW","NNW"];
 const OWN = "Eigene Gipfel";
 const $ = id => document.getElementById(id);
@@ -1109,9 +1187,12 @@ function normAsc(x){
 Object.keys(state).forEach(id=>{ const r=state[id]; if(!r || typeof r!=="object"){ delete state[id]; return; } r.a = (Array.isArray(r.a) ? r.a : (r.d ? [r.d] : [])).map(normAsc).filter(Boolean); delete r.d; r.s = +r.s||0; r.n = r.n||""; });
 
 let PEAKS = [], byId = {};
+let edits = lsGet(LS.edits, {});              // id -> {name, h, grp, lat, lon} (your corrections)
 function makePeak(id,name,lat,lon,star,isCustom){
+  const ed = edits[id];
+  if(ed){ if(ed.name) name = ed.name; if(isFinite(ed.lat) && isFinite(ed.lon)){ lat = ed.lat; lon = ed.lon; } }
   const p=[lat,lon], b=bearing(HALLEIN,p);
-  return {id,name,lat,lon,star:!!star,custom:!!isCustom,km:distKm(HALLEIN,p),brg:b,dir:DIRS[Math.round(b/22.5)%16],grp:isCustom?OWN:(GROUPS[id]||"Sonstige")};
+  return {id,name,lat,lon,star:!!star,custom:!!isCustom,km:distKm(HALLEIN,p),brg:b,dir:DIRS[Math.round(b/22.5)%16],grp:(ed && ed.grp) || (isCustom?OWN:(GROUPS[id]||"Sonstige")), edited:!!ed};
 }
 function rebuildPeaks(){
   PEAKS = RAW.map(([id,name,lat,lon,star])=>makePeak(id,name,lat,lon,star,false))
@@ -1131,7 +1212,7 @@ function update(id, patch){
   if(isEmpty(r)) delete state[id]; else state[id] = r;
   persist(); renderAll(id);
 }
-function eleOf(p){ const e = ele[p.id]; return e && isFinite(e.h) ? e : null; }
+function eleOf(p){ const ed = edits[p.id]; if(ed && isFinite(ed.h)) return {h:ed.h, src:"user"}; const e = ele[p.id]; return e && isFinite(e.h) ? e : null; }
 
 /* ---------- photos (IndexedDB) ---------- */
 let idb = null; const photoCount = {};
@@ -1205,6 +1286,7 @@ async function loadHeights(){
   }
   lsSet(LS.ele, ele);
   setSave(got ? "Gipfelhöhen geladen" : "Gespeichert auf diesem Gerät");
+  if(got){ terrainCache.clear(); panoView = null; if(tab==="pano") panoPrepare(); }
   renderAll();
 }
 
@@ -1249,10 +1331,11 @@ function initMap(){
   PEAKS.forEach(addMarker);
   const labels = ()=> el.classList.toggle("hide-labels", map.getZoom() < 12);
   map.on("zoomend", labels); labels();
-  map.on("contextmenu", e=>openAdd(e.latlng.lat, e.latlng.lng));
-  map.on("moveend", ()=>{ clearTimeout(poiTimer); poiTimer = setTimeout(loadPoi, 400); });
+  map.on("contextmenu", e=>{ if(wp.picking) return; openAdd(e.latlng.lat, e.latlng.lng); });
+  map.on("click", e=>{ if(wp.picking) setStart(e.latlng.lat, e.latlng.lng, "Punkt auf der Karte"); });
+  map.on("moveend", ()=>{ clearTimeout(poiTimer); poiTimer = setTimeout(loadPoi, 400); if(!$("offSheet").hidden) offEstimate(); });
   const lastLayers = lsGet("gipfelbuch-hallein-layers", {});
-  setTimeout(()=>{ if(lastLayers.hut) togglePoi("hut"); if(lastLayers.park) togglePoi("park"); }, 0);
+  setTimeout(()=>{ if(lastLayers.hut) togglePoi("hut"); if(lastLayers.park) togglePoi("park"); if(lsGet("gipfelbuch-hallein-trail", false)) toggleTrail(true); }, 0);
   // locate button
   const Loc = L.Control.extend({options:{position:"topleft"}, onAdd(){
     const b = L.DomUtil.create("button","map-btn"); b.type="button"; b.id="locBtn"; b.title="Mein Standort"; b.setAttribute("aria-label","Mein Standort"); b.setAttribute("aria-pressed","false");
@@ -1286,7 +1369,8 @@ function poiPopup(it){
   return '<h4>'+escH(name)+'</h4>'+(info.length?'<p>'+escH(info.join(" · "))+'</p>':'')+
     (near.length?'<p>Nahe: '+near.map(o=>escH(o.p.name)+" ("+fmt1(o.d)+" km)").join(", ")+'</p>':'')+
     '<div class="links"><a href="https://www.google.com/maps/dir/?api=1&destination='+q+'" target="_blank" rel="noopener">Navigation</a><a href="geo:'+q+'?q='+q+'">Karten-App</a>'+
-    (web && /^https?:\/\//.test(web) ? '<a href="'+escH(web)+'" target="_blank" rel="noopener">Webseite</a>' : '')+'</div>';
+    (web && /^https?:\/\//.test(web) ? '<a href="'+escH(web)+'" target="_blank" rel="noopener">Webseite</a>' : '')+'</div>'+
+    (wp.peak ? '<button type="button" class="as-start" data-lat="'+it.lat+'" data-lon="'+it.lon+'" data-name="'+escH(name)+'">Als Start für die Route</button>' : '');
 }
 function showPoiItems(kind, items){
   const lay = poiLayers[kind]; if(!lay) return;
@@ -1343,6 +1427,280 @@ function togglePoi(kind){
 }
 $("lyHut").addEventListener("click", ()=>togglePoi("hut"));
 $("lyPark").addEventListener("click", ()=>togglePoi("park"));
+
+/* ---------- offline map ---------- */
+const OFF_CACHE = "gipfelbuch-offline";
+const TILE_MAX = 3000;
+const tileUrl = (z,x,y) => "https://"+"abc"[Math.abs(x+y)%3]+".tile.opentopomap.org/"+z+"/"+x+"/"+y+".png";
+function lon2x(lon,z){ return Math.floor((lon+180)/360*2**z); }
+function lat2y(lat,z){ const r = rad(lat); return Math.floor((1 - Math.log(Math.tan(r) + 1/Math.cos(r))/Math.PI)/2*2**z); }
+function tilesFor(b, zmin, zmax){
+  const out = [];
+  for(let z=zmin; z<=zmax; z++){
+    const x0=lon2x(b.getWest(),z), x1=lon2x(b.getEast(),z), y0=lat2y(b.getNorth(),z), y1=lat2y(b.getSouth(),z);
+    for(let x=x0; x<=x1; x++) for(let y=y0; y<=y1; y++){ out.push([z,x,y]); if(out.length > TILE_MAX) return out; }
+  }
+  return out;
+}
+function offPlan(){ if(!map) return null; const zmax = +$("offZoom").value, zmin = Math.max(8, Math.min(zmax, Math.floor(map.getZoom())-2)); return {zmin, zmax, tiles:tilesFor(map.getBounds(), zmin, zmax)}; }
+function offEstimate(){
+  const p = offPlan(); if(!p) return;
+  const n = p.tiles.length;
+  $("offEst").textContent = n > TILE_MAX ? "Dieser Ausschnitt ist zu groß für diese Detailstufe. Zoom weiter hinein oder wähle eine geringere Detailstufe."
+    : "Ausschnitt: ca. "+n+" Kartenteile, etwa "+Math.max(1, Math.round(n*(trailOn?0.035:0.025)))+" MB.";
+  $("offGo").disabled = n > TILE_MAX || n === 0;
+}
+async function offStats(){
+  try{
+    const c = await caches.open(OFF_CACHE); const keys = await c.keys();
+    const map_n = keys.filter(k=>k.url.includes("opentopomap")).length, tr_n = keys.filter(k=>k.url.includes("waymarkedtrails")).length, dem_n = keys.length - map_n - tr_n;
+    let usage = "";
+    if(navigator.storage && navigator.storage.estimate){ const e = await navigator.storage.estimate(); usage = " · App belegt insgesamt "+Math.round((e.usage||0)/1048576)+" MB"; }
+    $("offStat").textContent = map_n ? map_n+" Kartenteile, "+(tr_n?tr_n+" Wanderwege-Teile, ":"")+dem_n+" Geländeteile gespeichert"+usage : "Noch keine Karten offline gespeichert."+usage;
+    $("offDel").hidden = !keys.length;
+  }catch(e){ $("offStat").textContent = "Offline-Speicher ist in diesem Browser nicht verfügbar."; $("offGo").disabled = true; }
+}
+let offRun = null;
+async function offSave(){
+  const plan = offPlan(); if(!plan || plan.tiles.length > TILE_MAX) return;
+  let cache; try{ cache = await caches.open(OFF_CACHE); }catch(e){ $("offMsg").textContent = "Offline-Speicher ist in diesem Browser nicht verfügbar."; return; }
+  const run = offRun = {stop:false}; const list = plan.tiles.map(([z,x,y])=>tileUrl(z,x,y));
+  if(trailOn) plan.tiles.forEach(([z,x,y])=>list.push(trailUrl(z,x,y)));
+  // terrain for panorama and peak finder: the view plus 60 km around its centre
+  const c = map.getCenter(); demTilesAround(c.lat, c.lng, 60).forEach(([x,y])=>list.push(demUrl(x,y)));
+  $("offGo").hidden = true; $("offStop").hidden = false; $("offBar").hidden = false; $("offMsg").textContent = "Speichere …";
+  let done = 0, failed = 0, corsBlocked = false, i = 0;
+  const worker = async ()=>{ while(i < list.length && !run.stop){ const url = list[i++];
+    try{
+      if(!(await cache.match(url))){ const r = await fetch(url, {mode:"cors"}); if(!r.ok) throw new Error("http"); await cache.put(url, r); }
+    }catch(e){ failed++; if(e instanceof TypeError && done===0 && failed>=3) corsBlocked = true; }
+    done++; $("offBarI").style.width = (done/list.length*100).toFixed(1)+"%"; $("offMsg").textContent = "Speichere … "+done+" von "+list.length;
+    if(corsBlocked){ run.stop = true; } } };
+  await Promise.all([worker(), worker(), worker()]);
+  $("offGo").hidden = false; $("offStop").hidden = true;
+  if(corsBlocked) $("offMsg").textContent = "Der Kartendienst erlaubt das Speichern gerade nicht. Versuch es später noch einmal.";
+  else if(run.stop) $("offMsg").textContent = "Abgebrochen. Bereits gespeicherte Teile bleiben erhalten.";
+  else if(failed) $("offMsg").textContent = "Fertig, "+failed+" Teile fehlen (Verbindung). Einfach noch einmal speichern, dann werden nur die fehlenden geladen.";
+  else { $("offMsg").textContent = "Fertig. Dieser Ausschnitt funktioniert jetzt auch ohne Netz."; setSave("Karte offline gespeichert"); }
+  if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+  offStats();
+}
+$("offOpen").addEventListener("click", ()=>{ closeAllSheets(); $("offSheet").hidden = false; $("offMsg").textContent = ""; $("offBar").hidden = true; offEstimate(); offStats(); });
+$("offClose").addEventListener("click", ()=>{ $("offSheet").hidden = true; });
+$("offZoom").addEventListener("change", offEstimate);
+$("offGo").addEventListener("click", offSave);
+$("offStop").addEventListener("click", ()=>{ if(offRun) offRun.stop = true; });
+$("offDel").addEventListener("click", async ()=>{
+  const b = $("offDel"); if(!b.dataset.armed){ b.dataset.armed = "1"; b.textContent = "Wirklich alle löschen?"; return; }
+  delete b.dataset.armed; b.textContent = "Gespeicherte Karten löschen";
+  try{ await caches.delete(OFF_CACHE); }catch(e){} $("offMsg").textContent = "Gespeicherte Karten gelöscht."; offStats();
+});
+
+/* ---------- hiking trail overlay (A) ---------- */
+let trailLayer = null, trailOn = false;
+const TRAIL_URL = "https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png";
+const trailUrl = (z,x,y) => "https://tile.waymarkedtrails.org/hiking/"+z+"/"+x+"/"+y+".png";
+function toggleTrail(force){
+  if(!map) return;
+  trailOn = typeof force === "boolean" ? force : !trailOn;
+  $("lyTrail").setAttribute("aria-pressed", String(trailOn));
+  if(trailOn && !trailLayer) trailLayer = L.tileLayer(TRAIL_URL, {maxZoom:17, opacity:.85, attribution:'Wanderwege: © <a href="https://hiking.waymarkedtrails.org">Waymarked Trails</a>'}).addTo(map);
+  if(!trailOn && trailLayer){ trailLayer.remove(); trailLayer = null; }
+  lsSet("gipfelbuch-hallein-trail", trailOn);
+}
+$("lyTrail").addEventListener("click", ()=>toggleTrail());
+
+/* ---------- paths around a summit, coloured by difficulty (B) ---------- */
+// Austrian convention: blue = easy, red = medium, black = difficult
+const DIFF = [
+  {k:0, c:"#8C7A5B", l:"Forst- oder Fahrweg"},
+  {k:1, c:"#2F6AD0", l:"Leicht (blau, T1)"},
+  {k:2, c:"#D23A2A", l:"Mittel (rot, T2–T3)"},
+  {k:4, c:"#141414", l:"Schwer (schwarz, T4–T6)"},
+  {k:5, c:"#8E44AD", l:"Klettersteig"},
+  {k:-1, c:"#6B6B6B", l:"Steig ohne Angabe", dash:"5 6"}
+];
+const SACK = {hiking:1, mountain_hiking:2, demanding_mountain_hiking:3, alpine_hiking:4, demanding_alpine_hiking:5, difficult_alpine_hiking:6};
+const SACL = {1:"T1 Wandern", 2:"T2 Bergwandern", 3:"T3 anspruchsvolles Bergwandern", 4:"T4 Alpinwandern", 5:"T5 anspruchsvolles Alpinwandern", 6:"T6 schwieriges Alpinwandern"};
+function wayClass(t){
+  if(t.highway==="via_ferrata" || t.via_ferrata_scale) return {cls:DIFF[4], rank:7, txt:"Klettersteig"+(t.via_ferrata_scale?", Grad "+t.via_ferrata_scale:"")};
+  const s = SACK[t.sac_scale];
+  if(s) return {cls: s===1 ? DIFF[1] : s<=3 ? DIFF[2] : DIFF[3], rank:s, txt:SACL[s]};
+  if(t.highway==="track" || t.highway==="service" || t.highway==="unclassified") return {cls:DIFF[0], rank:0, txt:"Forst- oder Fahrweg"};
+  if(t.highway==="path" || t.highway==="footway" || t.highway==="steps" || t.highway==="bridleway") return {cls:DIFF[5], rank:-1, txt:"Steig ohne Schwierigkeitsangabe"};
+  return {cls:DIFF[0], rank:0, txt:"Weg"};
+}
+let routePane = null, wegeLayer = null, routeLayer = null;
+const wp = {peak:null, start:null, picking:false, route:null, parks:[]};
+function ensurePane(){ if(!routePane && map){ routePane = map.createPane("routes"); routePane.style.zIndex = 450; } }
+async function cachedJson(key, loader){
+  const req = "https://gipfelbuch.app/cache/"+key;
+  try{ const c = await caches.open("gipfelbuch-wege"); const hit = await c.match(req); if(hit) return await hit.json();
+    const data = await loader(); await c.put(req, new Response(JSON.stringify(data), {headers:{"Content-Type":"application/json"}})); return data;
+  }catch(e){ if(e && e.message==="load") throw e; return loader(); }
+}
+async function overpass(q){
+  const r = await fetch("https://overpass-api.de/api/interpreter", {method:"POST", body:"data="+encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}});
+  if(!r.ok) throw new Error("load"); return r.json();
+}
+function wpMsg(t){ $("wpMsg").textContent = t||""; $("wpMsg").hidden = !t; }
+async function showWege(id){
+  const p = byId[id]; if(!p || !map) return;
+  closeSheet(); showTab("map"); ensurePane();
+  wp.peak = id; wp.route = null; if(routeLayer){ routeLayer.remove(); routeLayer = null; }
+  $("wpTitle").textContent = p.name; $("wpPanel").hidden = false; $("legend").hidden = true; $("wpRes").hidden = true;
+  fitAbovePanel(L.latLngBounds([[p.lat-.03, p.lon-.045],[p.lat+.03, p.lon+.045]]));
+  if(!poiOn.hut) togglePoi("hut"); if(!poiOn.park) togglePoi("park");
+  wpMsg("Lade Wege rund um den Gipfel …");
+  if(wegeLayer){ wegeLayer.remove(); wegeLayer = null; }
+  fillStarts();
+  try{
+    const data = await cachedJson("wege-"+id+"-"+p.lat.toFixed(4)+"-"+p.lon.toFixed(4), ()=>overpass('[out:json][timeout:40];(way["highway"~"^(path|footway|track|steps|bridleway|via_ferrata)$"](around:3500,'+p.lat.toFixed(5)+','+p.lon.toFixed(5)+');way["via_ferrata_scale"](around:3500,'+p.lat.toFixed(5)+','+p.lon.toFixed(5)+'););out tags geom;')
+      .then(js=>({ways:(js.elements||[]).filter(e=>e.geometry).map(e=>({t:e.tags||{}, g:e.geometry.map(n=>[+n.lat.toFixed(5), +n.lon.toFixed(5)])}))})));
+    if(wp.peak!==id) return;
+    const rend = L.canvas({pane:"routes"});
+    wegeLayer = L.layerGroup().addTo(map);
+    const ways = data.ways.slice().sort((a,b)=>wayClass(a.t).rank - wayClass(b.t).rank);
+    ways.forEach(w=>{
+      const wc = wayClass(w.t), c = wc.cls;
+      L.polyline(w.g, {renderer:rend, pane:"routes", color:"#ffffff", weight:c.k===0?5:7, opacity:.85, interactive:false}).addTo(wegeLayer);
+      const line = L.polyline(w.g, {renderer:rend, pane:"routes", color:c.c, weight:c.k===0?2.5:4, dashArray:c.dash||(c.k===5?"9 6":null), opacity:.95}).addTo(wegeLayer);
+      const info = [wc.txt]; if(w.t.ref) info.push("Nr. "+w.t.ref); if(w.t.trail_visibility==="bad"||w.t.trail_visibility==="horrible"||w.t.trail_visibility==="no") info.push("Weg schlecht erkennbar");
+      line.bindPopup('<h4>'+escH(w.t.name || (w.t.highway==="track" ? "Forstweg" : "Steig"))+'</h4><p>'+escH(info.join(" · "))+'</p>');
+    });
+    const counts = {}; ways.forEach(w=>{ const l = wayClass(w.t).cls.l; counts[l] = (counts[l]||0)+1; });
+    $("wpLegend").replaceChildren(...DIFF.filter(d=>counts[d.l]).map(d=>{ const s=document.createElement("span"); s.innerHTML='<i class="sw"></i>'; s.firstChild.style.background=d.c; if(d.dash) s.firstChild.classList.add("dash"); s.append(d.l); return s; }));
+    wpMsg(ways.length ? "" : "Rund um diesen Gipfel sind in OpenStreetMap keine Wege eingetragen.");
+  }catch(e){ if(wp.peak===id) wpMsg("Wege gerade nicht abrufbar. Mit Internet noch einmal versuchen."); }
+}
+// keep what matters visible above the panel at the bottom of the map
+function fitAbovePanel(b){ const ph = $("wpPanel").hidden ? 0 : $("wpPanel").offsetHeight; map.fitBounds(b, {paddingTopLeft:[50,20], paddingBottomRight:[20, Math.min(ph, $("map").clientHeight*.6)+20]}); }
+function closeWege(){
+  wp.peak = null; wp.route = null; wp.picking = false; $("map").classList.remove("picking");
+  if(wegeLayer){ wegeLayer.remove(); wegeLayer = null; } if(routeLayer){ routeLayer.remove(); routeLayer = null; }
+  $("wpPanel").hidden = true; $("legend").hidden = tab!=="map";
+}
+$("wpClose").addEventListener("click", closeWege);
+$("sWege").addEventListener("click", ()=>{ if(selected) showWege(selected); });
+
+/* ---------- route to the summit (C) ---------- */
+async function fillStarts(){
+  const p = byId[wp.peak]; if(!p) return;
+  const sel = $("wpStart"); const keep = sel.value;
+  const opts = [new Option("Mein Standort","me")];
+  wp.parks.forEach((k,i)=>opts.push(new Option(k.name+" ("+fmt1(k.d)+" km Luftlinie)","park"+i)));
+  if(wp.start && wp.start.custom) opts.push(new Option(wp.start.name, "custom"));
+  opts.push(new Option("Punkt auf der Karte antippen …","pick"));
+  sel.replaceChildren(...opts); if([...sel.options].some(o=>o.value===keep)) sel.value = keep;
+  if(wp.parksFor !== wp.peak){
+    wp.parksFor = wp.peak; wp.parks = [];
+    try{
+      const js = await cachedJson("park-"+wp.peak+"-"+p.lat.toFixed(4), ()=>overpass('[out:json][timeout:30];nwr["amenity"="parking"]["access"!~"^(private|customers|no)$"]["parking"!~"^(underground|multi-storey|rooftop)$"](around:9000,'+p.lat.toFixed(5)+','+p.lon.toFixed(5)+');out center tags;'));
+      if(wp.parksFor !== wp.peak) return;
+      wp.parks = (js.elements||[]).map(e=>{ const la = e.lat ?? (e.center&&e.center.lat), lo = e.lon ?? (e.center&&e.center.lon); if(la==null) return null; const t = e.tags||{};
+        return {lat:la, lon:lo, name:t.name || "Parkplatz", d:distKm([la,lo],[p.lat,p.lon])}; }).filter(Boolean).sort((a,b)=>a.d-b.d).slice(0,5);
+      if(wp.parks.length && sel.value==="me" && !me) sel.value = "park0";
+      fillStarts();
+    }catch(e){}
+  }
+}
+$("wpStart").addEventListener("change", ()=>{
+  if($("wpStart").value==="pick"){ wp.picking = true; $("map").classList.add("picking"); wpMsg("Tippe auf der Karte auf den Startpunkt."); }
+  else { wp.picking = false; $("map").classList.remove("picking"); wpMsg(""); }
+});
+function setStart(lat, lon, name){
+  wp.start = {lat, lon, name:name||"Punkt auf der Karte", custom:true}; wp.picking = false; $("map").classList.remove("picking");
+  fillStarts().then(()=>{}); $("wpStart").value = "custom"; wpMsg("Start gesetzt: "+wp.start.name+". Jetzt „Route berechnen“ tippen.");
+}
+document.addEventListener("click", e=>{ const b = e.target.closest && e.target.closest(".as-start"); if(!b) return; setStart(+b.dataset.lat, +b.dataset.lon, b.dataset.name); if(map) map.closePopup(); });
+async function startPoint(){
+  const v = $("wpStart").value;
+  if(v==="me"){ const p = await getPos(); return {lat:p.lat, lon:p.lon, name:"Mein Standort"}; }
+  if(v.startsWith("park")){ const k = wp.parks[+v.slice(4)]; if(k) return k; }
+  if(v==="custom" && wp.start) return wp.start;
+  throw new Error("nostart");
+}
+function walkTime(km, up, down){ const h = km/4, v = up/300 + down/500; return (Math.max(h,v) + Math.min(h,v)/2)*60; }
+function parseTags(s){ const o = {}; String(s||"").split(" ").forEach(kv=>{ const i = kv.indexOf("="); if(i>0) o[kv.slice(0,i)] = kv.slice(i+1); }); return o; }
+async function calcRoute(){
+  const p = byId[wp.peak]; if(!p) return;
+  let s; try{ s = await startPoint(); }catch(e){ wpMsg(e && e.message==="nostart" ? "Wähle zuerst einen Startpunkt." : "Dein Standort ist gerade nicht verfügbar. Wähle einen Parkplatz oder einen Punkt auf der Karte."); return; }
+  if(distKm([s.lat,s.lon],[p.lat,p.lon]) > 40){ wpMsg("Der Start ist mehr als 40 km vom Gipfel entfernt. Wähle einen näheren Startpunkt, etwa einen Parkplatz."); return; }
+  wpMsg("Berechne Route …"); $("wpGo").disabled = true;
+  try{
+    const url = "https://brouter.de/brouter?lonlats="+s.lon.toFixed(6)+","+s.lat.toFixed(6)+"|"+p.lon.toFixed(6)+","+p.lat.toFixed(6)+"&profile=hiking-mountain&alternativeidx=0&format=geojson";
+    const r = await fetch(url); const txt = await r.text();
+    let js; try{ js = JSON.parse(txt); }catch(e){ throw new Error(/target|from-position|not mapped|no route/i.test(txt) ? "noroute" : "service"); }
+    const f = js.features && js.features[0]; if(!f || !f.geometry) throw new Error("noroute");
+    const co = f.geometry.coordinates.map(c=>[c[1], c[0], c[2]]);
+    // distance, ascent and descent (elevation smoothed a little so GPS-like noise does not add up)
+    let km = 0, up = 0, down = 0; const prof = [[0, co[0][2]]]; let last = co[0][2];
+    for(let i=1;i<co.length;i++){ km += distKm(co[i-1], co[i]); prof.push([km, co[i][2]]);
+      const e = co[i][2]; if(isFinite(e) && isFinite(last)){ const d = e - last; if(Math.abs(d) >= 4){ if(d>0) up += d; else down -= d; last = e; } } else last = e; }
+    const pr = f.properties || {}; if(isFinite(+pr["filtered ascend"])) up = +pr["filtered ascend"];
+    const profKm = km; if(+pr["track-length"] > 0) km = +pr["track-length"]/1000;
+    // difficulty per stretch from the way tags the routing service reports
+    const segs = []; let maxRank = 0, maxTxt = "";
+    const msgs = Array.isArray(pr.messages) ? pr.messages : [];
+    if(msgs.length > 1){
+      const hd = msgs[0], iLo = hd.indexOf("Longitude"), iLa = hd.indexOf("Latitude"), iW = hd.indexOf("WayTags");
+      let ci = 0;
+      msgs.slice(1).forEach(row=>{
+        let lo = +row[iLo], la = +row[iLa]; if(Math.abs(lo) > 1000){ lo/=1e6; la/=1e6; }
+        let best = ci, bd = 1e9; for(let j=ci; j<co.length; j++){ const dd = Math.abs(co[j][0]-la)+Math.abs(co[j][1]-lo); if(dd<bd){ bd=dd; best=j; } if(dd<1e-6) break; }
+        const t = parseTags(row[iW]), wc = wayClass(t); segs.push({from:ci, to:best, wc}); ci = best;
+        if(wc.rank > maxRank){ maxRank = wc.rank; maxTxt = wc.txt; }
+      });
+      if(ci < co.length-1) segs.push({from:ci, to:co.length-1, wc:segs.length ? segs[segs.length-1].wc : wayClass({})});
+    }
+    if(!segs.length) segs.push({from:0, to:co.length-1, wc:null});
+    // draw
+    ensurePane(); if(routeLayer) routeLayer.remove();
+    const rend = L.canvas({pane:"routes"}); routeLayer = L.layerGroup().addTo(map);
+    const ll = co.map(c=>[c[0],c[1]]);
+    L.polyline(ll, {renderer:rend, pane:"routes", color:"#ffffff", weight:11, opacity:.95, interactive:false}).addTo(routeLayer);
+    L.polyline(ll, {renderer:rend, pane:"routes", color:css("--accent"), weight:8, opacity:.55, interactive:false}).addTo(routeLayer);
+    segs.forEach(sg=>{ if(sg.to <= sg.from) return; const c = sg.wc ? sg.wc.cls.c : css("--accent");
+      L.polyline(ll.slice(sg.from, sg.to+1), {renderer:rend, pane:"routes", color:c, weight:4, opacity:1, dashArray: sg.wc && sg.wc.cls.k===5 ? "9 6" : null}).addTo(routeLayer); });
+    L.circleMarker(ll[0], {radius:7, color:"#fff", weight:3, fillColor:css("--accent"), fillOpacity:1}).bindTooltip("Start").addTo(routeLayer);
+    fitAbovePanel(L.latLngBounds(ll).pad(.1));
+    const min = walkTime(km, up, down);
+    wp.route = {co, km, up, down, min, maxRank, maxTxt, start:s, prof};
+    $("wpStats").innerHTML = '<b>'+fmt1(km)+' km</b><span>Strecke</span><b>'+fmtHm(Math.round(up))+'</b><span>Aufstieg</span><b>'+fmtMin(Math.round(min))+'</b><span>Gehzeit hinauf</span>';
+    $("wpDiff").textContent = maxRank>0 ? "Schwierigste Stelle: "+maxTxt+"." : msgs.length>1 ? "Keine Schwierigkeitsangaben für diesen Weg vorhanden." : "";
+    $("wpRes").hidden = false; drawProfile(); wpMsg("");
+  }catch(e){
+    wpMsg(e.message==="noroute" ? "Zwischen Start und Gipfel wurde kein Weg gefunden. Versuch einen anderen Startpunkt." : "Der Routendienst ist gerade nicht erreichbar. Später noch einmal versuchen.");
+  }finally{ $("wpGo").disabled = false; }
+}
+function drawProfile(){
+  const r = wp.route, cv = $("wpProf"); if(!r) return;
+  const dpr = window.devicePixelRatio||1, W = cv.clientWidth, H = cv.clientHeight; if(!W) return;
+  cv.width = W*dpr; cv.height = H*dpr; const g = cv.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  const pts = r.prof.filter(x=>isFinite(x[1])); if(pts.length < 2) return;
+  const lo = Math.min(...pts.map(x=>x[1])), hi = Math.max(...pts.map(x=>x[1])), pad = 16, L0 = 34;
+  const dmax = pts[pts.length-1][0] || 1; const X = d => L0 + d/dmax*(W-L0-6), Yp = e => H - pad - (e-lo)/Math.max(1,hi-lo)*(H-pad-8);
+  g.strokeStyle = css("--line"); g.lineWidth = 1; [lo,hi].forEach(e=>{ g.beginPath(); g.moveTo(L0, Yp(e)+.5); g.lineTo(W, Yp(e)+.5); g.stroke(); });
+  g.fillStyle = css("--muted"); g.font = "10px "+css("--f-mono"); g.textAlign = "right"; g.textBaseline = "middle";
+  g.fillText(Math.round(hi), L0-4, Yp(hi)); g.fillText(Math.round(lo), L0-4, Yp(lo));
+  g.textAlign = "center"; g.textBaseline = "bottom"; g.fillText(fmt1(r.km)+" km", W-24, H);
+  g.beginPath(); g.moveTo(X(0), H-pad); pts.forEach(([d,e])=>g.lineTo(X(d), Yp(e))); g.lineTo(X(dmax), H-pad); g.closePath();
+  g.globalAlpha = .25; g.fillStyle = css("--climbed"); g.fill(); g.globalAlpha = 1;
+  g.beginPath(); pts.forEach(([d,e],i)=>i?g.lineTo(X(d),Yp(e)):g.moveTo(X(d),Yp(e))); g.strokeStyle = css("--climbed"); g.lineWidth = 2; g.stroke();
+}
+$("wpGo").addEventListener("click", calcRoute);
+$("wpGpx").addEventListener("click", ()=>{
+  const r = wp.route, p = byId[wp.peak]; if(!r || !p) return;
+  const x = s => String(s).replace(/[<&>"]/g, c=>({"<":"&lt;","&":"&amp;",">":"&gt;",'"':"&quot;"}[c]));
+  const gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Gipfelbuch Hallein" xmlns="http://www.topografix.com/GPX/1/1">\n'+
+    '<wpt lat="'+p.lat.toFixed(6)+'" lon="'+p.lon.toFixed(6)+'"><name>'+x(p.name)+'</name></wpt>\n<trk><name>'+x(r.start.name+" – "+p.name)+'</name><trkseg>\n'+
+    r.co.map(c=>'<trkpt lat="'+c[0].toFixed(6)+'" lon="'+c[1].toFixed(6)+'">'+(isFinite(c[2])?'<ele>'+Math.round(c[2])+'</ele>':'')+'</trkpt>').join("\n")+'\n</trkseg></trk>\n</gpx>\n';
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([gpx], {type:"application/gpx+xml"}));
+  a.download = slug(p.name)+"-route.gpx"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  wpMsg("GPX-Datei gespeichert. Du findest sie in deinen Downloads.");
+});
+$("wpClear").addEventListener("click", ()=>{ if(routeLayer){ routeLayer.remove(); routeLayer = null; } wp.route = null; $("wpRes").hidden = true; });
+$("sRoute").addEventListener("click", ()=>{ if(selected){ const id = selected; showWege(id); } });
 
 /* ---------- GPS: where am I, summit check-in ---------- */
 let watchId = null, me = null, meMarker = null, meCircle = null, firstFix = true;
@@ -1433,20 +1791,20 @@ document.querySelectorAll(".chips button").forEach(btn=>btn.addEventListener("cl
 
 /* ---------- peak sheet ---------- */
 const sheet = $("sheet"); let noteTimer = null; const wxCache = {};
-function closeAllSheets(){ ["sheet","addSheet","backup"].forEach(id=>{ if(id==="sheet") closeSheet(); else $(id).hidden = true; }); }
+function closeAllSheets(){ ["sheet","addSheet","backup","offSheet"].forEach(id=>{ if(id==="sheet") closeSheet(); else $(id).hidden = true; }); }
 function fillSheet(){
   const p = byId[selected]; if(!p) return; const r = rec(p.id), e = eleOf(p);
   $("sName").replaceChildren(document.createTextNode(p.name));
   const sm = document.createElement("small"); sm.textContent = (e ? fmtInt(e.h)+" m · " : "") + fmt1(p.km)+" km · "+Math.round(p.brg)+"°"; $("sName").appendChild(sm);
   $("sDir").textContent = p.dir+" · "+fmt1(p.km)+" km Luftlinie";
   $("needleG").setAttribute("transform","rotate("+p.brg.toFixed(1)+" 10 10)");
-  $("sEle").textContent = e ? (e.src==="dem" ? "ca. " : "")+fmtInt(e.h)+" m"+(e.src==="dem" ? " (Geländemodell)" : "") : "noch unbekannt";
+  $("sEle").textContent = e ? (e.src==="dem" ? "ca. " : "")+fmtInt(e.h)+" m"+(e.src==="dem" ? " (Geländemodell)" : e.src==="user" ? " (von dir)" : "") : "noch unbekannt";
   $("sGrp").textContent = p.grp;
   $("sPos").textContent = fmt4(p.lat)+"° N · "+fmt4(p.lon)+"° E";
   [["bOpen",0],["bGoal",2],["bDone",1]].forEach(([id,s])=>$(id).setAttribute("aria-pressed", String(r.s===s)));
   renderAscents(p, r);
   if(document.activeElement!==$("sNote")) $("sNote").value = r.n||"";
-  $("sTag").textContent = p.star ? "★ In PeakFinder markiert" : p.custom ? "Von dir hinzugefügt" : "";
+  $("sTag").textContent = [p.star ? "★ In PeakFinder markiert" : p.custom ? "Von dir hinzugefügt" : "", p.edited ? "Daten von dir korrigiert" : ""].filter(Boolean).join(" · ");
   const q = p.lat.toFixed(5)+","+p.lon.toFixed(5);
   $("lGeo").href = "geo:"+q+"?q="+q+"("+encodeURIComponent(p.name)+")";
   $("lGoogle").href = "https://www.google.com/maps/search/?api=1&query="+q;
@@ -1493,7 +1851,7 @@ async function fillWeather(){
 function openSheet(id){
   flushNote(); closeAllSheets();
   const prev = selected; selected = id; sheet.hidden = false; sheet.scrollTop = 0;
-  closeAscForm(); $("delAsk").hidden = false; $("delConfirm").hidden = true;
+  closeAscForm(); closeEdit(); $("delAsk").hidden = false; $("delConfirm").hidden = true;
   fillSheet(); fillPhotos(); fillWeather();
   if(prev) restyle(prev); restyle(id);
   if(markers[id]) markers[id].bringToFront();
@@ -1526,7 +1884,7 @@ $("sDelYes").addEventListener("click", async ()=>{
   const id = selected; if(!id || !byId[id].custom) return;
   const ph = await photosOf(id); for(const x of ph) await delPhoto(x.id, id);
   custom = custom.filter(c=>c.id!==id); lsSet(LS.custom, custom);
-  delete state[id]; delete ele[id]; lsSet(LS.ele, ele); persist();
+  delete state[id]; delete ele[id]; lsSet(LS.ele, ele); delete edits[id]; lsSet(LS.edits, edits); persist();
   if(markers[id]){ markers[id].remove(); delete markers[id]; }
   selected = null; sheet.hidden = true; rebuildPeaks(); fillGroupSelect(); renderAll(); setSave("Gipfel gelöscht");
 });
@@ -1582,6 +1940,49 @@ $("fDel").addEventListener("click", ()=>{
   if(id && aid) update(id, {a:(rec(id).a||[]).filter(y=>y.id!==aid)});
 });
 
+/* ---------- correct peak data ---------- */
+function rawOf(id){ const r = RAW.find(x=>x[0]===id); if(r) return {name:r[1], lat:r[2], lon:r[3], grp:GROUPS[id]||"Sonstige"}; const c = custom.find(x=>x.id===id); return c ? {name:c.name, lat:c.lat, lon:c.lon, grp:OWN} : null; }
+function closeEdit(){ $("eForm").hidden = true; $("eOpen").hidden = false; }
+$("eOpen").addEventListener("click", ()=>{
+  const p = byId[selected]; if(!p) return; const e = eleOf(p);
+  $("eName").value = p.name; $("eEle").value = e ? e.h : ""; $("eLat").value = p.lat.toFixed(5); $("eLon").value = p.lon.toFixed(5);
+  const groups = [...new Set(PEAKS.map(x=>x.grp))].sort((a,b)=>a.localeCompare(b,"de"));
+  $("eGrp").replaceChildren(...groups.map(g=>new Option(g,g)), new Option("Neues Gebiet …","__new"));
+  $("eGrp").value = p.grp; $("eGrpNewWrap").hidden = true; $("eGrpNew").value = "";
+  $("eReset").hidden = !edits[p.id]; $("eMsg").textContent = "";
+  $("eForm").hidden = false; $("eOpen").hidden = true;
+  setTimeout(()=>$("eForm").scrollIntoView({block:"nearest", behavior:"smooth"}), 30);
+});
+$("eGrp").addEventListener("change", ()=>{ $("eGrpNewWrap").hidden = $("eGrp").value!=="__new"; if($("eGrp").value==="__new") $("eGrpNew").focus(); });
+$("eCancel").addEventListener("click", closeEdit);
+function applyPeakChange(id){
+  rebuildPeaks(); fillGroupSelect();
+  if(markers[id]){ markers[id].remove(); delete markers[id]; } if(byId[id]) addMarker(byId[id]);
+  terrainCache.clear(); panoView = null; if(tab==="pano") panoPrepare(); renderAll(); fillSheet();
+}
+$("eForm").addEventListener("submit", ev=>{
+  ev.preventDefault(); const id = selected, orig = rawOf(id); if(!id || !orig) return;
+  const name = $("eName").value.trim(), lat = parseNum($("eLat").value), lon = parseNum($("eLon").value), hv = $("eEle").value.trim();
+  const grp = $("eGrp").value==="__new" ? $("eGrpNew").value.trim() : $("eGrp").value;
+  if(!name){ $("eMsg").textContent = "Der Name darf nicht leer sein."; return; }
+  if(!(lat>=-90 && lat<=90 && lon>=-180 && lon<=180)){ $("eMsg").textContent = "Die Koordinaten stimmen nicht. Beispiel: 47,6833 und 13,0967"; return; }
+  if(hv && !(+hv>0 && +hv<9000)){ $("eMsg").textContent = "Die Höhe bitte in Metern angeben, z. B. 1648."; return; }
+  if(!grp){ $("eMsg").textContent = "Gib dem neuen Gebiet einen Namen."; return; }
+  const ed = {};
+  if(name !== orig.name) ed.name = name;
+  if(Math.abs(lat-orig.lat) > 1e-6 || Math.abs(lon-orig.lon) > 1e-6){ ed.lat = lat; ed.lon = lon; }
+  if(grp !== orig.grp) ed.grp = grp;
+  const auto = ele[id];
+  if(hv && (!auto || Math.round(+hv) !== auto.h)) ed.h = Math.round(+hv);
+  if(Object.keys(ed).length) edits[id] = ed; else delete edits[id];
+  lsSet(LS.edits, edits); closeEdit(); applyPeakChange(id); setSave("Gipfeldaten gespeichert");
+});
+$("eReset").addEventListener("click", ()=>{
+  const b = $("eReset"); if(!b.dataset.armed){ b.dataset.armed = "1"; b.textContent = "Wirklich zurücksetzen?"; return; }
+  delete b.dataset.armed; b.textContent = "Original wiederherstellen";
+  const id = selected; delete edits[id]; lsSet(LS.edits, edits); closeEdit(); applyPeakChange(id); setSave("Originaldaten wiederhergestellt");
+});
+
 /* ---------- photo viewer ---------- */
 let viewing = null;
 function openViewer(ph){ viewing = ph; const v=$("viewer"), im=$("vImg"); if(im.src) URL.revokeObjectURL(im.src); im.src = URL.createObjectURL(ph.blob); $("vRow").hidden=false; $("vConfirm").hidden=true; v.hidden=false; }
@@ -1619,48 +2020,170 @@ $("aSave").addEventListener("click", ()=>{
   loadHeights();
 });
 
+/* ---------- terrain model (free Terrarium elevation tiles, about 100 m resolution) ---------- */
+const DEM_Z = 10, DEM_CACHE = "gipfelbuch-dem", DEM_N = 256*2**DEM_Z;
+const demUrl = (x,y) => "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/"+DEM_Z+"/"+x+"/"+y+".png";
+const demTiles = new Map();     // x*4096+y -> Float32Array | null
+const demPending = new Map();
+function demTilesAround(lat, lon, km){
+  const dLat = km/111.32, dLon = km/(111.32*Math.cos(rad(lat)));
+  const x0=lon2x(lon-dLon,DEM_Z), x1=lon2x(lon+dLon,DEM_Z), y0=lat2y(lat+dLat,DEM_Z), y1=lat2y(lat-dLat,DEM_Z);
+  const out=[]; for(let x=x0;x<=x1;x++) for(let y=y0;y<=y1;y++) out.push([x,y]); return out;
+}
+function demFetch(x,y){
+  const key = x*4096+y; if(demTiles.has(key)) return Promise.resolve(demTiles.get(key));
+  if(demPending.has(key)) return demPending.get(key);
+  const pr = (async()=>{
+    const url = demUrl(x,y); let res = null;
+    try{ res = await caches.match(url); }catch(e){}
+    if(!res){ res = await fetch(url, {mode:"cors"}); if(!res.ok) throw new Error("http"); try{ const c = await caches.open(DEM_CACHE); await c.put(url, res.clone()); }catch(e){} }
+    const bmp = await createImageBitmap(await res.blob());
+    const cv = document.createElement("canvas"); cv.width = 256; cv.height = 256;
+    const g = cv.getContext("2d", {willReadFrequently:true}); g.drawImage(bmp, 0, 0);
+    const d = g.getImageData(0,0,256,256).data, out = new Float32Array(65536);
+    for(let i=0;i<65536;i++) out[i] = d[i*4]*256 + d[i*4+1] + d[i*4+2]/256 - 32768;
+    return out;
+  })().then(a=>{ demTiles.set(key,a); demPending.delete(key); return a; }, ()=>{ demTiles.set(key,null); demPending.delete(key); return null; });
+  demPending.set(key, pr); return pr;
+}
+async function demLoad(lat, lon, km, onProg){
+  const list = demTilesAround(lat, lon, km); let done = 0, ok = 0, i = 0;
+  const work = async()=>{ while(i < list.length){ const [x,y] = list[i++]; if(await demFetch(x,y)) ok++; done++; onProg && onProg(done, list.length); } };
+  await Promise.all([work(), work(), work(), work()]);
+  return {ok, total:list.length};
+}
+function demAt(lat, lon){
+  const r = rad(lat), x = (lon+180)/360*DEM_N - .5, y = (1 - Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*DEM_N - .5;
+  const x0 = Math.floor(x), y0 = Math.floor(y), fx = x-x0, fy = y-y0;
+  const s = (X,Y)=>{ const t = demTiles.get((X>>8)*4096 + (Y>>8)); return t ? t[(Y&255)*256 + (X&255)] : NaN; };
+  return (s(x0,y0)*(1-fx) + s(x0+1,y0)*fx)*(1-fy) + (s(x0,y0+1)*(1-fx) + s(x0+1,y0+1)*fx)*fy;
+}
+const RANGE_KM = 75, RE = 6371000, K_REF = 0.13;
+const elevAngle = (h, h0, d) => deg(Math.atan2(h - h0 - d*d/(2*RE)*(1-K_REF), d));
+const terrainCache = new Map();
+// Horizon and line of sight from one standpoint. Only peaks that no terrain in front of them hides count as visible.
+async function computeView(lat0, lon0, h0){
+  const cosL = Math.cos(rad(lat0)), M = 111320, maxD = RANGE_KM*1000;
+  const march = (az, stopD, cb)=>{ const sa = Math.sin(rad(az))/(M*cosL), ca = Math.cos(rad(az))/M; let d = 40;
+    while(d < stopD){ const h = demAt(lat0 + d*ca, lon0 + d*sa); if(h===h) cb(d, h); d += 25 + d*0.01; } };
+  const STEP = 0.3, n = Math.round(360/STEP), bands = [3000, 10000, 25000, maxD];
+  const prof = bands.map(()=>new Float32Array(n).fill(-90));
+  for(let k=0; k<n; k++){
+    march(k*STEP, maxD, (d,h)=>{ const a = elevAngle(h, h0, d); let bi = 0; while(d > bands[bi]) bi++; if(a > prof[bi][k]) prof[bi][k] = a; });
+    if(k % 80 === 79) await new Promise(r=>setTimeout(r, 0));
+  }
+  const peaks = [];
+  PEAKS.forEach(p=>{
+    const D = distKm([lat0,lon0],[p.lat,p.lon])*1000; if(D < 30 || D > maxD) return;
+    const e = eleOf(p); const h = e ? e.h : demAt(p.lat, p.lon); if(!(h===h)) return;
+    const az = bearing([lat0,lon0],[p.lat,p.lon]), a = elevAngle(h, h0, D);
+    let block = -90; march(az, D - Math.max(150, D*0.03), (d,hh)=>{ const aa = elevAngle(hh, h0, d); if(aa > block) block = aa; });
+    peaks.push({p, az, a, d:D, vis: a >= block - 0.1});
+  });
+  return {lat:lat0, lon:lon0, h0, prof, STEP, bands, peaks, visible:new Set(peaks.filter(o=>o.vis).map(o=>o.p.id))};
+}
+async function viewFor(lat, lon, onStatus){
+  const key = lat.toFixed(3)+","+lon.toFixed(3);
+  if(terrainCache.has(key)) return terrainCache.get(key);
+  const r = await demLoad(lat, lon, RANGE_KM, (d,t)=>onStatus && onStatus("Lade Geländedaten "+d+" von "+t+" …"));
+  if(!r.ok) return null;
+  onStatus && onStatus("Berechne Sichtlinien …");
+  const g = demAt(lat, lon);
+  const v = await computeView(lat, lon, (g===g ? g : 447) + 1.7);
+  v.partial = r.ok < r.total;
+  terrainCache.set(key, v); return v;
+}
+
 /* ---------- panorama ---------- */
 const pano = $("pano"), wrap = $("panoWrap");
 let pxDeg = 9, offset = 135, panoHits = [];
 const VEX = 3;    // vertical exaggeration
+let panoMode = "hallein", panoView = null, panoToken = 0, panoMsg = "", panoPos = null;
 // rough footprint of a mountain: the higher above the valley, the wider its base (about 25° average slope)
 function baseR(p){ const e = eleOf(p); return Math.max(600, Math.min(6000, ((e ? e.h : 1000) - H0) * 2.2)); }
-function panoPeaks(){
-  return PEAKS.map(p=>{ const e = eleOf(p); if(!e) return null; const d = p.km*1000;
-    const drop = d*d/(2*6371000)*0.87; const a = deg(Math.atan2(e.h - H0 - drop, d)); return {p, a, d}; }).filter(Boolean);
+function panoStatus(t){ panoMsg = t||""; if(!$("panoView").hidden) drawPano(); }
+function getPos(){ return new Promise((res,rej)=>{ if(me && me.acc < 200) return res({lat:me.lat, lon:me.lon, acc:me.acc});
+  if(!navigator.geolocation) return rej(new Error("none"));
+  navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude, lon:p.coords.longitude, acc:p.coords.accuracy}), rej, {enableHighAccuracy:true, timeout:20000, maximumAge:30000}); }); }
+async function panoPrepare(){
+  const token = ++panoToken; let lat = HALLEIN[0], lon = HALLEIN[1];
+  if(panoMode==="me"){
+    panoStatus("Suche deinen Standort …");
+    try{ const p = await getPos(); lat = p.lat; lon = p.lon; panoPos = p; }
+    catch(e){ if(token!==panoToken) return; panoStatus(e && e.code===1 ? "Standort nicht erlaubt. Erlaube ihn in den Einstellungen von Chrome." : "Standort gerade nicht verfügbar. Draußen mit freiem Himmel klappt es meist besser."); panoView = null; return; }
+  }
+  if(token!==panoToken) return;
+  const v = await viewFor(lat, lon, t=>{ if(token===panoToken) panoStatus(t); });
+  if(token!==panoToken) return;
+  panoView = v;
+  if(v){ // turn towards the direction with the most visible peaks
+    const bins = new Array(12).fill(0); v.peaks.forEach(o=>{ if(o.vis) bins[Math.floor(o.az/30)%12]++; });
+    const best = bins.indexOf(Math.max(...bins)); offset = ((best*30 + 15 - wrap.clientWidth/2/pxDeg)%360+360)%360;
+  }
+  panoStatus(v ? "" : "Geländedaten gerade nicht erreichbar. Gezeigt wird ein vereinfachter Rundblick von Hallein, auch mit verdeckten Gipfeln.");
 }
+document.querySelectorAll("#panoSeg button").forEach(b=>b.addEventListener("click", ()=>{
+  if(panoMode === b.dataset.mode && panoView && panoMode === "hallein") return;
+  panoMode = b.dataset.mode; document.querySelectorAll("#panoSeg button").forEach(x=>x.setAttribute("aria-pressed", String(x===b)));
+  panoView = null; panoPrepare();
+}));
 function drawPano(){
   const dpr = window.devicePixelRatio||1, W = wrap.clientWidth, H = wrap.clientHeight;
   if(!W || !H) return;
   pano.width = Math.round(W*dpr); pano.height = Math.round(H*dpr);
   const g = pano.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
   g.fillStyle = css("--sky"); g.fillRect(0,0,W,H);
-  const list = panoPeaks();
-  $("panoNote").textContent = list.length ? "Rundblick von Hallein (447 m), Höhen "+VEX+"-fach überhöht. Wischen zum Drehen, Gipfel antippen."
-    : "Für den Rundblick lädt die App einmal die Gipfelhöhen aus dem Internet. Bitte online öffnen.";
-  const axisH = 26, baseY = H - axisH - 18;
-  const maxA = Math.max(4, ...list.map(o=>o.a));
-  const vs = Math.min(pxDeg*VEX, (baseY - 120)/maxA);   // px per degree, vertical
-  const X = b => ((b - offset)%360 + 360)%360 * pxDeg;   // 0..360*pxDeg
-  const span = 360*pxDeg;
-  // silhouettes, far to near
-  const bands = [[30,999,.16],[15,30,.24],[6,15,.34],[0,6,.48]];
   const ink = css("--ink");
-  bands.forEach(([lo,hi,al])=>{
-    const ps = list.filter(o=>o.p.km>=lo && o.p.km<hi); if(!ps.length) return;
-    const step = 1/pxDeg*2, n = Math.ceil(360/step), prof = new Float32Array(n).fill(-1);
-    ps.forEach(o=>{ const hw = Math.max(.8, deg(Math.atan2(baseR(o.p), o.d))); const c = o.p.brg;
-      for(let db=-hw; db<=hw; db+=step){ const k = Math.floor((((c+db)%360)+360)%360/step)%n; const v = Math.max(0, o.a)*(1-Math.abs(db)/hw) + (o.a<0?o.a:0); if(v>prof[k]) prof[k]=v; } });
-    g.globalAlpha = al; g.fillStyle = ink; g.beginPath(); g.moveTo(0, baseY);
-    for(let x=0; x<=W; x+=2){ const b = offset + x/pxDeg; const k = Math.floor(((b%360)+360)%360/step)%n; const v = prof[k]; g.lineTo(x, baseY - Math.max(0,v)*vs); }
-    g.lineTo(W, baseY); g.closePath(); g.fill(); g.globalAlpha = 1;
-  });
+  const usable = panoView && (panoMode!=="me" || panoView.lat!==HALLEIN[0]);
+  let list;
+  if(usable) list = panoView.peaks.filter(o=>o.vis);
+  else if(panoMode==="hallein" && !panoMsg.startsWith("Lade") && !panoMsg.startsWith("Berechne")) list = PEAKS.map(p=>{ const e = eleOf(p); if(!e) return null; const d = p.km*1000; return {p, a:elevAngle(e.h, H0, d), d, az:p.brg}; }).filter(Boolean);
+  else list = [];
+  // header text
+  if(panoMsg) $("panoNote").textContent = panoMsg;
+  else if(usable){
+    const where = panoMode==="me" ? "deinem Standort ("+Math.round(panoView.h0)+" m"+(panoPos?", ±"+Math.round(panoPos.acc)+" m":"")+")" : "Hallein ("+Math.round(panoView.h0)+" m)";
+    $("panoNote").textContent = "Von "+where+": "+list.length+" Gipfel sichtbar"+(panoView.partial?" (Gelände teilweise unvollständig)":"")+". Höhen "+VEX+"-fach überhöht.";
+  } else if(!PEAKS.some(eleOf)) $("panoNote").textContent = "Für den Rundblick lädt die App einmal die Gipfelhöhen aus dem Internet. Bitte online öffnen.";
+  const axisH = 26, baseY = H - axisH - 18;
+  let aMin = 0, aMax = 4;
+  list.forEach(o=>{ aMax = Math.max(aMax, o.a); aMin = Math.min(aMin, o.a); });
+  if(usable) panoView.prof.forEach(pr=>{ for(let k=0;k<pr.length;k+=4){ if(pr[k] > aMax) aMax = pr[k]; } });
+  aMin = Math.max(-8, aMin - 0.5);
+  const vs = Math.min(pxDeg*VEX, (baseY - 120)/(aMax - aMin));
+  const Y = a => baseY - (a - aMin)*vs;
+  const X = b => ((b - offset)%360 + 360)%360 * pxDeg;
+  const span = 360*pxDeg;
+  const alphas = [.5, .36, .25, .16];
+  if(usable){
+    // terrain silhouettes, far bands first so nearer ridges cover them
+    const {prof, STEP} = panoView, n = prof[0].length;
+    for(let bi=prof.length-1; bi>=0; bi--){
+      g.globalAlpha = alphas[bi]; g.fillStyle = ink; g.beginPath(); g.moveTo(0, H);
+      for(let x=0; x<=W; x+=2){ const b = ((offset + x/pxDeg)%360+360)%360, f = b/STEP, k0 = Math.floor(f)%n, k1 = (k0+1)%n, t = f-Math.floor(f);
+        const v0 = prof[bi][k0], v1 = prof[bi][k1]; const v = (v0<-80 || v1<-80) ? Math.max(v0,v1) : v0*(1-t)+v1*t;
+        g.lineTo(x, v < -80 ? H : Math.min(H, Y(v))); }
+      g.lineTo(W, H); g.closePath(); g.fill();
+    }
+    g.globalAlpha = 1;
+  } else if(list.length){
+    const bands = [[30,999,.16],[15,30,.24],[6,15,.34],[0,6,.48]];
+    bands.forEach(([lo,hi,al])=>{
+      const ps = list.filter(o=>o.d/1000>=lo && o.d/1000<hi); if(!ps.length) return;
+      const step = 1/pxDeg*2, n = Math.ceil(360/step), prof = new Float32Array(n).fill(-1);
+      ps.forEach(o=>{ const hw = Math.max(.8, deg(Math.atan2(baseR(o.p), o.d))); const c = o.az;
+        for(let db=-hw; db<=hw; db+=step){ const k = Math.floor((((c+db)%360)+360)%360/step)%n; const v = Math.max(0, o.a)*(1-Math.abs(db)/hw); if(v>prof[k]) prof[k]=v; } });
+      g.globalAlpha = al; g.fillStyle = ink; g.beginPath(); g.moveTo(0, baseY);
+      for(let x=0; x<=W; x+=2){ const b = offset + x/pxDeg; const k = Math.floor(((b%360)+360)%360/step)%n; g.lineTo(x, Y(Math.max(0,prof[k]))); }
+      g.lineTo(W, baseY); g.closePath(); g.fill(); g.globalAlpha = 1;
+    });
+  }
   g.fillStyle = css("--bg"); g.fillRect(0, baseY, W, H-baseY);
   g.strokeStyle = css("--line"); g.lineWidth = 1; g.beginPath(); g.moveTo(0, baseY+.5); g.lineTo(W, baseY+.5); g.stroke();
   // compass axis
   g.fillStyle = css("--muted"); g.font = "600 12px "+css("--f-display"); g.textAlign = "center"; g.textBaseline = "top";
   for(let b=0; b<360; b+=5){ for(const k of [0,-span,span]){ const x = X(b)+k; if(x<-20||x>W+20) continue;
-    const big = b%22.5===0 || b%45===0; g.fillRect(x, baseY+1, 1, big?8:4);
+    const big = b%45===0; g.fillRect(x, baseY+1, 1, big?8:4);
     if(b%45===0) g.fillText(DIRS[b/22.5], x, baseY+10); else if(b%15===0){ g.font="10px "+css("--f-mono"); g.fillText(b+"°", x, baseY+10); g.font="600 12px "+css("--f-display"); } } }
   // peaks
   panoHits = [];
@@ -1669,16 +2192,16 @@ function drawPano(){
   g.textAlign = "left"; g.textBaseline = "middle";
   order.forEach(o=>{
     for(const k of [0,-span,span]){
-      const x = X(o.p.brg)+k; if(x<-30||x>W+30) continue;
-      const y = baseY - Math.max(0,o.a)*vs, s = rec(o.p.id).s, sel = o.p.id===selected;
+      const x = X(o.az)+k; if(x<-30||x>W+30) continue;
+      const y = Math.min(baseY-2, Y(o.a)), s = rec(o.p.id).s, sel = o.p.id===selected;
       const free = !taken.some(t=>Math.abs(t-x) < 14);
       if(free || sel){
         taken.push(x);
-        const ly = Math.max(14, y - 14 - (o.p.km<6?6:0));
+        const ly = Math.max(14, y - 14);
         g.strokeStyle = css("--muted"); g.globalAlpha=.6; g.beginPath(); g.moveTo(x, y-4); g.lineTo(x, ly); g.stroke(); g.globalAlpha=1;
         g.save(); g.translate(x, ly); g.rotate(-Math.PI/2);
         g.font = (sel?"700 ":"600 ")+"12px "+css("--f-body"); g.fillStyle = sel ? css("--accent") : ink;
-        g.fillText(o.p.name + (eleOf(o.p)?"  "+eleOf(o.p).h:""), 3, 0); g.restore();
+        g.fillText(o.p.name + (eleOf(o.p)?"  "+eleOf(o.p).h:"") + "  " + fmt1(o.d/1000)+" km", 3, 0); g.restore();
       }
       g.beginPath(); g.arc(x, y, sel?6:4, 0, Math.PI*2);
       g.fillStyle = s ? statusColor(s) : css("--bg"); g.fill();
@@ -1749,20 +2272,22 @@ function renderStats(){
 }
 
 /* ---------- backup ---------- */
-function backupData(){ return {app:"gipfelbuch-hallein", v:2, exported:new Date().toISOString(), state, custom}; }
+function backupData(){ return {app:"gipfelbuch-hallein", v:3, exported:new Date().toISOString(), state, custom, edits}; }
 function mergeBackup(obj){
   if(!obj || typeof obj!=="object") throw new Error("format");
   const src = obj.state && typeof obj.state==="object" ? obj.state : (obj.app ? {} : obj);
   let n = 0;
   if(Array.isArray(obj.custom)) obj.custom.forEach(c=>{ if(c && c.id && c.name && isFinite(c.lat) && isFinite(c.lon) && !custom.some(x=>x.id===c.id)){ custom.push({id:String(c.id), name:String(c.name), lat:+c.lat, lon:+c.lon, t:c.t||Date.now()}); n++; } });
-  lsSet(LS.custom, custom); rebuildPeaks();
+  lsSet(LS.custom, custom);
+  if(obj.edits && typeof obj.edits==="object") Object.entries(obj.edits).forEach(([id,ed])=>{ if(ed && typeof ed==="object" && JSON.stringify(edits[id])!==JSON.stringify(ed)){ edits[id] = ed; n++; } });
+  lsSet(LS.edits, edits); rebuildPeaks();
   Object.keys(src).forEach(id=>{
     const r = src[id]; if(!byId[id] || !r || typeof r!=="object") return;
     const a = (Array.isArray(r.a) ? r.a : (r.d ? [r.d] : [])).map(normAsc).filter(Boolean);
     const cur = state[id];
     if(!cur || (r.t||0) > (cur.t||0)){ const nr = {s:+r.s||0, a, n:String(r.n||""), t:r.t||Date.now()}; if(isEmpty(nr)) delete state[id]; else state[id] = nr; n++; }
   });
-  persist(); if(map){ PEAKS.forEach(p=>{ if(!markers[p.id]) addMarker(p); }); } fillGroupSelect(); renderAll(); loadHeights(); return n;
+  persist(); if(map){ Object.values(markers).forEach(m=>m.remove()); Object.keys(markers).forEach(k=>delete markers[k]); PEAKS.forEach(addMarker); } fillGroupSelect(); renderAll(); loadHeights(); return n;
 }
 const bkMsg = $("bkMsg");
 $("bkOpen").addEventListener("click", ()=>{ closeAllSheets(); bkMsg.textContent = ""; $("backup").hidden = false; });
@@ -1829,9 +2354,16 @@ async function arStart(){
     AR.watch = navigator.geolocation.watchPosition(p=>{
       const first = !AR.pos; AR.pos = {lat:p.coords.latitude, lon:p.coords.longitude, acc:p.coords.accuracy};
       if(first) arAltitude(p.coords.altitude);
+      if(!AR.view || distKm([AR.view.lat, AR.view.lon], [AR.pos.lat, AR.pos.lon]) > 0.3) arTerrain();
     }, err=>{ if(!AR.pos){ AR.pos = {lat:HALLEIN[0], lon:HALLEIN[1], acc:0, fallback:true}; AR.alt = H0; AR.altSrc = "Hallein"; } }, {enableHighAccuracy:true, maximumAge:10000, timeout:20000});
   } else { AR.pos = {lat:HALLEIN[0], lon:HALLEIN[1], acc:0, fallback:true}; AR.alt = H0; AR.altSrc = "Hallein"; }
   cancelAnimationFrame(AR.raf); AR.raf = requestAnimationFrame(arLoop);
+}
+async function arTerrain(){
+  if(AR.terrBusy || !AR.pos) return; AR.terrBusy = true;
+  const p = AR.pos, v = await viewFor(p.lat, p.lon, t=>{ AR.terrMsg = t; });
+  AR.terrBusy = false; AR.terrMsg = ""; if(!AR.on) return;
+  if(v){ AR.view = v; AR.alt = v.h0; AR.altSrc = "Gelände"; }
 }
 async function arAltitude(gpsAlt){
   const p = AR.pos; AR.alt = isFinite(gpsAlt) && gpsAlt ? gpsAlt + 1.6 : 450; AR.altSrc = isFinite(gpsAlt) && gpsAlt ? "GPS" : "geschätzt";
@@ -1842,7 +2374,7 @@ function arStop(){
   window.removeEventListener("deviceorientationabsolute", onAbs); window.removeEventListener("deviceorientation", onRel);
   if(AR.stream){ AR.stream.getTracks().forEach(t=>t.stop()); AR.stream = null; }
   if(AR.watch!==null && navigator.geolocation){ navigator.geolocation.clearWatch(AR.watch); AR.watch = null; }
-  AR.pos = null; $("ar").hidden = true;
+  AR.pos = null; AR.view = null; $("ar").hidden = true;
   try{ if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); }catch(e){}
 }
 function arSyncOut(){ $("arOffOut").textContent = (arSettings.off>0?"+":"")+arSettings.off+"°"; $("arFovOut").textContent = arSettings.fov+"°"; }
@@ -1881,7 +2413,7 @@ function arLoop(){
   if(!AR.pos){ $("arRead").textContent = "Warte auf Standort …"; return; }
   if(!$("arMsg").hidden && $("arMsg").textContent.startsWith("Kamera, Standort")) arMsg("");
   const head = (AR.heading + arSettings.off + 360)%360, pitch = AR.pitch;
-  $("arRead").textContent = DIRS[Math.round(head/22.5)%16]+" "+Math.round(head)+"° · Neigung "+(pitch>0?"+":"")+Math.round(pitch)+"°"+(AR.pos.fallback?" · Standort: Hallein":" · ±"+Math.round(AR.pos.acc)+" m");
+  $("arRead").textContent = DIRS[Math.round(head/22.5)%16]+" "+Math.round(head)+"° · Neigung "+(pitch>0?"+":"")+Math.round(pitch)+"°"+(AR.pos.fallback?" · Standort: Hallein":" · ±"+Math.round(AR.pos.acc)+" m")+(AR.terrMsg?" · "+AR.terrMsg:"");
   // focal length in screen pixels: the setting is the camera's angle across its long side; the video is shown cropped to fill the screen
   const v = $("arVideo"); let fx;
   if(v.videoWidth && v.videoHeight){ const Lp = Math.max(v.videoWidth, v.videoHeight); fx = (Lp/2)/Math.tan(rad(arSettings.fov)/2) * Math.max(W/v.videoWidth, H/v.videoHeight); }
@@ -1898,8 +2430,7 @@ function arLoop(){
     pts.push({p, el, az, d});
   });
   // simple terrain mask from nearer peaks (each peak treated as a cone ~2.6 km wide at its base)
-  const vis = pts.filter(o=>{
-    if(arSettings.all) return true;
+  const vis = arSettings.all ? pts : AR.view ? pts.filter(o=>AR.view.visible.has(o.p.id)) : pts.filter(o=>{
     return !pts.some(q=>{ if(q===o || q.d >= o.d*0.92) return false; const hw = Math.max(.6, deg(Math.atan2(baseR(q.p), q.d))); const da = Math.abs(angDiff(o.az, q.az)); if(da >= hw) return false; return q.el*(1-da/hw) + (q.el<0?0:0) > o.el + 0.15; });
   });
   // rotate the overlay against the phone's roll so labels stay upright
@@ -1943,11 +2474,11 @@ function showTab(t){
   tab = t;
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.tab===t)));
   $("listView").hidden = t!=="list"; $("panoView").hidden = t!=="pano"; $("statsView").hidden = t!=="stats";
-  $("legend").hidden = t!=="map"; $("layers").hidden = t!=="map"; if(t!=="map"){ $("banner").hidden = true; layerMsg(""); }
+  $("legend").hidden = t!=="map" || !$("wpPanel").hidden; $("layers").hidden = t!=="map"; $("wpPanel").style.display = t==="map" ? "" : "none"; if(t!=="map"){ $("banner").hidden = true; layerMsg(""); }
   $("map").style.visibility = t==="map" ? "" : "hidden";
   if(t==="map" && map) setTimeout(()=>map.invalidateSize(),0);
   if(t==="list") renderList();
-  if(t==="pano") requestAnimationFrame(drawPano);
+  if(t==="pano"){ requestAnimationFrame(drawPano); if(!panoView) panoPrepare(); }
   if(t==="stats") renderStats();
 }
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
