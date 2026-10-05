@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1E2A26">
-<meta name="description" content="Die Gipfel rund um Hallein auf einer Karte – abhaken und Notizen schreiben.">
+<meta name="description" content="Die Gipfel rund um Hallein auf einer Karte – abhaken, planen, Notizen und Fotos.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -670,11 +670,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 		}
 	}
 
-/* Layout: one-screen app — header with progress, map or list fills the middle, tab bar at the bottom, peak details slide up as a sheet. */
+/* Layout: one-screen app — header with progress, four views (map, list, panorama, stats) in the middle, tab bar at the bottom, details slide up as sheets. */
 :root{
   --bg:#EEF0EC; --surface:#F9FAF7; --ink:#1E2A26; --muted:#5C6964; --line:#CBD2CD;
   --map-bg:#E2E7DF; --sign:#F2C230; --sign-ink:#1A1A16; --climbed:#2E7A4D; --open:#87928C;
-  --accent:#C4432C; --ring:#9AA59F; --shadow:0 -6px 24px rgba(20,30,26,.14);
+  --goal:#D59A00; --accent:#C4432C; --gps:#2F6AD0; --ring:#9AA59F; --sky:#DCE6EC; --shadow:0 -6px 24px rgba(20,30,26,.14);
   --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --f-body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
@@ -682,11 +682,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#111715; --surface:#19221F; --ink:#E4EBE7; --muted:#93A29B; --line:#2B3732;
   --map-bg:#16201C; --sign:#E6B724; --sign-ink:#141410; --climbed:#5DBA82; --open:#6B7972;
-  --accent:#EC6C52; --ring:#4A5852; --shadow:0 -6px 24px rgba(0,0,0,.45); color-scheme:dark}}
+  --goal:#E8B53A; --accent:#EC6C52; --gps:#6EA2F5; --ring:#4A5852; --sky:#17222A; --shadow:0 -6px 24px rgba(0,0,0,.45); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111715; --surface:#19221F; --ink:#E4EBE7; --muted:#93A29B; --line:#2B3732;
   --map-bg:#16201C; --sign:#E6B724; --sign-ink:#141410; --climbed:#5DBA82; --open:#6B7972;
-  --accent:#EC6C52; --ring:#4A5852; --shadow:0 -6px 24px rgba(0,0,0,.45); color-scheme:dark}
+  --goal:#E8B53A; --accent:#EC6C52; --gps:#6EA2F5; --ring:#4A5852; --sky:#17222A; --shadow:0 -6px 24px rgba(0,0,0,.45); color-scheme:dark}
 
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -698,117 +698,197 @@ button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* Header */
-header{padding:10px 16px 10px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--line);background:var(--bg)}
+header{padding:10px 16px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--line);background:var(--bg)}
 .head-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 h1{margin:0;font-family:var(--f-display);font-weight:700;font-size:1.65rem;letter-spacing:.01em;line-height:1;text-transform:uppercase}
-h1 small{display:block;font-family:var(--f-body);font-weight:400;font-size:.78rem;letter-spacing:.02em;text-transform:none;color:var(--muted);margin-top:3px}
 .count{font-family:var(--f-display);font-weight:600;font-size:1.5rem;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
 .count span{color:var(--muted);font-size:1rem}
-.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;display:flex}
 .bar i{display:block;height:100%;width:0;background:var(--climbed);transition:width .4s ease}
-.save-state{font-size:.75rem;color:var(--muted);min-height:1em}
+.bar i+i{background:var(--goal)}
+.head-sub{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.save-state{font-size:.75rem;color:var(--muted);min-height:1em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* Main */
 main{position:relative;min-height:0}
-#map{position:absolute;inset:0;background:var(--map-bg)}
+.view{position:absolute;inset:0}
+#map{background:var(--map-bg)}
 #map.leaflet-container{background:var(--map-bg);font-family:var(--f-body)}
-.view-list{position:absolute;inset:0;z-index:700;background:var(--bg);overflow-y:auto;padding:12px 16px 24px;display:flex;flex-direction:column;gap:12px}
+.scroll{overflow-y:auto;padding:12px 16px 24px;display:flex;flex-direction:column;gap:12px;background:var(--bg);z-index:700}
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .tools input[type=search]{flex:1 1 180px;min-width:0;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
-.chips{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px}
-.chips button{border:0;background:transparent;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:.88rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px}
+.chips button{border:0;background:transparent;padding:5px 9px;border-radius:5px;cursor:pointer;font-size:.86rem;color:var(--muted)}
 .chips button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.tools select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.tools select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);max-width:100%}
 ul.peaks{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-ul.peaks li button{width:100%;display:grid;grid-template-columns:14px 1fr auto;gap:12px;align-items:center;text-align:left;padding:11px 2px;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer}
+ul.peaks li button{width:100%;display:grid;grid-template-columns:14px 1fr auto;gap:12px;align-items:center;text-align:left;padding:10px 2px;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer}
 ul.peaks li button:hover{background:var(--surface)}
-.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--open);box-sizing:border-box}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--open);flex:none}
 .dot.on{background:var(--climbed);border-color:var(--climbed)}
+.dot.goal{background:var(--goal);border-color:var(--goal)}
 .pname{min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pname em{font-style:normal;font-weight:400;color:var(--muted);font-size:.82rem;margin-left:6px}
-.pdist{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.pname em{font-style:normal;font-weight:400;color:var(--muted);font-size:.8rem;margin-left:6px}
+.pmeta{display:block;font-weight:400;font-size:.78rem;color:var(--muted)}
+.pdist{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
 .empty{color:var(--muted);padding:24px 0;text-align:center}
 
 /* Tab bar */
-nav{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);background:var(--bg);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav button{border:0;background:transparent;padding:12px;font-family:var(--f-display);font-weight:600;font-size:1.05rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-top:3px solid transparent;margin-top:-1px}
+nav{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--bg);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{border:0;background:transparent;padding:12px 4px;font-family:var(--f-display);font-weight:600;font-size:1rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-top:3px solid transparent;margin-top:-1px}
 nav button[aria-selected="true"]{color:var(--ink);border-top-color:var(--accent)}
 
-/* Map labels */
-.leaflet-tooltip.peak-label{background:transparent;border:0;box-shadow:none;padding:0 0 0 2px;font-size:11.5px;font-weight:600;color:var(--ink);text-shadow:0 0 3px var(--map-bg),0 0 3px var(--map-bg),0 0 2px var(--map-bg)}
+/* Map overlays */
+.leaflet-tooltip.peak-label{background:transparent;border:0;box-shadow:none;padding:0 0 0 2px;font-size:11.5px;font-weight:600;color:#1E2A26;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 2px #fff}
 .leaflet-tooltip.peak-label::before,.leaflet-tooltip.place-label::before,.leaflet-tooltip.ring-label::before{display:none}
 .hide-labels .leaflet-tooltip.peak-label{display:none}
-.leaflet-tooltip.place-label{background:transparent;border:0;box-shadow:none;padding:0;font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-shadow:0 0 3px var(--map-bg),0 0 3px var(--map-bg)}
-.leaflet-tooltip.ring-label{background:transparent;border:0;box-shadow:none;padding:0;font-family:var(--f-mono);font-size:10px;color:var(--muted)}
-.leaflet-control-zoom a{background:var(--surface)!important;color:var(--ink)!important;border-color:var(--line)!important}
+.leaflet-tooltip.place-label{background:transparent;border:0;box-shadow:none;padding:0;font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#1E2A26;text-shadow:0 0 3px #fff,0 0 3px #fff}
+.leaflet-tooltip.ring-label{background:transparent;border:0;box-shadow:none;padding:0;font-family:var(--f-mono);font-size:10px;color:#444;text-shadow:0 0 2px #fff}
+.leaflet-control-zoom a,.map-btn{background:var(--surface)!important;color:var(--ink)!important;border-color:var(--line)!important}
 .leaflet-control-attribution{background:color-mix(in srgb,var(--bg) 80%,transparent)!important;color:var(--muted)!important}
 .leaflet-control-attribution a{color:var(--muted)!important}
-.legend{position:absolute;left:10px;bottom:10px;z-index:500;display:flex;gap:12px;background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.78rem;color:var(--muted)}
+.map-btn{display:grid;place-items:center;width:34px;height:34px;border:2px solid var(--line);border-radius:6px;cursor:pointer;padding:0}
+.map-btn svg{width:20px;height:20px}
+.map-btn[aria-pressed="true"]{color:var(--gps)!important;border-color:var(--gps)!important}
+.legend{position:absolute;left:10px;bottom:10px;z-index:500;display:flex;flex-wrap:wrap;gap:4px 12px;background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:.78rem;color:var(--muted);max-width:calc(100% - 20px)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .hint-lp{flex-basis:100%;font-size:.72rem}
+.banner{position:absolute;top:10px;left:56px;right:10px;z-index:900;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gps);border-radius:8px;padding:10px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+.banner p{margin:0}
+.banner .row{display:flex;gap:8px;flex-wrap:wrap}
 .nomap{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
 
-/* Sheet */
-.sheet{position:absolute;left:0;right:0;bottom:0;z-index:1000;max-height:78%;overflow-y:auto;background:var(--surface);border-top:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:var(--shadow);padding:14px 16px 18px;display:flex;flex-direction:column;gap:14px;transform:translateY(0);transition:transform .22s ease}
-.sheet[hidden]{display:none!important}
+/* Panorama */
+#panoView{display:flex;flex-direction:column;background:var(--bg);z-index:700}
+.pano-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.pano-head p{margin:0;font-size:.8rem;color:var(--muted);min-width:0}
+.zoom{display:flex;gap:4px}
+.zoom button{width:34px;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer;font-size:1.1rem}
+.pano-wrap{position:relative;flex:1;min-height:0;touch-action:none;cursor:grab}
+#pano{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+/* Stats */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile b{font-family:var(--f-display);font-weight:700;font-size:1.7rem;line-height:1.05;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.tile span{font-size:.78rem;color:var(--muted)}
+h2.sec{margin:8px 0 0;font-family:var(--f-display);font-weight:700;font-size:1.15rem;letter-spacing:.04em;text-transform:uppercase}
+.bars{display:flex;flex-direction:column;gap:7px}
+.brow{display:grid;grid-template-columns:minmax(0,9.5rem) 1fr 4.2rem;gap:10px;align-items:center;font-size:.86rem}
+.brow .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brow .track{height:10px;border-radius:5px;background:var(--line);overflow:hidden;display:flex}
+.brow .track i{display:block;height:100%;background:var(--climbed)}
+.brow .track i.g{background:var(--goal)}
+.brow .num{font-family:var(--f-mono);font-size:.78rem;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.note{font-size:.82rem;color:var(--muted);margin:0;max-width:60ch}
+
+/* Sheets */
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:1000;max-height:82%;overflow-y:auto;background:var(--surface);border-top:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:var(--shadow);padding:14px 16px 18px;display:flex;flex-direction:column;gap:14px}
 .sheet-top{display:flex;align-items:flex-start;gap:12px}
-.sign{flex:1;min-width:0;position:relative;background:var(--sign);color:var(--sign-ink);padding:9px 34px 9px 14px;clip-path:polygon(0 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,0 100%);font-family:var(--f-display);font-weight:700;font-size:1.45rem;line-height:1.1;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
+.sign{flex:1;min-width:0;background:var(--sign);color:var(--sign-ink);padding:9px 34px 9px 14px;clip-path:polygon(0 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,0 100%);font-family:var(--f-display);font-weight:700;font-size:1.45rem;line-height:1.1;text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
 .sign small{display:block;font-family:var(--f-mono);font-weight:500;font-size:.72rem;letter-spacing:0;text-transform:none;margin-top:3px}
-.close{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:1.2rem;line-height:1}
-.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;font-size:.9rem}
-.facts dt{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
-.facts dd{margin:0;font-family:var(--f-mono);font-size:.85rem;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:8px}
-.needle{width:18px;height:18px;flex:none}
-.status{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.status button{padding:11px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);cursor:pointer;font-weight:600}
-.status button[aria-pressed="true"].b-open{border-color:var(--ink)}
-.status button[aria-pressed="true"].b-done{background:var(--climbed);border-color:var(--climbed);color:#fff}
-label.fl{display:flex;flex-direction:column;gap:5px;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-label.fl input,label.fl textarea{text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink);padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
-label.fl textarea{min-height:92px;resize:vertical;line-height:1.45}
-.sheet-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.linkbtn{border:0;background:transparent;color:var(--accent);font-weight:600;cursor:pointer;padding:4px 0}
-.tag{font-size:.75rem;color:var(--muted)}
-@media (min-width:760px){.sheet{left:auto;right:16px;bottom:16px;width:380px;border-radius:14px;border:1px solid var(--line)}}
-.head-sub{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.linkbtn.small{font-size:.8rem;padding:0}
 .panel-title{flex:1;margin:0;font-family:var(--f-display);font-weight:700;font-size:1.45rem;text-transform:uppercase;letter-spacing:.02em}
-.hint{margin:0;color:var(--muted);font-size:.9rem;max-width:60ch}
-.primary,.secondary{padding:11px;border-radius:8px;font-weight:600;cursor:pointer}
+.close{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:1.2rem;line-height:1}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;align-items:center;font-size:.9rem;margin:0}
+.facts dt{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
+.facts dd{margin:0;font-family:var(--f-mono);font-size:.84rem;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:8px;min-width:0;overflow-wrap:anywhere}
+.needle{width:18px;height:18px;flex:none}
+.status{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.status button{padding:10px 4px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);cursor:pointer;font-weight:600}
+.status button[aria-pressed="true"].b-open{border-color:var(--ink)}
+.status button[aria-pressed="true"].b-goal{background:var(--goal);border-color:var(--goal);color:#1A1A16}
+.status button[aria-pressed="true"].b-done{background:var(--climbed);border-color:var(--climbed);color:#fff}
+.block{display:flex;flex-direction:column;gap:8px}
+.block h3{margin:0;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.ascents{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.ascents li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-family:var(--f-mono);font-size:.85rem}
+.ascents li button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1;padding:2px 6px}
+.addrow{display:flex;gap:8px;flex-wrap:wrap}
+.addrow input{flex:1 1 140px;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+label.fl{display:flex;flex-direction:column;gap:5px;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+label.fl input,label.fl textarea,label.fl select{text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink);padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);min-width:0}
+label.fl textarea{min-height:88px;resize:vertical;line-height:1.45}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px}
+.photos button{padding:0;border:0;border-radius:6px;overflow:hidden;aspect-ratio:1;max-width:100%;background:var(--line);cursor:pointer}
+.photos img{width:100%;height:100%;object-fit:cover;display:block}
+.filebtn{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;border:1.5px dashed var(--line);border-radius:8px;cursor:pointer;font-weight:600;font-size:.9rem;color:var(--muted)}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.wx{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
+.wx div{border:1px solid var(--line);border-radius:8px;padding:7px 6px;background:var(--bg);text-align:center;display:flex;flex-direction:column;gap:2px;min-width:0}
+.wx b{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+.wx .t{font-family:var(--f-mono);font-size:.82rem;font-variant-numeric:tabular-nums}
+.wx .c{font-size:.72rem;color:var(--muted);line-height:1.2;min-height:2.4em}
+.wx .r{font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.links{display:flex;flex-wrap:wrap;gap:6px}
+.links a,.links button{display:inline-flex;align-items:center;padding:7px 11px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);text-decoration:none;font-size:.85rem;font-weight:600;cursor:pointer}
+.linkbtn{border:0;background:transparent;color:var(--accent);font-weight:600;cursor:pointer;padding:4px 0}
+.linkbtn.small{font-size:.8rem;padding:0;white-space:nowrap}
+.tag{font-size:.75rem;color:var(--muted)}
+.hint{margin:0;color:var(--muted);font-size:.88rem;max-width:60ch}
+.primary,.secondary,.danger{padding:10px 14px;border-radius:8px;font-weight:600;cursor:pointer}
 .primary{border:0;background:var(--climbed);color:#fff}
 .secondary{border:1.5px solid var(--line);background:var(--bg)}
+.danger{border:1.5px solid var(--accent);background:transparent;color:var(--accent)}
+.viewer{position:absolute;inset:0;z-index:1200;background:rgba(10,14,12,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+.viewer img{max-width:100%;max-height:calc(100% - 70px);object-fit:contain;border-radius:6px}
+.viewer .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.viewer .secondary{background:#1c2421;color:#eee;border-color:#3a4642}
+.viewer .danger{color:#ff8a73;border-color:#ff8a73}
+@media (min-width:760px){.sheet{left:auto;right:16px;bottom:16px;width:400px;border-radius:14px;border:1px solid var(--line)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-
 <div class="app">
   <header>
     <div class="head-row">
-      <h1>Gipfelbuch Hallein<small>Berge in Sicht vom Salzachtal</small></h1>
+      <h1>Gipfelbuch Hallein</h1>
       <div class="count" aria-live="polite"><b id="nDone">0</b><span> / <b id="nAll">0</b></span></div>
     </div>
-    <div class="bar" role="progressbar" aria-label="Bestiegene Gipfel" id="bar"><i></i></div>
+    <div class="bar" role="progressbar" aria-label="Bestiegene Gipfel" id="bar"><i id="barDone"></i><i id="barGoal"></i></div>
     <div class="head-sub"><div class="save-state" id="saveState">Wird geladen …</div><button type="button" class="linkbtn small" id="bkOpen">Sicherung</button></div>
   </header>
 
   <main>
-    <div id="map" role="region" aria-label="Karte der Gipfel"></div>
-    <div class="legend" id="legend"><span><i class="dot on"></i>Bestiegen</span><span><i class="dot"></i>Offen</span></div>
-    <section class="view-list" id="listView" hidden>
+    <div class="view" id="map" role="region" aria-label="Karte der Gipfel"></div>
+    <div class="legend" id="legend"><span><i class="dot on"></i>Bestiegen</span><span><i class="dot goal"></i>Ziel</span><span><i class="dot"></i>Offen</span><span class="hint-lp">Lange auf die Karte drücken, um einen Gipfel hinzuzufügen.</span></div>
+    <div class="banner" id="banner" hidden role="status">
+      <p id="bannerText"></p>
+      <div class="row"><button type="button" class="primary" id="bannerYes">Besteigung eintragen</button><button type="button" class="secondary" id="bannerNo">Nein danke</button></div>
+    </div>
+
+    <section class="view scroll" id="listView" hidden>
       <div class="tools">
         <input type="search" id="q" placeholder="Gipfel suchen …" aria-label="Gipfel suchen">
+        <button type="button" class="secondary" id="addFromList">+ Gipfel</button>
+      </div>
+      <div class="tools">
         <div class="chips" role="group" aria-label="Filter">
           <button type="button" data-f="all" aria-pressed="true">Alle</button>
           <button type="button" data-f="open" aria-pressed="false">Offen</button>
+          <button type="button" data-f="goal" aria-pressed="false">Ziele</button>
           <button type="button" data-f="done" aria-pressed="false">Bestiegen</button>
         </div>
+        <select id="grpSel" aria-label="Gebiet"></select>
         <select id="sort" aria-label="Sortierung">
           <option value="dist">Nach Entfernung</option>
           <option value="name">Nach Name</option>
+          <option value="ele">Nach Höhe</option>
         </select>
       </div>
       <ul class="peaks" id="peakList"></ul>
     </section>
+
+    <section class="view" id="panoView" hidden>
+      <div class="pano-head">
+        <p id="panoNote">Rundblick von Hallein (447 m). Wischen zum Drehen, Gipfel antippen.</p>
+        <div class="zoom"><button type="button" id="pzOut" aria-label="Weiter weg">−</button><button type="button" id="pzIn" aria-label="Näher heran">+</button></div>
+      </div>
+      <div class="pano-wrap" id="panoWrap"><canvas id="pano" aria-label="Rundblick mit Gipfeln"></canvas></div>
+    </section>
+
+    <section class="view scroll" id="statsView" hidden></section>
 
     <aside class="sheet" id="sheet" hidden aria-label="Gipfeldetails">
       <div class="sheet-top">
@@ -817,37 +897,82 @@ label.fl textarea{min-height:92px;resize:vertical;line-height:1.45}
       </div>
       <dl class="facts">
         <dt>Von Hallein</dt><dd><svg class="needle" viewBox="0 0 20 20" aria-hidden="true"><g id="needleG"><path d="M10 1 L13 10 L10 8.5 L7 10 Z" fill="var(--accent)"/><path d="M10 19 L13 10 L10 11.5 L7 10 Z" fill="var(--muted)"/></g></svg><span id="sDir"></span></dd>
+        <dt>Höhe</dt><dd id="sEle"></dd>
+        <dt>Gebiet</dt><dd id="sGrp"></dd>
         <dt>Position</dt><dd id="sPos"></dd>
       </dl>
       <div class="status" role="group" aria-label="Status">
-        <button type="button" class="b-open" id="bOpen" aria-pressed="true">Noch offen</button>
+        <button type="button" class="b-open" id="bOpen" aria-pressed="true">Offen</button>
+        <button type="button" class="b-goal" id="bGoal" aria-pressed="false">Ziel</button>
         <button type="button" class="b-done" id="bDone" aria-pressed="false">Bestiegen</button>
       </div>
-      <label class="fl" id="dateWrap" hidden>Datum der Besteigung<input type="date" id="sDate"></label>
-      <label class="fl">Notizen<textarea id="sNote" placeholder="Route, Wetter, mit wem, Gipfelkreuz …"></textarea></label>
-      <div class="sheet-foot">
-        <button type="button" class="linkbtn" id="sShow">Auf Karte zeigen</button>
-        <span class="tag" id="sTag"></span>
+      <div class="block">
+        <h3>Tourenbuch</h3>
+        <ul class="ascents" id="sAsc"></ul>
+        <div class="addrow"><input type="date" id="sAscDate" aria-label="Datum der Besteigung"><button type="button" class="secondary" id="sAscAdd">Besteigung eintragen</button></div>
       </div>
+      <label class="fl">Notizen<textarea id="sNote" placeholder="Route, Wetter, mit wem, Gipfelkreuz …"></textarea></label>
+      <div class="block">
+        <h3>Fotos</h3>
+        <div class="photos" id="sPhotos"></div>
+        <label class="filebtn">Foto hinzufügen<input type="file" id="sPhotoIn" accept="image/*" multiple></label>
+      </div>
+      <div class="block">
+        <h3 id="wxTitle">Wetter am Gipfel</h3>
+        <div class="wx" id="sWx"></div>
+      </div>
+      <div class="block">
+        <h3>Route planen</h3>
+        <div class="links">
+          <button type="button" id="sShow">Auf Karte zeigen</button>
+          <a id="lGeo" href="#">Karten-App</a>
+          <a id="lGoogle" href="#" target="_blank" rel="noopener">Google Maps</a>
+          <a id="lOsm" href="#" target="_blank" rel="noopener">OpenStreetMap</a>
+          <a id="lOa" href="#" target="_blank" rel="noopener">Outdooractive</a>
+        </div>
+      </div>
+      <div class="block" id="customBlock" hidden>
+        <h3>Eigener Gipfel</h3>
+        <div class="addrow" id="delAsk"><button type="button" class="danger" id="sDel">Gipfel löschen</button></div>
+        <div class="addrow" id="delConfirm" hidden><span class="hint">Wirklich löschen, mit Notizen und Fotos?</span><button type="button" class="danger" id="sDelYes">Ja, löschen</button><button type="button" class="secondary" id="sDelNo">Abbrechen</button></div>
+      </div>
+      <span class="tag" id="sTag"></span>
+    </aside>
+
+    <aside class="sheet" id="addSheet" hidden aria-label="Gipfel hinzufügen">
+      <div class="sheet-top"><h2 class="panel-title">Gipfel hinzufügen</h2><button class="close" id="aClose" aria-label="Schließen">×</button></div>
+      <label class="fl">Name<input type="text" id="aName" placeholder="z. B. Rossfeldkopf" autocomplete="off"></label>
+      <div class="two">
+        <label class="fl">Breite (N)<input type="text" id="aLat" inputmode="decimal"></label>
+        <label class="fl">Länge (E)<input type="text" id="aLon" inputmode="decimal"></label>
+      </div>
+      <div class="addrow"><button type="button" class="secondary" id="aHere">Meinen Standort nehmen</button></div>
+      <p class="hint" id="aMsg"></p>
+      <button type="button" class="primary" id="aSave">Gipfel speichern</button>
     </aside>
 
     <aside class="sheet" id="backup" hidden aria-label="Sicherung">
-      <div class="sheet-top">
-        <h2 class="panel-title">Sicherung</h2>
-        <button class="close" id="bkClose" aria-label="Schließen">×</button>
-      </div>
-      <p class="hint">Deine Einträge sind auf diesem Gerät gespeichert. Lade ab und zu eine Sicherung herunter, dann geht nichts verloren, auch wenn du das Handy wechselst.</p>
+      <div class="sheet-top"><h2 class="panel-title">Sicherung</h2><button class="close" id="bkClose" aria-label="Schließen">×</button></div>
+      <p class="hint">Deine Einträge sind auf diesem Gerät gespeichert. Lade ab und zu eine Sicherung herunter, dann geht nichts verloren, auch wenn du das Handy wechselst. Fotos sind in der Sicherung nicht enthalten.</p>
       <button type="button" class="primary" id="bkDownload">Sicherung herunterladen</button>
       <label class="fl">Sicherung aus Datei laden<input type="file" id="bkFile" accept=".json,application/json"></label>
       <label class="fl">Oder kopierten Text einfügen<textarea id="bkPaste" placeholder="Hier den Text aus „Für Handy-App kopieren“ einfügen"></textarea></label>
       <button type="button" class="secondary" id="bkApply">Eingefügten Text übernehmen</button>
       <p class="hint" id="bkMsg" aria-live="polite"></p>
     </aside>
+
+    <div class="viewer" id="viewer" hidden>
+      <img id="vImg" alt="Gipfelfoto">
+      <div class="row" id="vRow"><button type="button" class="secondary" id="vClose">Schließen</button><button type="button" class="danger" id="vDel">Foto löschen</button></div>
+      <div class="row" id="vConfirm" hidden><button type="button" class="danger" id="vDelYes">Ja, Foto löschen</button><button type="button" class="secondary" id="vDelNo">Behalten</button></div>
+    </div>
   </main>
 
   <nav role="tablist">
-    <button role="tab" id="tMap" aria-selected="true">Karte</button>
-    <button role="tab" id="tList" aria-selected="false">Liste</button>
+    <button role="tab" data-tab="map" aria-selected="true">Karte</button>
+    <button role="tab" data-tab="list" aria-selected="false">Liste</button>
+    <button role="tab" data-tab="pano" aria-selected="false">Rundblick</button>
+    <button role="tab" data-tab="stats" aria-selected="false">Statistik</button>
   </nav>
 </div>
 
@@ -863,230 +988,610 @@ label.fl textarea{min-height:92px;resize:vertical;line-height:1.45}
 (function(){
 "use strict";
 const RAW = [["5-watzmannkind","5. Watzmannkind",47.5528,12.9306,0],["achselhorn","Achselhorn",47.4678,12.8994,0],["ahornbuchsenkopf","Ahornbüchsenkopf",47.6197,13.0817,0],["alpelhorn","Alpelhorn",47.5367,12.85,0],["anzenberghohe","Anzenberghöhe",47.7231,13.2428,0],["arbeskogel","Arbeskogel",47.5692,13.1661,0],["archenkopf","Archenkopf",47.565,12.9696,0],["armkarwand","Armkarwand",47.4964,13.5161,0],["beerwurzkogel","Beerwurzkogel",47.5247,13.5653,0],["bleikogel","Bleikogel",47.5142,13.2983,0],["bodenleiten","Bodenleiten",47.84,13.0284,0],["brettkogel","Brettkogel",47.5147,13.55,0],["brunnerkopfl","Brunnerköpfl",47.6411,13.2417,0],["brandlberg","Brändlberg",47.6653,13.0478,0],["buchberg","Buchberg",47.9346,12.8839,0],["buchberg-2","Buchberg",47.9536,13.1086,0],["bareck","Bäreck",47.5342,13.2025,0],["burglstein","Bürglstein",47.799,13.0574,0],["drei-docken","Drei Docken",47.4594,12.9022,0],["daumling","Däumling",47.5022,13.5172,0],["durlstein","Dürlstein",47.6658,13.2989,0],["eberstein","Eberstein",47.7242,13.1197,0],["ebnetriedel","Ebnetriedel",47.555,13.2958,0],["einberg","Einberg",47.6183,13.3606,0],["eisberg","Eisberg",47.6258,12.8475,0],["freyaturm","Freyaturm",47.5262,13.484,0],["gamsfeld","Gamsfeld",47.6233,13.4806,0],["gamskarkopfl","Gamskarköpfl",47.5089,12.9206,0],["gemainberg","Gemainberg",47.7347,13.0225,0],["gjaidkopf","Gjaidkopf",47.5164,12.9106,0],["golser-hugel","Golser Hügel",47.7839,13.0915,0],["gossenleieraussicht","Gossenleieraussicht",47.7392,13.0304,0],["grimming","Grimming",47.5206,14.0169,0],["grobriedel","Grobriedel",47.7094,13.2522,0],["grosse-bischofsmutze","Große Bischofsmütze",47.4939,13.5111,0],["grosser-breitstein","Großer Breitstein",47.5333,13.3156,0],["grosser-heubergkopf","Großer Heubergkopf",47.7145,13.0032,0],["grosser-hirsch","Großer Hirsch",47.4981,12.9203,0],["grosser-schneiber","Großer Schneiber",47.5108,12.9117,0],["grosser-schwarzkogel","Großer Schwarzkogel",47.5369,13.5644,0],["grosses-grundubelhorn","Großes Grundübelhorn",47.5928,12.8072,0],["grosses-hauselhorn","Großes Häuselhorn",47.6019,12.7839,0],["grosses-palfenhorn","Großes Palfenhorn",47.5281,12.8628,0],["grosswand","Großwand",47.5031,13.5136,0],["gschirrwand","Gschirrwand",47.605,13.2478,0],["gschlosslkogel","Gschlösslkogel",47.4971,13.5673,0],["gsengriegel","Gsengriegel",47.6063,13.2244,0],["guggenberg","Guggenberg",47.6933,13.1494,0],["gotschenkopf","Götschenkopf",47.6317,12.9339,0],["haarberg","Haarberg",47.5953,13.1897,0],["hachelkopf","Hachelkopf",47.5306,12.9336,0],["hals-kopf","Hals Kopf",47.7017,13.0083,0],["hartberg","Hartberg",48.0406,12.9133,0],["haunsberg","Haunsberg",47.9153,12.9989,0],["hengstberg","Hengstberg",47.76,13.1008,0],["hennenkopfl","Hennenköpfl",47.6265,13.0924,0],["heuberg","Heuberg",47.6953,13.1169,0],["hiefler","Hiefler",47.5003,13.2358,0],["hinkelstein","Hinkelstein",47.485,13.6032,0],["hinterbergkopf","Hinterbergkopf",47.5511,12.8525,0],["hintere-seekarwand","Hintere Seekarwand",47.5333,13.5489,0],["hinteres-freieck","Hinteres Freieck",47.5872,13.1003,0],["hinteres-streitmandl","Hinteres Streitmandl",47.5067,13.2444,0],["hirschberg","Hirschberg",47.5292,13.7367,0],["hirschbergkopf","Hirschbergkopf",47.8061,13.2289,0],["hocheisspitze","Hocheisspitze",47.5467,12.8425,0],["hochgitzen","Hochgitzen",47.8567,13.0344,0],["hochkarfelderkopf","Hochkarfelderkopf",47.5192,13.355,0],["hochkesselkopf","Hochkesselkopf",47.4828,13.5681,0],["hochkogel","Hochkogel",47.5175,13.1933,0],["hochpfeiler","Hochpfeiler",47.5069,13.2208,0],["hochthron","Hochthron",47.6908,13.3331,0],["hochtorl","Hochtörl",47.5509,13.2113,0],["hochwieskopf","Hochwieskopf",47.6406,13.3164,0],["hohe-hosswand","Hohe Hosswand",47.5122,13.5797,0],["hohe-scheibe","Hohe Scheibe",47.5631,13.5844,0],["hohe-schreiberwand","Hohe Schreiberwand",47.4936,13.5925,0],["hohenschnaitberg","Hohenschnaitberg",47.7159,13.166,0],["hoher-ochsenkogel","Hoher Ochsenkogel",47.5024,13.6018,0],["hohes-gerstfeld","Hohes Gerstfeld",47.6121,12.8245,0],["hohes-kreuz","Hohes Kreuz",47.4883,13.6042,0],["jagerhoh","Jagerhöh'",47.7859,13.0953,0],["kamplbrunnspitze","Kamplbrunnspitze",47.4892,13.5094,0],["karolinenhohe","Karolinenhöhe",47.7967,13.0403,0],["kiliansberg","Kiliansberg",47.6527,13.0279,0],["kleines-hauselhorn","Kleines Häuselhorn",47.6039,12.7808,0],["knallstein","Knallstein",47.5444,13.2317,0],["knoglberg","Knoglberg",47.6936,13.1986,0],["kolomansberg","Kolomansberg",47.8769,13.2756,0],["kopf-des-hunds","Kopf des Hunds",47.5736,12.8753,0],["krippenstein","Krippenstein",47.5242,13.6919,0],["kuchlberg","Kuchlberg",47.5578,13.2589,0],["kuhberg","Kühberg",47.8095,13.0856,0],["ladenberg","Ladenberg",47.701,13.2534,0],["lammeregg","Lammeregg",47.5817,13.2108,0],["langwand","Langwand",47.5253,13.3078,0],["lercheck","Lercheck",47.6595,13.0595,0],["lidaunberg","Lidaunberg",47.7953,13.2258,0],["mayerhoferkogel","Mayerhoferkogel",47.5383,13.2365,0],["mehlstein","Mehlstein",47.5953,13.2019,0],["mitterberg","Mitterberg",47.6613,12.8977,0],["mitterspitz","Mitterspitz",47.4756,13.5958,0],["mittlerer-hirlatz","Mittlerer Hirlatz",47.53,13.6303,0],["mittlerer-wieselstein","Mittlerer Wieselstein",47.5383,13.2228,0],["mittleres-streitmandl","Mittleres Streitmandl",47.5025,13.245,0],["mooslahnerkopf","Mooslahnerkopf",47.5606,12.9561,0],["morzger-hugel","Morzger Hügel",47.7669,13.0575,0],["moserstein","Moserstein",47.6651,13.0907,0],["muntigler-hugel","Muntigler Hügel",47.8553,13.0083,0],["muhlbachhohe","Mühlbachhöhe",47.7208,13.2519,0],["muhlstein","Mühlstein",47.7517,13.1269,0],["neureitkopf","Neureitkopf",47.7257,13.1651,0],["niedere-schreiberwand","Niedere Schreiberwand",47.4945,13.5861,0],["niederer-dachstein","Niederer Dachstein",47.4783,13.6067,0],["niederer-rainberg","Niederer Rainberg",47.7954,13.0343,0],["niederes-kreuz","Niederes Kreuz",47.4947,13.6076,0],["niedertorl","Niedertörl",47.5503,13.207,0],["nordlicher-wieselstein","Nördlicher Wieselstein",47.5428,13.2235,0],["ofenauer-berg","Ofenauer Berg",47.5703,13.1786,0],["ofentalhornl","Ofentalhörnl",47.5625,12.8625,0],["plainberg","Plainberg",47.8375,13.0442,0],["plassen","Plassen",47.57,13.6058,0],["platteneck","Platteneck",47.5531,13.2247,0],["rabenstein","Rabenstein",47.5992,13.1762,0],["rainberg","Rainberg",47.7947,13.0364,0],["raspenhohe","Raspenhöhe",47.6604,13.1036,0],["raucheck","Raucheck",47.7347,13.1403,0],["rauheck","Rauheck",47.7055,12.9922,0],["reinsberg","Reinsberg",47.6756,13.2968,0],["rengerberg","Rengerberg",47.6878,13.2082,0],["rettenstein","Rettenstein",47.4575,13.5547,0],["roadberg","Roadberg",47.5722,13.2917,0],["rotwand","Rotwand",47.5494,13.2746,0],["rotwandl","Rotwandl",47.4764,12.9228,0],["sattelberg","Sattelberg",47.5706,13.2403,0],["sattelkopfel","Sattelköpfel",47.6908,13.2561,0],["schafberg","Schafberg",47.7764,13.4339,0],["schafgebirgspitz","Schafgebirgspitz",47.5469,13.1958,0],["schallwand","Schallwand",47.5319,13.3581,0],["schapbachriedel","Schapbachriedel",47.5889,12.9561,0],["schatteck","Schatteck",47.7442,13.1556,0],["scheiblingkogel","Scheiblingkogel",47.5342,13.2722,0],["schneelochturm","Schneelochturm",47.4928,13.5956,0],["schornhohe","Schornhöhe",47.6533,13.1008,0],["schwarzkogel","Schwarzkogel",47.5464,13.3044,0],["schwerwand","Schwerwand",47.5451,13.2828,0],["schonbachkopf","Schönbachkopf",47.584,13.1207,0],["schonwandeck","Schönwandeck",47.5643,12.8678,0],["sendlberg","Sendlberg",47.7367,13.1789,0],["sennberg","Sennberg",47.5958,13.2336,0],["sigeretkopf","Sigeretkopf",47.5297,12.8533,0],["silberkopf","Silberkopf",47.6892,13.0089,0],["simetsberg","Simetsberg",47.5118,12.9449,0],["sommerbichl","Sommerbichl",47.5782,12.9738,0],["sommereckspitze","Sommereckspitze",47.5563,13.2449,0],["stadelhorn","Stadelhorn",47.5928,12.795,0],["stanglahnerkopf","Stanglahnerkopf",47.5794,12.8903,0],["steinberg","Steinberg",47.5873,12.8762,0],["sternkogel","Sternkogel",47.5043,13.5085,0],["strichkogel","Strichkogel",47.5197,13.4872,0],["strumberg","Strumberg",47.7806,13.1939,0],["stuhllochspitz","Stuhllochspitz",47.4969,13.5028,0],["sudlicher-wieselstein","Südlicher Wieselstein",47.5342,13.225,0],["tagweide","Tagweide",47.5269,13.3554,0],["tanzboden","Tanzboden",47.7039,13.1831,0],["torstein","Torstein",47.4747,13.5853,0],["toter-mann","Toter Mann",47.6311,12.9233,0],["traxlspitz","Traxlspitz",47.5993,13.2349,0],["torlkopf","Törlkopf",47.6769,12.8925,0],["viehkogel","Viehkogel",47.4883,12.9325,0],["vorderes-freieck","Vorderes Freieck",47.5867,13.1097,0],["vorderes-streitmandl","Vorderes Streitmandl",47.4996,13.2424,0],["wagendrischelhorn","Wagendrischelhorn",47.5989,12.7917,0],["watzmanngugel","Watzmanngugel",47.5726,12.9238,0],["wimbachschneidspitze","Wimbachschneidspitze",47.5461,12.8475,0],["wirreck","Wirreck",47.5622,13.2078,0],["zwolferhorn","Zwölferhorn",47.7425,13.3514,0],["aulhorn","Äulhorn",47.4633,12.9014,0],["4-watzmannkind","4. Watzmannkind",47.5531,12.9325,1],["bannkopf","Bannkopf",47.6789,12.9733,1],["berchtesgadener-hochthron-untersberg","Berchtesgadener Hochthron (Untersberg)",47.6936,12.9867,1],["bierfasselkopf","Bierfasselkopf",47.7306,13.0086,1],["breithorn","Breithorn",47.4572,12.9025,1],["barenstuhl","Bärenstuhl",47.5886,13.1289,1],["eibleck","Eibleck",47.7428,13.21,1],["faistenauer-schafberg","Faistenauer Schafberg",47.7489,13.3047,1],["falzkopf","Falzkopf",47.5714,12.934,1],["festungsberg","Festungsberg",47.795,13.0469,1],["frunstberg","Frunstberg",47.6564,13.2856,1],["gaisberg","Gaisberg",47.805,13.1128,1],["geiereck-untersberg","Geiereck (Untersberg)",47.7224,13.0087,1],["gennerhorn","Gennerhorn",47.6747,13.3094,1],["gitschenwand","Gitschenwand",47.6344,13.2597,1],["goisberg","Goisberg",47.7264,13.0531,1],["grosser-barmstein","Großer Barmstein",47.6906,13.0758,1],["grosser-donnerkogel","Großer Donnerkogel",47.5242,13.4814,1],["grosser-rauher-kopf","Großer Rauher Kopf",47.6692,12.9765,1],["gruberhorn","Gruberhorn",47.5852,13.1047,1],["grunstein","Grünstein",47.5944,12.965,1],["gurlspitze","Gurlspitze",47.7881,13.1433,1],["gutratberg","Gutratberg",47.7103,13.0569,1],["hellbrunner-berg","Hellbrunner Berg",47.7589,13.0661,1],["hochalpkopf","Hochalpkopf",47.6995,12.9876,1],["hocheck","Hocheck",47.6564,13.1048,1],["hocheck-2","Hocheck",47.5584,12.9238,1],["hochkalter","Hochkalter",47.5697,12.865,1],["hoher-dachstein","Hoher Dachstein",47.4753,13.6058,1],["hoher-first","Hoher First",47.6617,13.2961,1],["hoher-goll","Hoher Göll",47.5939,13.0669,1],["hoher-gotschen","Hoher Götschen",47.6956,13.0644,1],["jagernase","Jägernase",47.6846,13.2099,1],["kallersberg","Kallersberg",47.7363,13.218,1],["kapuzinerberg","Kapuzinerberg",47.805,13.0575,1],["kastenspitz","Kastenspitz",47.5557,13.1851,1],["katzenbarmsteine","Katzenbarmsteine",47.6872,13.0804,1],["kehlstein","Kehlstein",47.6097,13.0456,1],["kleiner-barmstein","Kleiner Barmstein",47.6889,13.0775,1],["kleiner-goll","Kleiner Göll",47.5897,13.1262,1],["kleiner-rauher-kopf","Kleiner Rauher Kopf",47.6668,12.9768,1],["kleiner-watzmann","Kleiner Watzmann",47.5589,12.9425,1],["kleinkalter","Kleinkalter",47.5727,12.8624,1],["kneifelspitze","Kneifelspitze",47.6586,13.0197,1],["kratzspitz","Kratzspitz",47.5628,13.1489,1],["leonhardspitze","Leonhardspitze",47.7253,13.0223,1],["loibersbacher-hohe","Loibersbacher Höhe",47.7403,13.2964,1],["mitterhorn","Mitterhorn",47.4608,12.9003,1],["monchsberg-nord","Mönchsberg Nord",47.8021,13.0367,1],["oberalmberg","Oberalmberg",47.7142,13.1147,1],["ochsenberg","Ochsenberg",47.7486,13.2031,1],["regenspitz","Regenspitz",47.6806,13.2889,1],["rotpalfen","Rotpalfen",47.5786,12.8622,1],["rossfeld","Roßfeld",47.628,13.0956,1],["salzburger-hochthron-untersberg","Salzburger Hochthron (Untersberg)",47.7181,13.0047,1],["schlenken","Schlenken",47.6817,13.2133,1],["schmittenstein","Schmittenstein",47.6831,13.2364,1],["schober","Schober",47.5325,13.3844,1],["schwarzenberg","Schwarzenberg",47.7606,13.1564,1],["schwarzer-berg","Schwarzer Berg",47.6064,13.2369,1],["schartenspitze","Schärtenspitze",47.5819,12.8747,1],["schartenwandkopf","Schärtenwandkopf",47.5841,12.8613,1],["spielberg","Spielberg",47.7264,13.2203,1],["taxhamer-kreuz","Taxhamer Kreuz",47.7279,13.0076,1],["tiroler-kogel","Tiroler Kogel",47.5247,13.2039,1],["trattberg","Trattberg",47.6411,13.2742,1],["watzmann-mittelspitze","Watzmann-Mittelspitze",47.5544,12.9222,1],["watzmann-sudspitze","Watzmann-Südspitze",47.5481,12.9169,1],["wieserhorndl","Wieserhörndl",47.7272,13.2331,1],["wilhelmswand","Wilhelmswand",47.6327,13.24,1],["zinkenkopf","Zinkenkopf",47.6478,13.0864,1]];
-const HALLEIN = [47.6833, 13.0967];
-const PLACES = [["Hallein",47.6833,13.0967]];
-const PLACES_OLD = [["Salzburg",47.8000,13.0450],["Golling",47.5983,13.1650],["Kuchl",47.6260,13.1460],["Berchtesgaden",47.6317,13.0017],["Bad Reichenhall",47.7250,12.8770],["Abtenau",47.5630,13.3450]];
-const LS_KEY = "gipfelbuch-hallein-v1";
+const GROUPS = {"5-watzmannkind":"Watzmann","achselhorn":"Steinernes Meer","ahornbuchsenkopf":"Göll & Roßfeld","alpelhorn":"Hochkalter","anzenberghohe":"Osterhorngruppe","arbeskogel":"Hagengebirge","archenkopf":"Watzmann","armkarwand":"Gosaukamm","beerwurzkogel":"Gosaukamm","bleikogel":"Tennengebirge","bodenleiten":"Salzburg & Vorland","brettkogel":"Gosaukamm","brunnerkopfl":"Osterhorngruppe","brandlberg":"Rund um Hallein","buchberg":"Salzburg & Vorland","buchberg-2":"Salzburg & Vorland","bareck":"Tennengebirge","burglstein":"Salzburg & Vorland","drei-docken":"Steinernes Meer","daumling":"Gosaukamm","durlstein":"Osterhorngruppe","eberstein":"Rund um Hallein","ebnetriedel":"Tennengebirge","einberg":"Osterhorngruppe","eisberg":"Reiter Alm","freyaturm":"Gosaukamm","gamsfeld":"Salzkammergut","gamskarkopfl":"Steinernes Meer","gemainberg":"Untersberg","gjaidkopf":"Steinernes Meer","golser-hugel":"Salzburg & Vorland","gossenleieraussicht":"Untersberg","grimming":"Grimming","grobriedel":"Osterhorngruppe","grosse-bischofsmutze":"Gosaukamm","grosser-breitstein":"Tennengebirge","grosser-heubergkopf":"Untersberg","grosser-hirsch":"Steinernes Meer","grosser-schneiber":"Steinernes Meer","grosser-schwarzkogel":"Gosaukamm","grosses-grundubelhorn":"Reiter Alm","grosses-hauselhorn":"Reiter Alm","grosses-palfenhorn":"Hochkalter","grosswand":"Gosaukamm","gschirrwand":"Osterhorngruppe","gschlosslkogel":"Dachstein","gsengriegel":"Osterhorngruppe","guggenberg":"Osterhorngruppe","gotschenkopf":"Lattengebirge","haarberg":"Osterhorngruppe","hachelkopf":"Steinernes Meer","hals-kopf":"Untersberg","hartberg":"Salzburg & Vorland","haunsberg":"Salzburg & Vorland","hengstberg":"Salzburg & Vorland","hennenkopfl":"Göll & Roßfeld","heuberg":"Rund um Hallein","hiefler":"Tennengebirge","hinkelstein":"Dachstein","hinterbergkopf":"Hochkalter","hintere-seekarwand":"Gosaukamm","hinteres-freieck":"Göll & Roßfeld","hinteres-streitmandl":"Tennengebirge","hirschberg":"Dachstein","hirschbergkopf":"Salzburg & Vorland","hocheisspitze":"Hochkalter","hochgitzen":"Salzburg & Vorland","hochkarfelderkopf":"Tennengebirge","hochkesselkopf":"Dachstein","hochkogel":"Tennengebirge","hochpfeiler":"Tennengebirge","hochthron":"Osterhorngruppe","hochtorl":"Tennengebirge","hochwieskopf":"Osterhorngruppe","hohe-hosswand":"Gosaukamm","hohe-scheibe":"Dachstein","hohe-schreiberwand":"Dachstein","hohenschnaitberg":"Osterhorngruppe","hoher-ochsenkogel":"Dachstein","hohes-gerstfeld":"Reiter Alm","hohes-kreuz":"Dachstein","jagerhoh":"Salzburg & Vorland","kamplbrunnspitze":"Gosaukamm","karolinenhohe":"Salzburg & Vorland","kiliansberg":"Rund um Hallein","kleines-hauselhorn":"Reiter Alm","knallstein":"Tennengebirge","knoglberg":"Osterhorngruppe","kolomansberg":"Salzburg & Vorland","kopf-des-hunds":"Hochkalter","krippenstein":"Dachstein","kuchlberg":"Tennengebirge","kuhberg":"Salzburg & Vorland","ladenberg":"Osterhorngruppe","lammeregg":"Osterhorngruppe","langwand":"Tennengebirge","lercheck":"Rund um Hallein","lidaunberg":"Salzburg & Vorland","mayerhoferkogel":"Tennengebirge","mehlstein":"Osterhorngruppe","mitterberg":"Lattengebirge","mitterspitz":"Dachstein","mittlerer-hirlatz":"Dachstein","mittlerer-wieselstein":"Tennengebirge","mittleres-streitmandl":"Tennengebirge","mooslahnerkopf":"Watzmann","morzger-hugel":"Salzburg & Vorland","moserstein":"Rund um Hallein","muntigler-hugel":"Salzburg & Vorland","muhlbachhohe":"Osterhorngruppe","muhlstein":"Salzburg & Vorland","neureitkopf":"Osterhorngruppe","niedere-schreiberwand":"Dachstein","niederer-dachstein":"Dachstein","niederer-rainberg":"Salzburg & Vorland","niederes-kreuz":"Dachstein","niedertorl":"Tennengebirge","nordlicher-wieselstein":"Tennengebirge","ofenauer-berg":"Hagengebirge","ofentalhornl":"Hochkalter","plainberg":"Salzburg & Vorland","plassen":"Dachstein","platteneck":"Tennengebirge","rabenstein":"Osterhorngruppe","rainberg":"Salzburg & Vorland","raspenhohe":"Rund um Hallein","raucheck":"Salzburg & Vorland","rauheck":"Untersberg","reinsberg":"Osterhorngruppe","rengerberg":"Osterhorngruppe","rettenstein":"Dachstein","roadberg":"Tennengebirge","rotwand":"Tennengebirge","rotwandl":"Steinernes Meer","sattelberg":"Tennengebirge","sattelkopfel":"Osterhorngruppe","schafberg":"Salzkammergut","schafgebirgspitz":"Tennengebirge","schallwand":"Tennengebirge","schapbachriedel":"Watzmann","schatteck":"Salzburg & Vorland","scheiblingkogel":"Tennengebirge","schneelochturm":"Dachstein","schornhohe":"Rund um Hallein","schwarzkogel":"Tennengebirge","schwerwand":"Tennengebirge","schonbachkopf":"Göll & Roßfeld","schonwandeck":"Hochkalter","sendlberg":"Osterhorngruppe","sennberg":"Osterhorngruppe","sigeretkopf":"Hochkalter","silberkopf":"Untersberg","simetsberg":"Steinernes Meer","sommerbichl":"Watzmann","sommereckspitze":"Tennengebirge","stadelhorn":"Reiter Alm","stanglahnerkopf":"Hochkalter","steinberg":"Hochkalter","sternkogel":"Gosaukamm","strichkogel":"Gosaukamm","strumberg":"Salzburg & Vorland","stuhllochspitz":"Gosaukamm","sudlicher-wieselstein":"Tennengebirge","tagweide":"Tennengebirge","tanzboden":"Osterhorngruppe","torstein":"Dachstein","toter-mann":"Lattengebirge","traxlspitz":"Osterhorngruppe","torlkopf":"Lattengebirge","viehkogel":"Steinernes Meer","vorderes-freieck":"Göll & Roßfeld","vorderes-streitmandl":"Tennengebirge","wagendrischelhorn":"Reiter Alm","watzmanngugel":"Watzmann","wimbachschneidspitze":"Hochkalter","wirreck":"Tennengebirge","zwolferhorn":"Osterhorngruppe","aulhorn":"Steinernes Meer","4-watzmannkind":"Watzmann","bannkopf":"Untersberg","berchtesgadener-hochthron-untersberg":"Untersberg","bierfasselkopf":"Untersberg","breithorn":"Steinernes Meer","barenstuhl":"Göll & Roßfeld","eibleck":"Osterhorngruppe","faistenauer-schafberg":"Osterhorngruppe","falzkopf":"Watzmann","festungsberg":"Salzburg & Vorland","frunstberg":"Osterhorngruppe","gaisberg":"Salzburg & Vorland","geiereck-untersberg":"Untersberg","gennerhorn":"Osterhorngruppe","gitschenwand":"Osterhorngruppe","goisberg":"Rund um Hallein","grosser-barmstein":"Rund um Hallein","grosser-donnerkogel":"Gosaukamm","grosser-rauher-kopf":"Untersberg","gruberhorn":"Göll & Roßfeld","grunstein":"Watzmann","gurlspitze":"Salzburg & Vorland","gutratberg":"Rund um Hallein","hellbrunner-berg":"Salzburg & Vorland","hochalpkopf":"Untersberg","hocheck":"Rund um Hallein","hocheck-2":"Watzmann","hochkalter":"Hochkalter","hoher-dachstein":"Dachstein","hoher-first":"Osterhorngruppe","hoher-goll":"Göll & Roßfeld","hoher-gotschen":"Rund um Hallein","jagernase":"Osterhorngruppe","kallersberg":"Osterhorngruppe","kapuzinerberg":"Salzburg & Vorland","kastenspitz":"Hagengebirge","katzenbarmsteine":"Rund um Hallein","kehlstein":"Göll & Roßfeld","kleiner-barmstein":"Rund um Hallein","kleiner-goll":"Göll & Roßfeld","kleiner-rauher-kopf":"Untersberg","kleiner-watzmann":"Watzmann","kleinkalter":"Hochkalter","kneifelspitze":"Rund um Hallein","kratzspitz":"Hagengebirge","leonhardspitze":"Untersberg","loibersbacher-hohe":"Osterhorngruppe","mitterhorn":"Steinernes Meer","monchsberg-nord":"Salzburg & Vorland","oberalmberg":"Rund um Hallein","ochsenberg":"Osterhorngruppe","regenspitz":"Osterhorngruppe","rotpalfen":"Hochkalter","rossfeld":"Göll & Roßfeld","salzburger-hochthron-untersberg":"Untersberg","schlenken":"Osterhorngruppe","schmittenstein":"Osterhorngruppe","schober":"Tennengebirge","schwarzenberg":"Salzburg & Vorland","schwarzer-berg":"Osterhorngruppe","schartenspitze":"Hochkalter","schartenwandkopf":"Hochkalter","spielberg":"Osterhorngruppe","taxhamer-kreuz":"Untersberg","tiroler-kogel":"Tennengebirge","trattberg":"Osterhorngruppe","watzmann-mittelspitze":"Watzmann","watzmann-sudspitze":"Watzmann","wieserhorndl":"Osterhorngruppe","wilhelmswand":"Osterhorngruppe","zinkenkopf":"Göll & Roßfeld"};
+const HALLEIN = [47.6833, 13.0967], H0 = 447 + 2;
+const LS = {state:"gipfelbuch-hallein-v1", stars:"gipfelbuch-hallein-import-stars", custom:"gipfelbuch-hallein-custom", ele:"gipfelbuch-hallein-ele"};
 const DIRS = ["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+const OWN = "Eigene Gipfel";
+const $ = id => document.getElementById(id);
 
-const rad = d => d*Math.PI/180;
+const rad = d => d*Math.PI/180, deg = r => r*180/Math.PI;
 function distKm(a,b){const R=6371,dp=rad(b[0]-a[0]),dl=rad(b[1]-a[1]);const h=Math.sin(dp/2)**2+Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dl/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
-function bearing(a,b){const y=Math.sin(rad(b[1]-a[1]))*Math.cos(rad(b[0]));const x=Math.cos(rad(a[0]))*Math.sin(rad(b[0]))-Math.sin(rad(a[0]))*Math.cos(rad(b[0]))*Math.cos(rad(b[1]-a[1]));return (Math.atan2(y,x)*180/Math.PI+360)%360;}
+function bearing(a,b){const y=Math.sin(rad(b[1]-a[1]))*Math.cos(rad(b[0]));const x=Math.cos(rad(a[0]))*Math.sin(rad(b[0]))-Math.sin(rad(a[0]))*Math.cos(rad(b[0]))*Math.cos(rad(b[1]-a[1]));return (deg(Math.atan2(y,x))+360)%360;}
 const fmt1 = n => n.toLocaleString("de-AT",{minimumFractionDigits:1,maximumFractionDigits:1});
 const fmt4 = n => n.toLocaleString("de-AT",{minimumFractionDigits:4,maximumFractionDigits:4});
+const fmtInt = n => String(Math.round(n));
+const fmtDate = s => { const [y,m,d] = (s||"").split("-"); return y&&m&&d ? (+d)+". "+(+m)+". "+y : s; };
+const today = () => { const t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); };
+function lsGet(k, def){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; }catch(e){ return def; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+function slug(s){ return s.replace(/ß/g,"ss").normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "gipfel"; }
 
-const PEAKS = RAW.map(([id,name,lat,lon,star])=>{const p=[lat,lon];const b=bearing(HALLEIN,p);return {id,name,lat,lon,star:!!star,km:distKm(HALLEIN,p),brg:b,dir:DIRS[Math.round(b/22.5)%16]};});
-const byId = Object.fromEntries(PEAKS.map(p=>[p.id,p]));
+/* ---------- data ---------- */
+let custom = lsGet(LS.custom, []);              // [{id,name,lat,lon,t}]
+let ele = lsGet(LS.ele, {});                    // id -> {h, src:"osm"|"dem"}
+let state = lsGet(LS.state, {});                // id -> {s:0|1|2, a:[dates], n, t}
+// migrate older entries (single date "d") to the tour log
+Object.keys(state).forEach(id=>{ const r=state[id]; if(!r || typeof r!=="object"){ delete state[id]; return; } if(!Array.isArray(r.a)) r.a = r.d ? [r.d] : []; delete r.d; r.s = +r.s||0; r.n = r.n||""; });
 
-/* ---------- state ---------- */
-let state = {};               // id -> {s:0|1, d:"", n:"", t:ms}
-try{ state = JSON.parse(localStorage.getItem(LS_KEY)||"{}")||{}; }catch(e){ state = {}; }
-let col = null;               // db collection for this person, or null
-let mode = "loading";         // loading | cloud | local
-const chains = {};            // per-doc write queue
-const saveEl = document.getElementById("saveState");
+let PEAKS = [], byId = {};
+function makePeak(id,name,lat,lon,star,isCustom){
+  const p=[lat,lon], b=bearing(HALLEIN,p);
+  return {id,name,lat,lon,star:!!star,custom:!!isCustom,km:distKm(HALLEIN,p),brg:b,dir:DIRS[Math.round(b/22.5)%16],grp:isCustom?OWN:(GROUPS[id]||"Sonstige")};
+}
+function rebuildPeaks(){
+  PEAKS = RAW.map(([id,name,lat,lon,star])=>makePeak(id,name,lat,lon,star,false))
+    .concat(custom.map(c=>makePeak(c.id,c.name,c.lat,c.lon,0,true)));
+  byId = Object.fromEntries(PEAKS.map(p=>[p.id,p]));
+}
+rebuildPeaks();
+
+const rec = id => state[id] || {s:0,a:[],n:"",t:0};
+const isEmpty = r => !r.s && !(r.a&&r.a.length) && !(r.n||"").trim();
+const saveEl = $("saveState");
 function setSave(t){ saveEl.textContent = t; }
-function cacheLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
-const rec = id => state[id] || {s:0,d:"",n:"",t:0};
-const isEmpty = r => !r.s && !r.d && !(r.n||"").trim();
-
-function persist(id){
-  cacheLocal();
-  if(!col){ setSave(mode==="local" ? "Gespeichert auf diesem Gerät" : "Gespeichert"); return; }
-  setSave("Speichert …");
-  const r = rec(id);
-  chains[id] = (chains[id]||Promise.resolve()).then(()=> isEmpty(r) ? col.doc(id).delete() : col.doc(id).set({s:r.s,d:r.d||"",n:r.n||"",t:r.t}))
-    .then(()=>setSave("Gespeichert"))
-    .catch(e=>{ setSave(e && e.code==="quota_exceeded" ? "Speicher voll – bitte Notizen kürzen." : "Nicht gespeichert – Verbindung prüfen. Lokal gesichert."); });
-}
+function persist(){ setSave(lsSet(LS.state, state) ? "Gespeichert auf diesem Gerät" : "Speichern nicht möglich – Speicher des Browsers ist voll oder gesperrt."); }
 function update(id, patch){
-  state[id] = Object.assign({}, rec(id), patch, {t:Date.now()});
-  if(isEmpty(state[id])) delete state[id];
-  persist(id); renderAll(id);
+  const r = Object.assign({}, rec(id), patch, {t:Date.now()});
+  r.a = (r.a||[]).slice();
+  if(isEmpty(r)) delete state[id]; else state[id] = r;
+  persist(); renderAll(id);
+}
+function eleOf(p){ const e = ele[p.id]; return e && isFinite(e.h) ? e : null; }
+
+/* ---------- photos (IndexedDB) ---------- */
+let idb = null; const photoCount = {};
+function openDb(){
+  return new Promise(res=>{
+    try{
+      const r = indexedDB.open("gipfelbuch-hallein", 1);
+      r.onupgradeneeded = ()=>{ const s = r.result.createObjectStore("photos",{keyPath:"id",autoIncrement:true}); s.createIndex("peak","peak"); };
+      r.onsuccess = ()=>{ idb = r.result; res(idb); };
+      r.onerror = ()=>res(null);
+    }catch(e){ res(null); }
+  });
+}
+function tx(mode){ return idb.transaction("photos", mode).objectStore("photos"); }
+function photosOf(peak){ return new Promise(res=>{ if(!idb) return res([]); const q = tx("readonly").index("peak").getAll(peak); q.onsuccess=()=>res(q.result||[]); q.onerror=()=>res([]); }); }
+function countPhotos(){ return new Promise(res=>{ if(!idb) return res(); const q = tx("readonly").openCursor(); q.onsuccess=()=>{ const c=q.result; if(c){ photoCount[c.value.peak]=(photoCount[c.value.peak]||0)+1; c.continue(); } else res(); }; q.onerror=()=>res(); }); }
+function addPhoto(peak, blob){ return new Promise((res,rej)=>{ const q = tx("readwrite").add({peak, blob, t:Date.now()}); q.onsuccess=()=>{ photoCount[peak]=(photoCount[peak]||0)+1; res(q.result); }; q.onerror=()=>rej(q.error); }); }
+function delPhoto(id, peak){ return new Promise(res=>{ const q = tx("readwrite").delete(id); q.onsuccess=()=>{ photoCount[peak]=Math.max(0,(photoCount[peak]||1)-1); res(); }; q.onerror=()=>res(); }); }
+async function shrink(file){
+  const url = URL.createObjectURL(file);
+  try{
+    const img = await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; });
+    const max = 1600, sc = Math.min(1, max/Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement("canvas"); c.width = Math.round(img.naturalWidth*sc); c.height = Math.round(img.naturalHeight*sc);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return await new Promise(res=>c.toBlob(b=>res(b||file), "image/jpeg", .82));
+  } finally { URL.revokeObjectURL(url); }
 }
 
-/* ---------- storage on this device ---------- */
-const IMPORT_LS = "gipfelbuch-hallein-import-stars";
-function startLocal(){
-  mode = "local";
-  let done = null; try{ done = localStorage.getItem(IMPORT_LS); }catch(e){}
-  if(!done){
-    let n = 0; const now = Date.now();
-    PEAKS.forEach(p=>{ if(p.star && !rec(p.id).s){ state[p.id] = Object.assign({}, rec(p.id), {s:1, t:now}); n++; } });
-    cacheLocal(); try{ localStorage.setItem(IMPORT_LS, "1"); }catch(e){}
-    setSave(n ? n+" Gipfel aus PeakFinder als bestiegen übernommen" : "Gespeichert auf diesem Gerät");
-  } else setSave("Gespeichert auf diesem Gerät");
-  if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+/* ---------- first start: PeakFinder stars = climbed ---------- */
+function importStars(){
+  if(lsGet(LS.stars, null)) return 0;
+  let n = 0; const now = Date.now();
+  PEAKS.forEach(p=>{ if(p.star && !rec(p.id).s){ state[p.id] = Object.assign({}, rec(p.id), {s:1, t:now}); n++; } });
+  lsSet(LS.state, state); lsSet(LS.stars, 1); return n;
+}
+
+/* ---------- heights from OpenStreetMap, terrain model as fallback ---------- */
+const norm = s => (s||"").replace(/\(.*?\)/g,"").replace(/ß/g,"ss").normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z]/g,"");
+async function loadHeights(){
+  const missing = PEAKS.filter(p=>!eleOf(p));
+  if(!missing.length || !navigator.onLine) return;
+  setSave("Lade Gipfelhöhen …");
+  let got = 0;
+  try{
+    const lats = missing.map(p=>p.lat), lons = missing.map(p=>p.lon);
+    const bb = [Math.min(...lats)-.02, Math.min(...lons)-.02, Math.max(...lats)+.02, Math.max(...lons)+.02].map(v=>v.toFixed(3)).join(",");
+    const qy = '[out:json][timeout:40];node["natural"~"^(peak|volcano|hill)$"]('+bb+');out body;';
+    const r = await fetch("https://overpass-api.de/api/interpreter", {method:"POST", body:"data="+encodeURIComponent(qy), headers:{"Content-Type":"application/x-www-form-urlencoded"}});
+    if(r.ok){
+      const js = await r.json();
+      const nodes = (js.elements||[]).filter(n=>n.tags && n.tags.ele).map(n=>({lat:n.lat, lon:n.lon, h:parseFloat(String(n.tags.ele).replace(",", ".")), nm:norm(n.tags.name)})).filter(n=>isFinite(n.h));
+      missing.forEach(p=>{
+        const pn = norm(p.name); let best = null, bd = 1e9, bestAny = null, bad = 1e9;
+        nodes.forEach(n=>{ const d = distKm([p.lat,p.lon],[n.lat,n.lon]); if(n.nm && n.nm===pn && d<0.8 && d<bd){ bd=d; best=n; } if(d<bad){ bad=d; bestAny=n; } });
+        const m = best || (bad < 0.15 ? bestAny : null);
+        if(m){ ele[p.id] = {h:Math.round(m.h), src:"osm"}; got++; }
+      });
+    }
+  }catch(e){}
+  // fallback: terrain model height at the coordinate (slightly lower than the real summit)
+  const still = PEAKS.filter(p=>!eleOf(p));
+  for(let i=0; i<still.length; i+=100){
+    const part = still.slice(i, i+100);
+    try{
+      const r = await fetch("https://api.open-meteo.com/v1/elevation?latitude="+part.map(p=>p.lat.toFixed(5)).join(",")+"&longitude="+part.map(p=>p.lon.toFixed(5)).join(","));
+      if(!r.ok) break;
+      const js = await r.json();
+      (js.elevation||[]).forEach((h,k)=>{ if(isFinite(h)){ ele[part[k].id] = {h:Math.round(h), src:"dem"}; got++; } });
+    }catch(e){ break; }
+  }
+  lsSet(LS.ele, ele);
+  setSave(got ? "Gipfelhöhen geladen" : "Gespeichert auf diesem Gerät");
   renderAll();
 }
 
-/* ---------- backup ---------- */
-const bk = document.getElementById("backup"), bkMsg = document.getElementById("bkMsg"), bkPaste = document.getElementById("bkPaste");
-function backupData(){ return {app:"gipfelbuch-hallein", v:1, exported:new Date().toISOString(), state}; }
-function mergeBackup(obj){
-  const src = obj && obj.state ? obj.state : obj;
-  if(!src || typeof src !== "object") throw new Error("format");
-  let n = 0;
-  Object.keys(src).forEach(id=>{
-    const r = src[id]; if(!byId[id] || !r || typeof r !== "object") return;
-    const cur = state[id];
-    if(!cur || (r.t||0) > (cur.t||0)){ state[id] = {s:r.s?1:0, d:String(r.d||""), n:String(r.n||""), t:r.t||Date.now()}; if(isEmpty(state[id])) delete state[id]; n++; }
-  });
-  cacheLocal(); renderAll(); return n;
-}
-function bkResult(t){ bkMsg.textContent = t; }
-document.getElementById("bkOpen").addEventListener("click", ()=>{ closeSheet(); bkResult(""); bk.hidden = false; });
-document.getElementById("bkClose").addEventListener("click", ()=>{ bk.hidden = true; });
-document.getElementById("bkDownload").addEventListener("click", ()=>{
-  const blob = new Blob([JSON.stringify(backupData(), null, 1)], {type:"application/json"});
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-  a.download = "gipfelbuch-sicherung-" + new Date().toISOString().slice(0,10) + ".json";
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
-  bkResult("Sicherung gespeichert. Du findest sie in deinen Downloads.");
-});
-document.getElementById("bkFile").addEventListener("change", e=>{
-  const f = e.target.files && e.target.files[0]; if(!f) return;
-  const fr = new FileReader();
-  fr.onload = ()=>{ try{ const n = mergeBackup(JSON.parse(fr.result)); bkResult(n+" Einträge übernommen."); }catch(err){ bkResult("Diese Datei ist keine Gipfelbuch-Sicherung."); } e.target.value = ""; };
-  fr.readAsText(f);
-});
-document.getElementById("bkApply").addEventListener("click", ()=>{
-  const t = bkPaste.value.trim(); if(!t){ bkResult("Füge zuerst den kopierten Text ein."); return; }
-  try{ const n = mergeBackup(JSON.parse(t)); bkResult(n+" Einträge übernommen."); bkPaste.value = ""; }catch(err){ bkResult("Der eingefügte Text ist keine Gipfelbuch-Sicherung. Kopiere ihn bitte noch einmal vollständig."); }
-});
-
-/* ---------- offline ---------- */
-if("serviceWorker" in navigator) window.addEventListener("load", ()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
-
-
 /* ---------- header ---------- */
-const nDone = document.getElementById("nDone"), nAll = document.getElementById("nAll"), bar = document.getElementById("bar");
+function counts(){ let done=0, goal=0; PEAKS.forEach(p=>{ const s=rec(p.id).s; if(s===1) done++; else if(s===2) goal++; }); return {done, goal}; }
 function renderCount(){
-  const done = PEAKS.filter(p=>rec(p.id).s).length;
-  nDone.textContent = done; nAll.textContent = PEAKS.length;
-  bar.firstElementChild.style.width = (done/PEAKS.length*100).toFixed(1)+"%";
-  bar.setAttribute("aria-valuenow", done); bar.setAttribute("aria-valuemax", PEAKS.length);
+  const {done, goal} = counts();
+  $("nDone").textContent = done; $("nAll").textContent = PEAKS.length;
+  $("barDone").style.width = (done/PEAKS.length*100).toFixed(1)+"%";
+  $("barGoal").style.width = (goal/PEAKS.length*100).toFixed(1)+"%";
+  $("bar").setAttribute("aria-valuenow", done); $("bar").setAttribute("aria-valuemax", PEAKS.length);
 }
 
 /* ---------- map ---------- */
 let map = null; const markers = {}; let selected = null;
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function statusColor(s){ return s===1 ? css("--climbed") : s===2 ? css("--goal") : css("--open"); }
 function markerStyle(p){
-  const on = !!rec(p.id).s, sel = selected===p.id;
-  return { radius: sel?10:(p.star?7:5.5), weight: sel?3:(on?1.5:2), color: sel?css("--accent"):(on?css("--climbed"):css("--open")),
-           fillColor: on?css("--climbed"):css("--map-bg"), fillOpacity: 1 };
+  const s = rec(p.id).s, sel = selected===p.id;
+  return { radius: sel?10:(p.star?7:6), weight: sel?3:2, color: sel?css("--accent"):(s?"#ffffff":statusColor(0)),
+           fillColor: s?statusColor(s):"#ffffff", fillOpacity: 1 };
+}
+function addMarker(p){
+  if(!map) return;
+  const m = L.circleMarker([p.lat,p.lon], markerStyle(p)).addTo(map);
+  m.bindTooltip(p.name,{permanent:true,direction:"right",offset:[7,0],className:"peak-label"});
+  m.on("click", ()=>openSheet(p.id));
+  markers[p.id] = m;
 }
 function initMap(){
-  const el = document.getElementById("map");
-  if(typeof L === "undefined"){ el.innerHTML = '<div class="nomap">Die Karte konnte nicht geladen werden. Die Liste funktioniert trotzdem.</div>'; return; }
-  map = L.map(el, {preferCanvas:true, zoomControl:true, attributionControl:true}).setView([47.64,13.15], 10);
+  const el = $("map");
+  if(typeof L === "undefined"){ el.innerHTML = '<div class="nomap">Die Karte konnte nicht geladen werden. Liste, Rundblick und Statistik funktionieren trotzdem.</div>'; return; }
+  map = L.map(el, {preferCanvas:true, zoomControl:true}).setView([47.64,13.15], 10);
   map.attributionControl.setPrefix(false);
-  // Topo tiles load where the page is allowed to fetch them; otherwise the self-drawn base below stays.
   L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,subdomains:"abc",attribution:'Karte: © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA), © <a href="https://www.openstreetmap.org/copyright">OSM</a>'}).addTo(map);
-  // distance rings
-  [5,10,20,40,60].forEach(km=>{
-    L.circle(HALLEIN,{radius:km*1000,color:css("--ring"),weight:1,dashArray:"4 5",fill:false,interactive:false}).addTo(map);
-    const lat = HALLEIN[0] + km/111.2;
-    L.tooltip({permanent:true,direction:"center",className:"ring-label"}).setLatLng([lat,HALLEIN[1]]).setContent(km+" km").addTo(map);
+  [5,10,20,40].forEach(km=>{
+    L.circle(HALLEIN,{radius:km*1000,color:"#55625C",opacity:.55,weight:1,dashArray:"4 5",fill:false,interactive:false}).addTo(map);
+    L.tooltip({permanent:true,direction:"center",className:"ring-label"}).setLatLng([HALLEIN[0]+km/111.2,HALLEIN[1]]).setContent(km+" km").addTo(map);
   });
-  PLACES.forEach(([n,la,lo])=>{
-    const home = n==="Hallein";
-    L.circleMarker([la,lo],{radius:home?6:3.5,color:css(home?"--accent":"--muted"),weight:home?3:1,fillColor:css(home?"--accent":"--muted"),fillOpacity:1,interactive:false}).addTo(map)
-      .bindTooltip(n,{permanent:true,direction:"right",offset:[6,0],className:"place-label"});
-  });
-  PEAKS.forEach(p=>{
-    const m = L.circleMarker([p.lat,p.lon], markerStyle(p)).addTo(map);
-    m.bindTooltip(p.name,{permanent:true,direction:"right",offset:[7,0],className:"peak-label"});
-    m.on("click", ()=>openSheet(p.id));
-    markers[p.id] = m;
-  });
+  L.circleMarker(HALLEIN,{radius:6,color:css("--accent"),weight:3,fillColor:css("--accent"),fillOpacity:1,interactive:false}).addTo(map)
+    .bindTooltip("Hallein",{permanent:true,direction:"right",offset:[6,0],className:"place-label"});
+  PEAKS.forEach(addMarker);
   const labels = ()=> el.classList.toggle("hide-labels", map.getZoom() < 12);
   map.on("zoomend", labels); labels();
+  map.on("contextmenu", e=>openAdd(e.latlng.lat, e.latlng.lng));
+  // locate button
+  const Loc = L.Control.extend({options:{position:"topleft"}, onAdd(){
+    const b = L.DomUtil.create("button","map-btn"); b.type="button"; b.id="locBtn"; b.title="Mein Standort"; b.setAttribute("aria-label","Mein Standort"); b.setAttribute("aria-pressed","false");
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
+    L.DomEvent.disableClickPropagation(b); L.DomEvent.on(b,"click",toggleLocate); return b; }});
+  map.addControl(new Loc());
 }
-function restyle(id){ if(!map) return; (id?[byId[id]]:PEAKS).forEach(p=>markers[p.id] && markers[p.id].setStyle(markerStyle(p))); }
-function refreshThemeColors(){ restyle(); }
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>setTimeout(refreshThemeColors,0));
-new MutationObserver(()=>setTimeout(refreshThemeColors,0)).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+function restyle(id){ if(!map) return; (id?[byId[id]].filter(Boolean):PEAKS).forEach(p=>markers[p.id] && markers[p.id].setStyle(markerStyle(p))); }
+const themeChanged = ()=>setTimeout(()=>{ restyle(); if(!$("panoView").hidden) drawPano(); },0);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeChanged);
+new MutationObserver(themeChanged).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+/* ---------- GPS: where am I, summit check-in ---------- */
+let watchId = null, me = null, meMarker = null, meCircle = null, firstFix = true;
+const asked = new Set();
+function toggleLocate(){
+  const b = $("locBtn");
+  if(watchId !== null){
+    navigator.geolocation.clearWatch(watchId); watchId = null; b && b.setAttribute("aria-pressed","false");
+    if(meMarker){ meMarker.remove(); meCircle.remove(); meMarker = meCircle = null; } me = null; $("banner").hidden = true; return;
+  }
+  if(!navigator.geolocation){ setSave("Dieses Gerät kann den Standort nicht bestimmen."); return; }
+  b && b.setAttribute("aria-pressed","true"); firstFix = true; setSave("Suche Standort …");
+  watchId = navigator.geolocation.watchPosition(onPos, err=>{
+    setSave(err.code===1 ? "Standort nicht erlaubt. Erlaube ihn in den Browser-Einstellungen." : "Standort gerade nicht verfügbar.");
+    if(err.code===1){ toggleLocate(); }
+  }, {enableHighAccuracy:true, maximumAge:15000, timeout:30000});
+}
+function onPos(pos){
+  const {latitude:la, longitude:lo, accuracy:acc} = pos.coords; me = {lat:la, lon:lo, acc};
+  if(map){
+    if(!meMarker){
+      meCircle = L.circle([la,lo],{radius:acc,color:css("--gps"),weight:1,fillColor:css("--gps"),fillOpacity:.12,interactive:false}).addTo(map);
+      meMarker = L.circleMarker([la,lo],{radius:7,color:"#fff",weight:3,fillColor:css("--gps"),fillOpacity:1,interactive:false}).addTo(map);
+    } else { meMarker.setLatLng([la,lo]); meCircle.setLatLng([la,lo]).setRadius(acc); }
+    if(firstFix){ firstFix=false; map.flyTo([la,lo], Math.max(map.getZoom(),13), {duration:.8}); }
+  }
+  let near = null, nd = 1e9;
+  PEAKS.forEach(p=>{ const d = distKm([la,lo],[p.lat,p.lon])*1000; if(d<nd){ nd=d; near=p; } });
+  setSave(near ? "Standort ±"+Math.round(acc)+" m · nächster Gipfel: "+near.name+" ("+fmtInt(nd)+" m)" : "Standort gefunden");
+  if(near && nd <= 150 && acc <= 120 && !asked.has(near.id) && !(rec(near.id).a||[]).includes(today())){
+    asked.add(near.id); checkinPeak = near.id;
+    $("bannerText").textContent = "Du bist am Gipfel: "+near.name+" ("+fmtInt(nd)+" m entfernt). Heutige Besteigung eintragen?";
+    $("banner").hidden = false; showTab("map");
+  }
+}
+let checkinPeak = null;
+$("bannerYes").addEventListener("click", ()=>{ if(checkinPeak){ addAscent(checkinPeak, today()); openSheet(checkinPeak); } $("banner").hidden = true; });
+$("bannerNo").addEventListener("click", ()=>{ $("banner").hidden = true; });
 
 /* ---------- list ---------- */
 let filter = "all";
-const q = document.getElementById("q"), sortSel = document.getElementById("sort"), listEl = document.getElementById("peakList");
+const listEl = $("peakList");
+function fillGroupSelect(){
+  const sel = $("grpSel"), cur = sel.value;
+  const groups = [...new Set(PEAKS.map(p=>p.grp))].sort((a,b)=>a.localeCompare(b,"de"));
+  sel.innerHTML = ""; sel.append(new Option("Alle Gebiete",""));
+  groups.forEach(g=>sel.append(new Option(g,g)));
+  sel.value = groups.includes(cur) ? cur : "";
+}
 function renderList(){
-  const term = q.value.trim().toLowerCase();
+  const term = $("q").value.trim().toLowerCase(), grp = $("grpSel").value, sort = $("sort").value;
   let rows = PEAKS.filter(p=>{
-    const on = !!rec(p.id).s;
-    if(filter==="open" && on) return false;
-    if(filter==="done" && !on) return false;
+    const s = rec(p.id).s;
+    if(filter==="open" && s!==0) return false;
+    if(filter==="done" && s!==1) return false;
+    if(filter==="goal" && s!==2) return false;
+    if(grp && p.grp!==grp) return false;
     return !term || p.name.toLowerCase().includes(term);
   });
-  rows.sort(sortSel.value==="name" ? (a,b)=>a.name.localeCompare(b.name,"de") : (a,b)=>a.km-b.km);
+  const eh = p => (eleOf(p)||{h:-1}).h;
+  rows.sort(sort==="name" ? (a,b)=>a.name.localeCompare(b.name,"de") : sort==="ele" ? (a,b)=>eh(b)-eh(a) : (a,b)=>a.km-b.km);
   if(!rows.length){ listEl.innerHTML = '<li class="empty">Keine Gipfel passen zu dieser Auswahl.</li>'; return; }
   listEl.replaceChildren(...rows.map(p=>{
     const r = rec(p.id), li = document.createElement("li"), b = document.createElement("button");
     b.type="button";
-    const dot = document.createElement("i"); dot.className = "dot"+(r.s?" on":"");
+    const dot = document.createElement("i"); dot.className = "dot"+(r.s===1?" on":r.s===2?" goal":"");
     const nm = document.createElement("span"); nm.className="pname"; nm.textContent = p.name;
-    if((r.n||"").trim()){ const em=document.createElement("em"); em.textContent="Notiz"; nm.appendChild(em); }
-    const ds = document.createElement("span"); ds.className="pdist"; ds.textContent = p.dir+" · "+fmt1(p.km)+" km";
+    const tags = [];
+    if((r.a||[]).length > 1) tags.push(r.a.length+"×");
+    if((r.n||"").trim()) tags.push("Notiz");
+    if(photoCount[p.id]) tags.push("Foto");
+    if(tags.length){ const em=document.createElement("em"); em.textContent=tags.join(" · "); nm.appendChild(em); }
+    const meta = document.createElement("span"); meta.className="pmeta"; meta.textContent = p.grp; nm.appendChild(meta);
+    const ds = document.createElement("span"); ds.className="pdist";
+    const e = eleOf(p); ds.textContent = (e ? fmtInt(e.h)+" m\n" : "") + p.dir+" · "+fmt1(p.km)+" km"; ds.style.whiteSpace="pre";
     b.append(dot,nm,ds); b.addEventListener("click",()=>openSheet(p.id));
     li.appendChild(b); return li;
   }));
 }
-q.addEventListener("input", renderList);
-sortSel.addEventListener("change", renderList);
+$("q").addEventListener("input", renderList);
+$("sort").addEventListener("change", renderList);
+$("grpSel").addEventListener("change", renderList);
 document.querySelectorAll(".chips button").forEach(btn=>btn.addEventListener("click",()=>{
   filter = btn.dataset.f;
   document.querySelectorAll(".chips button").forEach(x=>x.setAttribute("aria-pressed", String(x===btn)));
   renderList();
 }));
 
-/* ---------- sheet ---------- */
-const sheet=document.getElementById("sheet"), sName=document.getElementById("sName"), sDir=document.getElementById("sDir"), sPos=document.getElementById("sPos"),
-      bOpen=document.getElementById("bOpen"), bDone=document.getElementById("bDone"), dateWrap=document.getElementById("dateWrap"),
-      sDate=document.getElementById("sDate"), sNote=document.getElementById("sNote"), sTag=document.getElementById("sTag"), needle=document.getElementById("needleG");
-let noteTimer=null;
+/* ---------- peak sheet ---------- */
+const sheet = $("sheet"); let noteTimer = null; const wxCache = {};
+function closeAllSheets(){ ["sheet","addSheet","backup"].forEach(id=>{ if(id==="sheet") closeSheet(); else $(id).hidden = true; }); }
 function fillSheet(){
-  const p = byId[selected]; if(!p) return; const r = rec(p.id);
-  sName.innerHTML = ""; sName.append(document.createTextNode(p.name));
-  const sm=document.createElement("small"); sm.textContent = fmt1(p.km)+" km · "+Math.round(p.brg)+"°"; sName.appendChild(sm);
-  sDir.textContent = p.dir+" · "+fmt1(p.km)+" km Luftlinie";
-  needle.setAttribute("transform","rotate("+p.brg.toFixed(1)+" 10 10)");
-  sPos.textContent = fmt4(p.lat)+"° N · "+fmt4(p.lon)+"° E";
-  bOpen.setAttribute("aria-pressed", String(!r.s)); bDone.setAttribute("aria-pressed", String(!!r.s));
-  dateWrap.hidden = !r.s;
-  if(document.activeElement!==sDate) sDate.value = r.d||"";
-  if(document.activeElement!==sNote) sNote.value = r.n||"";
-  sTag.textContent = p.star ? "★ In PeakFinder markiert" : "";
+  const p = byId[selected]; if(!p) return; const r = rec(p.id), e = eleOf(p);
+  $("sName").replaceChildren(document.createTextNode(p.name));
+  const sm = document.createElement("small"); sm.textContent = (e ? fmtInt(e.h)+" m · " : "") + fmt1(p.km)+" km · "+Math.round(p.brg)+"°"; $("sName").appendChild(sm);
+  $("sDir").textContent = p.dir+" · "+fmt1(p.km)+" km Luftlinie";
+  $("needleG").setAttribute("transform","rotate("+p.brg.toFixed(1)+" 10 10)");
+  $("sEle").textContent = e ? (e.src==="dem" ? "ca. " : "")+fmtInt(e.h)+" m"+(e.src==="dem" ? " (Geländemodell)" : "") : "noch unbekannt";
+  $("sGrp").textContent = p.grp;
+  $("sPos").textContent = fmt4(p.lat)+"° N · "+fmt4(p.lon)+"° E";
+  [["bOpen",0],["bGoal",2],["bDone",1]].forEach(([id,s])=>$(id).setAttribute("aria-pressed", String(r.s===s)));
+  const asc = (r.a||[]).slice().sort().reverse();
+  $("sAsc").replaceChildren(...(asc.length ? asc.map(d=>{
+    const li=document.createElement("li"); const sp=document.createElement("span"); sp.textContent=fmtDate(d);
+    const x=document.createElement("button"); x.type="button"; x.textContent="×"; x.setAttribute("aria-label","Besteigung vom "+fmtDate(d)+" entfernen");
+    x.addEventListener("click",()=>{ const a=(rec(p.id).a||[]).slice(); const i=a.indexOf(d); if(i>=0) a.splice(i,1); update(p.id,{a}); });
+    li.append(sp,x); return li;
+  }) : [Object.assign(document.createElement("li"),{textContent: r.s===1 ? "Bestiegen, Datum unbekannt" : "Noch keine Besteigung eingetragen"})]));
+  if(!$("sAscDate").value) $("sAscDate").value = today();
+  if(document.activeElement!==$("sNote")) $("sNote").value = r.n||"";
+  $("sTag").textContent = p.star ? "★ In PeakFinder markiert" : p.custom ? "Von dir hinzugefügt" : "";
+  const q = p.lat.toFixed(5)+","+p.lon.toFixed(5);
+  $("lGeo").href = "geo:"+q+"?q="+q+"("+encodeURIComponent(p.name)+")";
+  $("lGoogle").href = "https://www.google.com/maps/search/?api=1&query="+q;
+  $("lOsm").href = "https://www.openstreetmap.org/?mlat="+p.lat.toFixed(5)+"&mlon="+p.lon.toFixed(5)+"#map=15/"+p.lat.toFixed(5)+"/"+p.lon.toFixed(5);
+  $("lOa").href = "https://www.outdooractive.com/de/search/?q="+encodeURIComponent(p.name);
+  $("customBlock").hidden = !p.custom;
+}
+async function fillPhotos(){
+  const id = selected, box = $("sPhotos");
+  box.querySelectorAll("img").forEach(i=>URL.revokeObjectURL(i.src));
+  const list = await photosOf(id); if(id!==selected) return;
+  box.replaceChildren(...list.map(ph=>{
+    const b=document.createElement("button"); b.type="button"; b.setAttribute("aria-label","Foto öffnen");
+    const im=document.createElement("img"); im.alt=""; im.src=URL.createObjectURL(ph.blob); b.appendChild(im);
+    b.addEventListener("click",()=>openViewer(ph)); return b;
+  }));
+  if(!idb) box.replaceChildren(Object.assign(document.createElement("p"),{className:"hint",textContent:"Fotos können in diesem Browser nicht gespeichert werden."}));
+}
+const WX = {0:"Klar",1:"Meist klar",2:"Teils bewölkt",3:"Bedeckt",45:"Nebel",48:"Nebel mit Reif",51:"Leichter Niesel",53:"Niesel",55:"Starker Niesel",56:"Gefrierender Niesel",57:"Gefrierender Niesel",61:"Leichter Regen",63:"Regen",65:"Starker Regen",66:"Gefrierender Regen",67:"Gefrierender Regen",71:"Leichter Schnee",73:"Schneefall",75:"Starker Schnee",77:"Schneegriesel",80:"Regenschauer",81:"Regenschauer",82:"Heftige Schauer",85:"Schneeschauer",86:"Schneeschauer",95:"Gewitter",96:"Gewitter, Hagel",99:"Gewitter, Hagel"};
+async function fillWeather(){
+  const p = byId[selected], box = $("sWx"); if(!p) return;
+  const e = eleOf(p);
+  $("wxTitle").textContent = "Wetter am Gipfel" + (e ? " ("+fmtInt(e.h)+" m)" : "");
+  const show = d => box.replaceChildren(...d.daily.time.map((t,i)=>{
+    const div=document.createElement("div"); const wd=new Date(t+"T12:00").toLocaleDateString("de-AT",{weekday:"short"});
+    div.innerHTML = '<b></b><span class="c"></span><span class="t"></span><span class="r"></span>';
+    div.children[0].textContent = i===0 ? "Heute" : wd;
+    div.children[1].textContent = WX[d.daily.weather_code[i]] || "–";
+    div.children[2].textContent = Math.round(d.daily.temperature_2m_max[i])+"° / "+Math.round(d.daily.temperature_2m_min[i])+"°";
+    div.children[3].textContent = (d.daily.precipitation_probability_max[i]??"–")+" % · "+Math.round(d.daily.wind_speed_10m_max[i])+" km/h";
+    return div;
+  }));
+  const key = p.id, c = wxCache[key];
+  if(c && Date.now()-c.t < 30*60*1000){ show(c.d); return; }
+  box.innerHTML = '<p class="hint">'+(navigator.onLine ? "Wetter wird geladen …" : "Für das Wetter braucht die App Internet.")+'</p>';
+  if(!navigator.onLine) return;
+  try{
+    const url = "https://api.open-meteo.com/v1/forecast?latitude="+p.lat.toFixed(4)+"&longitude="+p.lon.toFixed(4)+(e?"&elevation="+e.h:"")+
+      "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe%2FVienna&forecast_days=4";
+    const r = await fetch(url); if(!r.ok) throw 0; const d = await r.json();
+    wxCache[key] = {t:Date.now(), d}; if(selected===key) show(d);
+  }catch(err){ if(selected===key) box.innerHTML = '<p class="hint">Wetter gerade nicht abrufbar. Versuch es später noch einmal.</p>'; }
 }
 function openSheet(id){
-  const prev = selected; selected = id; sheet.hidden = false; fillSheet();
+  flushNote(); closeAllSheets();
+  const prev = selected; selected = id; sheet.hidden = false; sheet.scrollTop = 0;
+  $("sAscDate").value = today(); $("delAsk").hidden = false; $("delConfirm").hidden = true;
+  fillSheet(); fillPhotos(); fillWeather();
   if(prev) restyle(prev); restyle(id);
   if(markers[id]) markers[id].bringToFront();
+  if(!$("panoView").hidden) drawPano();
 }
-function closeSheet(){ flushNote(); const prev=selected; selected=null; sheet.hidden=true; if(prev) restyle(prev); }
-document.getElementById("sClose").addEventListener("click", closeSheet);
-bOpen.addEventListener("click", ()=>{ if(selected) update(selected,{s:0,d:""}); });
-bDone.addEventListener("click", ()=>{ if(!selected) return; const r=rec(selected); update(selected,{s:1,d:r.d||new Date().toISOString().slice(0,10)}); });
-sDate.addEventListener("change", ()=>{ if(selected) update(selected,{d:sDate.value}); });
-function flushNote(){ if(noteTimer){ clearTimeout(noteTimer); noteTimer=null; if(selected && sNote.value!==(rec(selected).n||"")) update(selected,{n:sNote.value}); } }
-sNote.addEventListener("input", ()=>{ setSave("Ungespeicherte Notiz …"); clearTimeout(noteTimer); noteTimer=setTimeout(flushNote, 900); });
-sNote.addEventListener("blur", flushNote);
-document.getElementById("sShow").addEventListener("click", ()=>{ const p=byId[selected]; if(!p) return; showTab("map"); if(map) map.flyTo([p.lat,p.lon], Math.max(map.getZoom(),13), {duration:.6}); });
-document.addEventListener("keydown", e=>{ if(e.key==="Escape" && !sheet.hidden) closeSheet(); });
+function closeSheet(){ flushNote(); const prev=selected; selected=null; sheet.hidden=true; if(prev) restyle(prev); if(!$("panoView").hidden) drawPano(); }
+$("sClose").addEventListener("click", closeSheet);
+function setStatus(s){ if(!selected) return; update(selected,{s}); }
+$("bOpen").addEventListener("click", ()=>setStatus(0));
+$("bGoal").addEventListener("click", ()=>setStatus(2));
+$("bDone").addEventListener("click", ()=>setStatus(1));
+function addAscent(id, d){ const a=(rec(id).a||[]).slice(); if(d && !a.includes(d)) a.push(d); update(id,{a, s:1}); }
+$("sAscAdd").addEventListener("click", ()=>{ if(selected) addAscent(selected, $("sAscDate").value || today()); });
+function flushNote(){ if(noteTimer){ clearTimeout(noteTimer); noteTimer=null; if(selected && $("sNote").value!==(rec(selected).n||"")) update(selected,{n:$("sNote").value}); } }
+$("sNote").addEventListener("input", ()=>{ setSave("Ungespeicherte Notiz …"); clearTimeout(noteTimer); noteTimer=setTimeout(flushNote, 900); });
+$("sNote").addEventListener("blur", flushNote);
+$("sShow").addEventListener("click", ()=>{ const p=byId[selected]; if(!p) return; showTab("map"); if(map) map.flyTo([p.lat,p.lon], Math.max(map.getZoom(),13), {duration:.6}); });
+$("sPhotoIn").addEventListener("change", async e=>{
+  const files = [...(e.target.files||[])]; e.target.value = ""; const id = selected;
+  if(!files.length || !id) return;
+  if(!idb){ setSave("Fotos können in diesem Browser nicht gespeichert werden."); return; }
+  setSave("Speichere Foto …");
+  try{ for(const f of files){ await addPhoto(id, await shrink(f)); } setSave(files.length>1 ? files.length+" Fotos gespeichert" : "Foto gespeichert"); }
+  catch(err){ setSave("Foto konnte nicht gespeichert werden – Speicher voll?"); }
+  if(selected===id) fillPhotos(); renderAll(id);
+});
+// delete own peak
+$("sDel").addEventListener("click", ()=>{ $("delAsk").hidden = true; $("delConfirm").hidden = false; });
+$("sDelNo").addEventListener("click", ()=>{ $("delAsk").hidden = false; $("delConfirm").hidden = true; });
+$("sDelYes").addEventListener("click", async ()=>{
+  const id = selected; if(!id || !byId[id].custom) return;
+  const ph = await photosOf(id); for(const x of ph) await delPhoto(x.id, id);
+  custom = custom.filter(c=>c.id!==id); lsSet(LS.custom, custom);
+  delete state[id]; delete ele[id]; lsSet(LS.ele, ele); persist();
+  if(markers[id]){ markers[id].remove(); delete markers[id]; }
+  selected = null; sheet.hidden = true; rebuildPeaks(); fillGroupSelect(); renderAll(); setSave("Gipfel gelöscht");
+});
+
+/* ---------- photo viewer ---------- */
+let viewing = null;
+function openViewer(ph){ viewing = ph; const v=$("viewer"), im=$("vImg"); if(im.src) URL.revokeObjectURL(im.src); im.src = URL.createObjectURL(ph.blob); $("vRow").hidden=false; $("vConfirm").hidden=true; v.hidden=false; }
+function closeViewer(){ $("viewer").hidden = true; viewing = null; }
+$("vClose").addEventListener("click", closeViewer);
+$("vDel").addEventListener("click", ()=>{ $("vRow").hidden=true; $("vConfirm").hidden=false; });
+$("vDelNo").addEventListener("click", ()=>{ $("vRow").hidden=false; $("vConfirm").hidden=true; });
+$("vDelYes").addEventListener("click", async ()=>{ if(viewing){ await delPhoto(viewing.id, viewing.peak); } closeViewer(); fillPhotos(); renderAll(selected); setSave("Foto gelöscht"); });
+
+/* ---------- add own peak ---------- */
+function parseNum(s){ const v = parseFloat(String(s).replace(",", ".")); return isFinite(v) ? v : NaN; }
+function openAdd(lat, lon){
+  closeAllSheets();
+  if(lat==null){ const c = me ? [me.lat,me.lon] : map ? [map.getCenter().lat,map.getCenter().lng] : HALLEIN; lat=c[0]; lon=c[1]; }
+  $("aName").value = ""; $("aLat").value = lat.toFixed(5); $("aLon").value = lon.toFixed(5); $("aMsg").textContent = "";
+  $("aHere").hidden = !navigator.geolocation;
+  $("addSheet").hidden = false; setTimeout(()=>$("aName").focus(), 50);
+}
+$("addFromList").addEventListener("click", ()=>openAdd());
+$("aClose").addEventListener("click", ()=>{ $("addSheet").hidden = true; });
+$("aHere").addEventListener("click", ()=>{
+  if(me){ $("aLat").value = me.lat.toFixed(5); $("aLon").value = me.lon.toFixed(5); $("aMsg").textContent = "Standort übernommen (±"+Math.round(me.acc)+" m)."; return; }
+  $("aMsg").textContent = "Suche Standort …";
+  navigator.geolocation.getCurrentPosition(pos=>{ $("aLat").value = pos.coords.latitude.toFixed(5); $("aLon").value = pos.coords.longitude.toFixed(5); $("aMsg").textContent = "Standort übernommen (±"+Math.round(pos.coords.accuracy)+" m)."; },
+    err=>{ $("aMsg").textContent = err.code===1 ? "Standort nicht erlaubt." : "Standort gerade nicht verfügbar."; }, {enableHighAccuracy:true, timeout:20000});
+});
+$("aSave").addEventListener("click", ()=>{
+  const name = $("aName").value.trim(), lat = parseNum($("aLat").value), lon = parseNum($("aLon").value);
+  if(!name){ $("aMsg").textContent = "Gib dem Gipfel einen Namen."; $("aName").focus(); return; }
+  if(!(lat>=-90 && lat<=90 && lon>=-180 && lon<=180)){ $("aMsg").textContent = "Die Koordinaten stimmen nicht. Beispiel: 47,6833 und 13,0967"; return; }
+  let id = "eigen-"+slug(name), k = 2; while(byId[id]) id = "eigen-"+slug(name)+"-"+(k++);
+  custom.push({id, name, lat, lon, t:Date.now()}); lsSet(LS.custom, custom);
+  rebuildPeaks(); fillGroupSelect(); addMarker(byId[id]);
+  $("addSheet").hidden = true; setSave(name+" hinzugefügt"); renderAll(); openSheet(id);
+  loadHeights();
+});
+
+/* ---------- panorama ---------- */
+const pano = $("pano"), wrap = $("panoWrap");
+let pxDeg = 9, offset = 135, panoHits = [];
+const VEX = 3;    // vertical exaggeration
+function panoPeaks(){
+  return PEAKS.map(p=>{ const e = eleOf(p); if(!e) return null; const d = p.km*1000;
+    const drop = d*d/(2*6371000)*0.87; const a = deg(Math.atan2(e.h - H0 - drop, d)); return {p, a, d}; }).filter(Boolean);
+}
+function drawPano(){
+  const dpr = window.devicePixelRatio||1, W = wrap.clientWidth, H = wrap.clientHeight;
+  if(!W || !H) return;
+  pano.width = Math.round(W*dpr); pano.height = Math.round(H*dpr);
+  const g = pano.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle = css("--sky"); g.fillRect(0,0,W,H);
+  const list = panoPeaks();
+  $("panoNote").textContent = list.length ? "Rundblick von Hallein (447 m), Höhen "+VEX+"-fach überhöht. Wischen zum Drehen, Gipfel antippen."
+    : "Für den Rundblick lädt die App einmal die Gipfelhöhen aus dem Internet. Bitte online öffnen.";
+  const axisH = 26, baseY = H - axisH - 18;
+  const maxA = Math.max(4, ...list.map(o=>o.a));
+  const vs = Math.min(pxDeg*VEX, (baseY - 120)/maxA);   // px per degree, vertical
+  const X = b => ((b - offset)%360 + 360)%360 * pxDeg;   // 0..360*pxDeg
+  const span = 360*pxDeg;
+  // silhouettes, far to near
+  const bands = [[30,999,.16],[15,30,.24],[6,15,.34],[0,6,.48]];
+  const ink = css("--ink");
+  bands.forEach(([lo,hi,al])=>{
+    const ps = list.filter(o=>o.p.km>=lo && o.p.km<hi); if(!ps.length) return;
+    const step = 1/pxDeg*2, n = Math.ceil(360/step), prof = new Float32Array(n).fill(-1);
+    ps.forEach(o=>{ const hw = Math.max(.8, deg(Math.atan2(2600, o.d))); const c = o.p.brg;
+      for(let db=-hw; db<=hw; db+=step){ const k = Math.floor((((c+db)%360)+360)%360/step)%n; const v = Math.max(0, o.a)*(1-Math.abs(db)/hw) + (o.a<0?o.a:0); if(v>prof[k]) prof[k]=v; } });
+    g.globalAlpha = al; g.fillStyle = ink; g.beginPath(); g.moveTo(0, baseY);
+    for(let x=0; x<=W; x+=2){ const b = offset + x/pxDeg; const k = Math.floor(((b%360)+360)%360/step)%n; const v = prof[k]; g.lineTo(x, baseY - Math.max(0,v)*vs); }
+    g.lineTo(W, baseY); g.closePath(); g.fill(); g.globalAlpha = 1;
+  });
+  g.fillStyle = css("--bg"); g.fillRect(0, baseY, W, H-baseY);
+  g.strokeStyle = css("--line"); g.lineWidth = 1; g.beginPath(); g.moveTo(0, baseY+.5); g.lineTo(W, baseY+.5); g.stroke();
+  // compass axis
+  g.fillStyle = css("--muted"); g.font = "600 12px "+css("--f-display"); g.textAlign = "center"; g.textBaseline = "top";
+  for(let b=0; b<360; b+=5){ for(const k of [0,-span,span]){ const x = X(b)+k; if(x<-20||x>W+20) continue;
+    const big = b%22.5===0 || b%45===0; g.fillRect(x, baseY+1, 1, big?8:4);
+    if(b%45===0) g.fillText(DIRS[b/22.5], x, baseY+10); else if(b%15===0){ g.font="10px "+css("--f-mono"); g.fillText(b+"°", x, baseY+10); g.font="600 12px "+css("--f-display"); } } }
+  // peaks
+  panoHits = [];
+  const order = list.slice().sort((A,B)=>{ const pr = o => (o.p.id===selected?1e6:0) + (rec(o.p.id).s===2?3000:0) + (o.p.star?2000:0) + o.a*100; return pr(B)-pr(A); });
+  const taken = [];
+  g.textAlign = "left"; g.textBaseline = "middle";
+  order.forEach(o=>{
+    for(const k of [0,-span,span]){
+      const x = X(o.p.brg)+k; if(x<-30||x>W+30) continue;
+      const y = baseY - Math.max(0,o.a)*vs, s = rec(o.p.id).s, sel = o.p.id===selected;
+      const free = !taken.some(t=>Math.abs(t-x) < 14);
+      if(free || sel){
+        taken.push(x);
+        const ly = Math.max(14, y - 14 - (o.p.km<6?6:0));
+        g.strokeStyle = css("--muted"); g.globalAlpha=.6; g.beginPath(); g.moveTo(x, y-4); g.lineTo(x, ly); g.stroke(); g.globalAlpha=1;
+        g.save(); g.translate(x, ly); g.rotate(-Math.PI/2);
+        g.font = (sel?"700 ":"600 ")+"12px "+css("--f-body"); g.fillStyle = sel ? css("--accent") : ink;
+        g.fillText(o.p.name + (eleOf(o.p)?"  "+eleOf(o.p).h:""), 3, 0); g.restore();
+      }
+      g.beginPath(); g.arc(x, y, sel?6:4, 0, Math.PI*2);
+      g.fillStyle = s ? statusColor(s) : css("--bg"); g.fill();
+      g.lineWidth = sel?3:1.5; g.strokeStyle = sel ? css("--accent") : (s ? css("--bg") : statusColor(0)); g.stroke();
+      panoHits.push({x, y, id:o.p.id});
+    }
+  });
+}
+// drag to rotate, tap to open
+let drag = null;
+wrap.addEventListener("pointerdown", e=>{ drag = {x:e.clientX, o:offset, moved:false}; wrap.setPointerCapture(e.pointerId); wrap.style.cursor="grabbing"; });
+wrap.addEventListener("pointermove", e=>{ if(!drag) return; const dx = e.clientX-drag.x; if(Math.abs(dx)>4) drag.moved = true; offset = ((drag.o - dx/pxDeg)%360+360)%360; if(drag.moved) requestAnimationFrame(drawPano); });
+wrap.addEventListener("pointerup", e=>{
+  wrap.style.cursor="grab"; if(!drag) return; const moved = drag.moved; drag = null; if(moved) return;
+  const r = wrap.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  let best = null, bd = 22;
+  panoHits.forEach(h=>{ const d = Math.hypot(h.x-x, h.y-y); if(d<bd){ bd=d; best=h; } });
+  if(best) openSheet(best.id);
+});
+wrap.addEventListener("pointercancel", ()=>{ drag = null; });
+function zoomPano(f){ const W = wrap.clientWidth, mid = offset + W/2/pxDeg; pxDeg = Math.min(48, Math.max(4, pxDeg*f)); offset = ((mid - W/2/pxDeg)%360+360)%360; drawPano(); }
+$("pzIn").addEventListener("click", ()=>zoomPano(1.4));
+$("pzOut").addEventListener("click", ()=>zoomPano(1/1.4));
+wrap.addEventListener("wheel", e=>{ e.preventDefault(); if(Math.abs(e.deltaX) > Math.abs(e.deltaY)){ offset = ((offset + e.deltaX/pxDeg)%360+360)%360; drawPano(); } else zoomPano(e.deltaY<0?1.15:1/1.15); }, {passive:false});
+window.addEventListener("resize", ()=>{ if(!$("panoView").hidden) drawPano(); });
+
+/* ---------- stats ---------- */
+function renderStats(){
+  const box = $("statsView"); const {done, goal} = counts();
+  const climbed = PEAKS.filter(p=>rec(p.id).s===1);
+  const tours = PEAKS.reduce((n,p)=>n+(rec(p.id).a||[]).length, 0);
+  const hi = climbed.filter(eleOf).sort((a,b)=>eleOf(b).h-eleOf(a).h)[0];
+  const far = climbed.slice().sort((a,b)=>b.km-a.km)[0];
+  const tile = (v,l)=>'<div class="tile"><b>'+v+'</b><span>'+l+'</span></div>';
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  let h = '<div class="tiles">'+
+    tile(done+" / "+PEAKS.length, "Gipfel bestiegen ("+Math.round(done/PEAKS.length*100)+" %)")+
+    tile(goal, goal===1?"Ziel geplant":"Ziele geplant")+
+    tile(tours, "Touren im Tourenbuch")+
+    tile(hi ? fmtInt(eleOf(hi).h)+" m" : "–", hi ? "Höchster: "+esc(hi.name) : "Höchster Gipfel (Höhen fehlen noch)")+
+    tile(far ? fmt1(far.km)+" km" : "–", far ? "Am weitesten weg: "+esc(far.name) : "Am weitesten weg")+
+    '</div>';
+  const barRow = (lbl, d, g, tot)=>'<div class="brow"><span class="lbl" title="'+esc(lbl)+'">'+esc(lbl)+'</span><span class="track"><i style="width:'+(tot?d/tot*100:0)+'%"></i><i class="g" style="width:'+(tot?g/tot*100:0)+'%"></i></span><span class="num">'+d+" / "+tot+'</span></div>';
+  // by group
+  const byG = {}; PEAKS.forEach(p=>{ const o = byG[p.grp] = byG[p.grp] || {d:0,g:0,t:0}; o.t++; const s=rec(p.id).s; if(s===1) o.d++; else if(s===2) o.g++; });
+  h += '<h2 class="sec">Nach Gebiet</h2><div class="bars">'+Object.entries(byG).sort((a,b)=>b[1].t-a[1].t).map(([k,o])=>barRow(k,o.d,o.g,o.t)).join("")+'</div>';
+  h += '<p class="note">Die Gebiete sind automatisch nach Lage zugeordnet. Grün = bestiegen, gelb = Ziel.</p>';
+  // by height
+  const bandsH = [[0,1000,"unter 1.000 m"],[1000,1500,"1.000–1.500 m"],[1500,2000,"1.500–2.000 m"],[2000,2500,"2.000–2.500 m"],[2500,9000,"über 2.500 m"]];
+  const known = PEAKS.filter(eleOf);
+  if(known.length){
+    h += '<h2 class="sec">Nach Höhe</h2><div class="bars">'+bandsH.map(([a,b,l])=>{ const ps = known.filter(p=>eleOf(p).h>=a && eleOf(p).h<b); return barRow(l, ps.filter(p=>rec(p.id).s===1).length, ps.filter(p=>rec(p.id).s===2).length, ps.length); }).join("")+'</div>';
+  } else h += '<h2 class="sec">Nach Höhe</h2><p class="note">Die Gipfelhöhen werden geladen, sobald die App online ist.</p>';
+  // by year
+  const years = {}; PEAKS.forEach(p=>(rec(p.id).a||[]).forEach(d=>{ const y = d.slice(0,4); years[y]=(years[y]||0)+1; }));
+  const ys = Object.keys(years).sort().reverse();
+  h += '<h2 class="sec">Touren pro Jahr</h2>';
+  if(ys.length){ const mx = Math.max(...Object.values(years)); h += '<div class="bars">'+ys.map(y=>'<div class="brow"><span class="lbl">'+y+'</span><span class="track"><i style="width:'+(years[y]/mx*100)+'%"></i></span><span class="num">'+years[y]+'</span></div>').join("")+'</div>'; }
+  else h += '<p class="note">Sobald du Besteigungen mit Datum einträgst, siehst du hier deine Jahre.</p>';
+  box.innerHTML = h;
+}
+
+/* ---------- backup ---------- */
+function backupData(){ return {app:"gipfelbuch-hallein", v:2, exported:new Date().toISOString(), state, custom}; }
+function mergeBackup(obj){
+  if(!obj || typeof obj!=="object") throw new Error("format");
+  const src = obj.state && typeof obj.state==="object" ? obj.state : (obj.app ? {} : obj);
+  let n = 0;
+  if(Array.isArray(obj.custom)) obj.custom.forEach(c=>{ if(c && c.id && c.name && isFinite(c.lat) && isFinite(c.lon) && !custom.some(x=>x.id===c.id)){ custom.push({id:String(c.id), name:String(c.name), lat:+c.lat, lon:+c.lon, t:c.t||Date.now()}); n++; } });
+  lsSet(LS.custom, custom); rebuildPeaks();
+  Object.keys(src).forEach(id=>{
+    const r = src[id]; if(!byId[id] || !r || typeof r!=="object") return;
+    const a = Array.isArray(r.a) ? r.a.map(String) : (r.d ? [String(r.d)] : []);
+    const cur = state[id];
+    if(!cur || (r.t||0) > (cur.t||0)){ const nr = {s:+r.s||0, a, n:String(r.n||""), t:r.t||Date.now()}; if(isEmpty(nr)) delete state[id]; else state[id] = nr; n++; }
+  });
+  persist(); if(map){ PEAKS.forEach(p=>{ if(!markers[p.id]) addMarker(p); }); } fillGroupSelect(); renderAll(); loadHeights(); return n;
+}
+const bkMsg = $("bkMsg");
+$("bkOpen").addEventListener("click", ()=>{ closeAllSheets(); bkMsg.textContent = ""; $("backup").hidden = false; });
+$("bkClose").addEventListener("click", ()=>{ $("backup").hidden = true; });
+$("bkDownload").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(backupData(), null, 1)], {type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "gipfelbuch-sicherung-" + today() + ".json";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  bkMsg.textContent = "Sicherung gespeichert. Du findest sie in deinen Downloads.";
+});
+$("bkFile").addEventListener("change", e=>{
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=>{ try{ const n = mergeBackup(JSON.parse(fr.result)); bkMsg.textContent = n+" Einträge übernommen."; }catch(err){ bkMsg.textContent = "Diese Datei ist keine Gipfelbuch-Sicherung."; } e.target.value = ""; };
+  fr.readAsText(f);
+});
+$("bkApply").addEventListener("click", ()=>{
+  const t = $("bkPaste").value.trim(); if(!t){ bkMsg.textContent = "Füge zuerst den kopierten Text ein."; return; }
+  try{ const n = mergeBackup(JSON.parse(t)); bkMsg.textContent = n+" Einträge übernommen."; $("bkPaste").value = ""; }catch(err){ bkMsg.textContent = "Der eingefügte Text ist keine Gipfelbuch-Sicherung. Kopiere ihn bitte noch einmal vollständig."; }
+});
 
 /* ---------- tabs ---------- */
-const tMap=document.getElementById("tMap"), tList=document.getElementById("tList"), listView=document.getElementById("listView"), legend=document.getElementById("legend");
+let tab = "map";
 function showTab(t){
-  const isMap = t==="map";
-  tMap.setAttribute("aria-selected",String(isMap)); tList.setAttribute("aria-selected",String(!isMap));
-  listView.hidden = isMap; legend.hidden = !isMap; document.getElementById("map").style.visibility = isMap ? "" : "hidden";
-  if(isMap && map) setTimeout(()=>map.invalidateSize(),0); else renderList();
+  tab = t;
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.tab===t)));
+  $("listView").hidden = t!=="list"; $("panoView").hidden = t!=="pano"; $("statsView").hidden = t!=="stats";
+  $("legend").hidden = t!=="map"; if(t!=="map") $("banner").hidden = true;
+  $("map").style.visibility = t==="map" ? "" : "hidden";
+  if(t==="map" && map) setTimeout(()=>map.invalidateSize(),0);
+  if(t==="list") renderList();
+  if(t==="pano") requestAnimationFrame(drawPano);
+  if(t==="stats") renderStats();
 }
-tMap.addEventListener("click",()=>showTab("map")); tList.addEventListener("click",()=>showTab("list"));
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+document.addEventListener("keydown", e=>{ if(e.key!=="Escape") return; if(!$("viewer").hidden) closeViewer(); else if(!sheet.hidden) closeSheet(); else { $("addSheet").hidden = true; $("backup").hidden = true; } });
 
-function renderAll(id){ renderCount(); restyle(id); if(!listView.hidden) renderList(); if(selected && (!id || id===selected)) fillSheet(); }
+function renderAll(id){
+  renderCount(); restyle(id);
+  if(tab==="list") renderList();
+  if(tab==="stats") renderStats();
+  if(tab==="pano") drawPano();
+  if(selected && (!id || id===selected)) fillSheet();
+}
 
-initMap(); renderCount(); startLocal();
+/* ---------- start ---------- */
+fillGroupSelect();
+initMap();
+const imported = importStars();
+renderAll();
+setSave(imported ? imported+" Gipfel aus PeakFinder als bestiegen übernommen" : "Gespeichert auf diesem Gerät");
+if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+openDb().then(countPhotos).then(()=>{ if(tab==="list") renderList(); });
+setTimeout(loadHeights, 800);
+window.addEventListener("online", loadHeights);
+if("serviceWorker" in navigator) window.addEventListener("load", ()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 })();
 </script>
 </body>

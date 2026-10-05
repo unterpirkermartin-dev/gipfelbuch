@@ -1,5 +1,5 @@
 // Gipfelbuch Hallein – offline support
-const APP = "gipfelbuch-app-v1";
+const APP = "gipfelbuch-app-v2";
 const TILES = "gipfelbuch-tiles-v1";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 
