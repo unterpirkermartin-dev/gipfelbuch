@@ -1,0 +1,17 @@
+{
+  "name": "Gipfelbuch Hallein",
+  "short_name": "Gipfelbuch",
+  "description": "Die Gipfel rund um Hallein auf einer Karte – abhaken und Notizen schreiben.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EEF0EC",
+  "theme_color": "#1E2A26",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
