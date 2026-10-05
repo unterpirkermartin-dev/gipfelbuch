@@ -756,6 +756,24 @@ nav button[aria-selected="true"]{color:var(--ink);border-top-color:var(--accent)
 .banner{position:absolute;top:96px;left:56px;right:10px;z-index:900;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gps);border-radius:8px;padding:10px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
 .banner p{margin:0}
 .banner .row{display:flex;gap:8px;flex-wrap:wrap}
+.msearch{position:absolute;left:10px;right:10px;top:10px;z-index:1100;display:flex;flex-direction:column;gap:6px}
+.msearch-row{display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:5px 5px 5px 12px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.msearch-row input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+.msearch-row input{flex:1;min-width:0;border:0;background:transparent;font-size:1rem;padding:6px 0;outline:none}
+.mresults{list-style:none;margin:0;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.18);max-height:min(50vh,340px);overflow-y:auto}
+.mresults:empty{display:none}
+.mresults li button{width:100%;display:grid;grid-template-columns:14px 1fr auto;gap:10px;align-items:center;text-align:left;padding:9px 8px;border:0;border-radius:7px;background:transparent;cursor:pointer}
+.mresults li button:hover,.mresults li button.act{background:var(--bg)}
+.mresults .mn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.mresults .mn mark{background:color-mix(in srgb,var(--sign) 55%,transparent);color:inherit;border-radius:2px}
+.mresults .mm{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);white-space:nowrap}
+.mresults .none{padding:10px;color:var(--muted);font-size:.9rem}
+.found{position:absolute;left:10px;right:10px;bottom:10px;z-index:860;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:8px 8px 8px 12px;box-shadow:var(--shadow)}
+.found div{flex:1;min-width:0;display:flex;flex-direction:column}
+.found b{font-family:var(--f-display);font-size:1.25rem;text-transform:uppercase;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.found span{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.found .primary{padding:8px 12px}
+@media (min-width:760px){.msearch{right:auto;width:380px;left:56px}.found{right:auto;width:400px}}
 .layers{position:absolute;right:10px;top:10px;z-index:800;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 .layers button{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:2px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-size:.82rem;font-weight:600;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.12)}
 .layers button[aria-pressed="true"]{border-color:var(--ink)}
@@ -927,6 +945,19 @@ h3.sub{margin:4px 0 0;font-size:.72rem;font-weight:600;text-transform:uppercase;
       </div>
       <p class="note">Wege und Routen stammen aus OpenStreetMap und werden automatisch berechnet. Vor der Tour mit Karte, Wetter und Verhältnissen vor Ort prüfen; Schnee und Sperren kennt die App nicht.</p>
     </section>
+    <div class="msearch" id="mSearch" hidden role="search">
+      <div class="msearch-row">
+        <input type="search" id="mq" placeholder="Gipfel suchen …" aria-label="Gipfel auf der Karte suchen" autocomplete="off" enterkeyhint="search">
+        <button type="button" class="close" id="mqClose" aria-label="Suche schließen">×</button>
+      </div>
+      <ul class="mresults" id="mResults" role="listbox" aria-label="Treffer"></ul>
+    </div>
+    <div class="found" id="found" hidden>
+      <i class="dot" id="fDot"></i>
+      <div><b id="fName"></b><span id="fMeta"></span></div>
+      <button type="button" class="primary" id="fOpen">Details</button>
+      <button type="button" class="close" id="fClose" aria-label="Schließen">×</button>
+    </div>
     <div class="layers" id="layers" role="group" aria-label="Zusatzebenen">
       <button type="button" id="lyHut" aria-pressed="false"><i class="ico hut"></i>Hütten</button>
       <button type="button" id="lyPark" aria-pressed="false"><i class="ico park">P</i>Parkplätze</button>
@@ -1342,6 +1373,11 @@ function initMap(){
     b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
     L.DomEvent.disableClickPropagation(b); L.DomEvent.on(b,"click",toggleLocate); return b; }});
   map.addControl(new Loc());
+  const Find = L.Control.extend({options:{position:"topleft"}, onAdd(){
+    const b = L.DomUtil.create("button","map-btn"); b.type="button"; b.id="findBtn"; b.title="Gipfel suchen"; b.setAttribute("aria-label","Gipfel suchen");
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>';
+    L.DomEvent.disableClickPropagation(b); L.DomEvent.on(b,"click",openMapSearch); return b; }});
+  map.addControl(new Find());
 }
 function restyle(id){ if(!map) return; (id?[byId[id]].filter(Boolean):PEAKS).forEach(p=>markers[p.id] && markers[p.id].setStyle(markerStyle(p))); }
 const themeChanged = ()=>setTimeout(()=>{ restyle(); if(!$("panoView").hidden) drawPano(); },0);
@@ -1550,6 +1586,7 @@ async function showWege(id){
   const p = byId[id]; if(!p || !map) return;
   closeSheet(); showTab("map");
   wp.peak = id; wp.route = null; if(routeLayer){ routeLayer.remove(); routeLayer = null; }
+  $("found").hidden = true; foundId = null;
   $("wpTitle").textContent = p.name; $("wpPanel").hidden = false; $("legend").hidden = true; $("wpRes").hidden = true;
   fitAbovePanel(L.latLngBounds([[p.lat-.03, p.lon-.045],[p.lat+.03, p.lon+.045]]));
   if(!poiOn.hut) togglePoi("hut"); if(!poiOn.park) togglePoi("park");
@@ -1705,6 +1742,63 @@ $("wpGpx").addEventListener("click", ()=>{
 $("wpClear").addEventListener("click", ()=>{ if(routeLayer){ routeLayer.remove(); routeLayer = null; } wp.route = null; $("wpRes").hidden = true; });
 $("sRoute").addEventListener("click", ()=>{ if(selected){ const id = selected; showWege(id); } });
 
+/* ---------- search on the map ---------- */
+const fold = s => (s||"").toLowerCase().replace(/ß/g,"ss").normalize("NFKD").replace(/[\u0300-\u036f]/g,"");
+let mHits = [], mAct = 0, pulse = null, pulseTimer = null, foundId = null;
+function openMapSearch(){
+  closeAllSheets(); $("mSearch").hidden = false; $("layers").hidden = true; $("mq").value = ""; renderMapResults();
+  setTimeout(()=>$("mq").focus(), 30);
+}
+function closeMapSearch(){ $("mSearch").hidden = true; $("layers").hidden = tab!=="map"; $("mResults").replaceChildren(); }
+function renderMapResults(){
+  const q = fold($("mq").value.trim()), box = $("mResults");
+  if(!q){ box.replaceChildren(); mHits = []; return; }
+  // starts-with first, then word starts, then anywhere; shorter names first
+  mHits = PEAKS.map(p=>{ const n = fold(p.name), i = n.indexOf(q); if(i<0) return null;
+      const rank = i===0 ? 0 : /[\s\-(.]/.test(n[i-1]) ? 1 : 2; return {p, rank, i}; })
+    .filter(Boolean).sort((a,b)=>a.rank-b.rank || a.p.name.length-b.p.name.length || a.p.name.localeCompare(b.p.name,"de")).slice(0,8);
+  mAct = 0;
+  if(!mHits.length){ box.innerHTML = '<li class="none">Kein Gipfel gefunden. Über lange Drücken auf die Karte kannst du ihn hinzufügen.</li>'; return; }
+  box.replaceChildren(...mHits.map((h,k)=>{
+    const li = document.createElement("li"), b = document.createElement("button"); b.type = "button"; b.setAttribute("role","option"); if(k===mAct) b.classList.add("act");
+    const s = rec(h.p.id).s, dot = document.createElement("i"); dot.className = "dot"+(s===1?" on":s===2?" goal":"");
+    const nm = document.createElement("span"); nm.className = "mn";
+    const L0 = h.p.name.length; // highlight the match (positions match because folding keeps length for German names)
+    const raw = h.p.name, mk = document.createElement("mark");
+    if(fold(raw).length===L0){ nm.append(raw.slice(0,h.i)); mk.textContent = raw.slice(h.i, h.i+q.length); nm.append(mk, raw.slice(h.i+q.length)); } else nm.textContent = raw;
+    const mm = document.createElement("span"); mm.className = "mm"; const e = eleOf(h.p);
+    const dup = mHits.some(o=>o!==h && o.p.name===h.p.name);
+    mm.textContent = dup ? h.p.grp : (e ? e.h+" m · " : "") + fmt1(h.p.km)+" km";
+    b.append(dot, nm, mm); b.addEventListener("click", ()=>goToPeak(h.p.id)); li.appendChild(b); return li;
+  }));
+}
+function goToPeak(id){
+  const p = byId[id]; if(!p) return;
+  closeMapSearch(); showTab("map");
+  if(map){
+    map.flyTo([p.lat,p.lon], Math.max(map.getZoom(), 14), {duration:.9});
+    if(pulse){ pulse.remove(); clearTimeout(pulseTimer); }
+    pulse = L.circleMarker([p.lat,p.lon], {radius:20, color:css("--accent"), weight:3, fill:false, interactive:false}).addTo(map);
+    pulseTimer = setTimeout(()=>{ if(pulse){ pulse.remove(); pulse = null; } }, 6000);
+  }
+  const prev = selected; selected = id; if(prev) restyle(prev); restyle(id); if(markers[id]) markers[id].bringToFront();
+  foundId = id; const s = rec(id).s, e = eleOf(p);
+  $("fDot").className = "dot"+(s===1?" on":s===2?" goal":""); $("fName").textContent = p.name;
+  $("fMeta").textContent = [e ? e.h+" m" : null, p.grp, s===1 ? "bestiegen" : s===2 ? "Ziel" : "offen"].filter(Boolean).join(" · ");
+  $("found").hidden = false; $("legend").hidden = true;
+}
+function closeFound(){ $("found").hidden = true; if(foundId && selected===foundId){ selected = null; restyle(foundId); } foundId = null; $("legend").hidden = tab!=="map" || !$("wpPanel").hidden; }
+$("mq").addEventListener("input", renderMapResults);
+$("mq").addEventListener("keydown", e=>{
+  const items = [...$("mResults").querySelectorAll("button")];
+  if(e.key==="ArrowDown" || e.key==="ArrowUp"){ e.preventDefault(); if(!items.length) return; mAct = (mAct + (e.key==="ArrowDown"?1:-1) + items.length) % items.length; items.forEach((b,k)=>b.classList.toggle("act", k===mAct)); items[mAct].scrollIntoView({block:"nearest"}); }
+  else if(e.key==="Enter"){ e.preventDefault(); if(mHits[mAct]) goToPeak(mHits[mAct].p.id); }
+  else if(e.key==="Escape"){ closeMapSearch(); }
+});
+$("mqClose").addEventListener("click", closeMapSearch);
+$("fOpen").addEventListener("click", ()=>{ const id = foundId; $("found").hidden = true; foundId = null; if(id) openSheet(id); });
+$("fClose").addEventListener("click", closeFound);
+
 /* ---------- GPS: where am I, summit check-in ---------- */
 let watchId = null, me = null, meMarker = null, meCircle = null, firstFix = true;
 const asked = new Set();
@@ -1853,7 +1947,7 @@ async function fillWeather(){
   }catch(err){ if(selected===key) box.innerHTML = '<p class="hint">Wetter gerade nicht abrufbar. Versuch es später noch einmal.</p>'; }
 }
 function openSheet(id){
-  flushNote(); closeAllSheets();
+  flushNote(); closeAllSheets(); if(!$("found").hidden && foundId!==id) closeFound(); else { $("found").hidden = true; foundId = null; }
   const prev = selected; selected = id; sheet.hidden = false; sheet.scrollTop = 0;
   closeAscForm(); closeEdit(); $("delAsk").hidden = false; $("delConfirm").hidden = true;
   fillSheet(); fillPhotos(); fillWeather();
@@ -2478,7 +2572,8 @@ function showTab(t){
   tab = t;
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.tab===t)));
   $("listView").hidden = t!=="list"; $("panoView").hidden = t!=="pano"; $("statsView").hidden = t!=="stats";
-  $("legend").hidden = t!=="map" || !$("wpPanel").hidden; $("layers").hidden = t!=="map"; $("wpPanel").style.display = t==="map" ? "" : "none"; if(t!=="map"){ $("banner").hidden = true; layerMsg(""); }
+  if(t!=="map"){ closeMapSearch(); if(!$("found").hidden) closeFound(); }
+  $("legend").hidden = t!=="map" || !$("wpPanel").hidden || !$("found").hidden; $("layers").hidden = t!=="map" || !$("mSearch").hidden; $("wpPanel").style.display = t==="map" ? "" : "none"; if(t!=="map"){ $("banner").hidden = true; layerMsg(""); }
   $("map").style.visibility = t==="map" ? "" : "hidden";
   if(t==="map" && map) setTimeout(()=>map.invalidateSize(),0);
   if(t==="list") renderList();
@@ -2486,7 +2581,7 @@ function showTab(t){
   if(t==="stats") renderStats();
 }
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
-document.addEventListener("keydown", e=>{ if(e.key!=="Escape") return; if(!$("viewer").hidden) closeViewer(); else if(!sheet.hidden) closeSheet(); else { $("addSheet").hidden = true; $("backup").hidden = true; } });
+document.addEventListener("keydown", e=>{ if(e.key!=="Escape") return; if(!$("mSearch").hidden) return closeMapSearch(); if(!$("found").hidden) return closeFound(); if(!$("viewer").hidden) closeViewer(); else if(!sheet.hidden) closeSheet(); else { $("addSheet").hidden = true; $("backup").hidden = true; } });
 
 function renderAll(id){
   renderCount(); restyle(id);

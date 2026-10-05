@@ -1,5 +1,5 @@
 // Gipfelbuch Hallein – offline support
-const APP = "gipfelbuch-app-v6";
+const APP = "gipfelbuch-app-v7";
 const TILES = "gipfelbuch-tiles-v1";       // map tiles seen while browsing (trimmed)
 const OFFLINE = "gipfelbuch-offline";      // areas saved on purpose (never trimmed)
 const DEM = "gipfelbuch-dem";              // terrain tiles for panorama / peak finder
