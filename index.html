@@ -1530,9 +1530,11 @@ function wayClass(t){
   if(t.highway==="path" || t.highway==="footway" || t.highway==="steps" || t.highway==="bridleway") return {cls:DIFF[5], rank:-1, txt:"Steig ohne Schwierigkeitsangabe"};
   return {cls:DIFF[0], rank:0, txt:"Weg"};
 }
-let routePane = null, wegeLayer = null, routeLayer = null;
+let wegeLayer = null, routeLayer = null;
 const wp = {peak:null, start:null, picking:false, route:null, parks:[]};
-function ensurePane(){ if(!routePane && map){ routePane = map.createPane("routes"); routePane.style.zIndex = 450; } }
+// Paths and routes share the map's single drawing layer with the peaks; afterwards the peaks are lifted on top again,
+// so they always stay tappable (a second drawing layer on top would swallow every tap).
+function peaksToFront(){ Object.values(markers).forEach(m=>m.bringToFront()); if(meMarker) meMarker.bringToFront(); }
 async function cachedJson(key, loader){
   const req = "https://gipfelbuch.app/cache/"+key;
   try{ const c = await caches.open("gipfelbuch-wege"); const hit = await c.match(req); if(hit) return await hit.json();
@@ -1546,7 +1548,7 @@ async function overpass(q){
 function wpMsg(t){ $("wpMsg").textContent = t||""; $("wpMsg").hidden = !t; }
 async function showWege(id){
   const p = byId[id]; if(!p || !map) return;
-  closeSheet(); showTab("map"); ensurePane();
+  closeSheet(); showTab("map");
   wp.peak = id; wp.route = null; if(routeLayer){ routeLayer.remove(); routeLayer = null; }
   $("wpTitle").textContent = p.name; $("wpPanel").hidden = false; $("legend").hidden = true; $("wpRes").hidden = true;
   fitAbovePanel(L.latLngBounds([[p.lat-.03, p.lon-.045],[p.lat+.03, p.lon+.045]]));
@@ -1558,16 +1560,16 @@ async function showWege(id){
     const data = await cachedJson("wege-"+id+"-"+p.lat.toFixed(4)+"-"+p.lon.toFixed(4), ()=>overpass('[out:json][timeout:40];(way["highway"~"^(path|footway|track|steps|bridleway|via_ferrata)$"](around:3500,'+p.lat.toFixed(5)+','+p.lon.toFixed(5)+');way["via_ferrata_scale"](around:3500,'+p.lat.toFixed(5)+','+p.lon.toFixed(5)+'););out tags geom;')
       .then(js=>({ways:(js.elements||[]).filter(e=>e.geometry).map(e=>({t:e.tags||{}, g:e.geometry.map(n=>[+n.lat.toFixed(5), +n.lon.toFixed(5)])}))})));
     if(wp.peak!==id) return;
-    const rend = L.canvas({pane:"routes"});
     wegeLayer = L.layerGroup().addTo(map);
     const ways = data.ways.slice().sort((a,b)=>wayClass(a.t).rank - wayClass(b.t).rank);
     ways.forEach(w=>{
       const wc = wayClass(w.t), c = wc.cls;
-      L.polyline(w.g, {renderer:rend, pane:"routes", color:"#ffffff", weight:c.k===0?5:7, opacity:.85, interactive:false}).addTo(wegeLayer);
-      const line = L.polyline(w.g, {renderer:rend, pane:"routes", color:c.c, weight:c.k===0?2.5:4, dashArray:c.dash||(c.k===5?"9 6":null), opacity:.95}).addTo(wegeLayer);
+      L.polyline(w.g, {color:"#ffffff", weight:c.k===0?5:7, opacity:.85, interactive:false}).addTo(wegeLayer);
+      const line = L.polyline(w.g, {color:c.c, weight:c.k===0?2.5:4, dashArray:c.dash||(c.k===5?"9 6":null), opacity:.95}).addTo(wegeLayer);
       const info = [wc.txt]; if(w.t.ref) info.push("Nr. "+w.t.ref); if(w.t.trail_visibility==="bad"||w.t.trail_visibility==="horrible"||w.t.trail_visibility==="no") info.push("Weg schlecht erkennbar");
       line.bindPopup('<h4>'+escH(w.t.name || (w.t.highway==="track" ? "Forstweg" : "Steig"))+'</h4><p>'+escH(info.join(" · "))+'</p>');
     });
+    peaksToFront();
     const counts = {}; ways.forEach(w=>{ const l = wayClass(w.t).cls.l; counts[l] = (counts[l]||0)+1; });
     $("wpLegend").replaceChildren(...DIFF.filter(d=>counts[d.l]).map(d=>{ const s=document.createElement("span"); s.innerHTML='<i class="sw"></i>'; s.firstChild.style.background=d.c; if(d.dash) s.firstChild.classList.add("dash"); s.append(d.l); return s; }));
     wpMsg(ways.length ? "" : "Rund um diesen Gipfel sind in OpenStreetMap keine Wege eingetragen.");
@@ -1655,14 +1657,15 @@ async function calcRoute(){
     }
     if(!segs.length) segs.push({from:0, to:co.length-1, wc:null});
     // draw
-    ensurePane(); if(routeLayer) routeLayer.remove();
-    const rend = L.canvas({pane:"routes"}); routeLayer = L.layerGroup().addTo(map);
+    if(routeLayer) routeLayer.remove();
+    routeLayer = L.layerGroup().addTo(map);
     const ll = co.map(c=>[c[0],c[1]]);
-    L.polyline(ll, {renderer:rend, pane:"routes", color:"#ffffff", weight:11, opacity:.95, interactive:false}).addTo(routeLayer);
-    L.polyline(ll, {renderer:rend, pane:"routes", color:css("--accent"), weight:8, opacity:.55, interactive:false}).addTo(routeLayer);
+    L.polyline(ll, {color:"#ffffff", weight:11, opacity:.95, interactive:false}).addTo(routeLayer);
+    L.polyline(ll, {color:css("--accent"), weight:8, opacity:.55, interactive:false}).addTo(routeLayer);
     segs.forEach(sg=>{ if(sg.to <= sg.from) return; const c = sg.wc ? sg.wc.cls.c : css("--accent");
-      L.polyline(ll.slice(sg.from, sg.to+1), {renderer:rend, pane:"routes", color:c, weight:4, opacity:1, dashArray: sg.wc && sg.wc.cls.k===5 ? "9 6" : null}).addTo(routeLayer); });
+      L.polyline(ll.slice(sg.from, sg.to+1), {color:c, weight:4, opacity:1, dashArray: sg.wc && sg.wc.cls.k===5 ? "9 6" : null}).addTo(routeLayer); });
     L.circleMarker(ll[0], {radius:7, color:"#fff", weight:3, fillColor:css("--accent"), fillOpacity:1}).bindTooltip("Start").addTo(routeLayer);
+    peaksToFront();
     fitAbovePanel(L.latLngBounds(ll).pad(.1));
     const min = walkTime(km, up, down);
     wp.route = {co, km, up, down, min, maxRank, maxTxt, start:s, prof};
@@ -1845,6 +1848,7 @@ async function fillWeather(){
     const url = "https://api.open-meteo.com/v1/forecast?latitude="+p.lat.toFixed(4)+"&longitude="+p.lon.toFixed(4)+(e?"&elevation="+e.h:"")+
       "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Europe%2FVienna&forecast_days=4";
     const r = await fetch(url); if(!r.ok) throw 0; const d = await r.json();
+    if(!d.daily || !Array.isArray(d.daily.time) || !d.daily.time.length) throw 0;
     wxCache[key] = {t:Date.now(), d}; if(selected===key) show(d);
   }catch(err){ if(selected===key) box.innerHTML = '<p class="hint">Wetter gerade nicht abrufbar. Versuch es später noch einmal.</p>'; }
 }
