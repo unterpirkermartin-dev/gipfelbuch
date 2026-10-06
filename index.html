@@ -1019,6 +1019,7 @@ h3.sub{margin:4px 0 0;font-size:.72rem;font-weight:600;text-transform:uppercase;
         <button type="button" class="row" id="lyHut" aria-pressed="false"><i class="ico hut"></i>Hütten</button>
         <button type="button" class="row" id="lyPark" aria-pressed="false"><i class="ico park">P</i>Parkplätze</button>
       </div>
+      <button type="button" class="secondary" id="steigeReload">Steige neu laden</button>
       <p class="note">Die amtlichen Karten zeigen nur ihr eigenes Land genau. Watzmann, Hochkalter und Berchtesgaden liegen in Bayern, der Rest meist in Österreich. „Topo“ deckt alles ab.</p>
     </div>
     <div class="layer-msg" id="layerMsg" hidden></div>
@@ -1685,22 +1686,26 @@ async function cachedJson(key, loader){
 }
 async function overpass(q){
   const r = await fetch("https://overpass-api.de/api/interpreter", {method:"POST", body:"data="+encodeURIComponent(q), headers:{"Content-Type":"application/x-www-form-urlencoded"}});
-  if(!r.ok) throw new Error("load"); return r.json();
+  if(!r.ok) throw new Error("load");
+  const js = await r.json();
+  // the server sometimes answers OK but with a time-out note and only part of the data: treat that as a failure, never cache it
+  if(js && js.remark && /error|timed out|timeout|out of memory/i.test(js.remark)) throw new Error("load");
+  return js;
 }
 function wpMsg(t){ $("wpMsg").textContent = t||""; $("wpMsg").hidden = !t; }
 
 /* ---------- layer with every path in view, coloured by difficulty ---------- */
 const STEIGE_CELL = .05, STEIGE_AGE = 60*24*3600*1000;
 const KEEP_T = ["highway","sac_scale","via_ferrata_scale","name","ref","trail_visibility"];
-let steigeOn = false, steigeLayer = null, steigeLines = [], steigeSeen = new Set(), steigeBusy = false, steigeTimer = null;
+let steigeOn = false, steigeLayer = null, steigeLines = [], steigeSeen = new Set(), steigeBusy = false, steigeTimer = null, steigeAgain = false;
 const steigeMem = new Map();
-const cellKey = (a,b) => "steige-"+a+"_"+b;
+const cellKey = (a,b) => "steige2-"+a+"_"+b;   // v2: earlier versions could store incomplete data
 async function steigeCacheGet(key){ try{ const c = await caches.open("gipfelbuch-wege"); const r = await c.match("https://gipfelbuch.app/cache/"+key); return r ? await r.json() : null; }catch(e){ return null; } }
 async function steigeCachePut(key, d){ try{ const c = await caches.open("gipfelbuch-wege"); await c.put("https://gipfelbuch.app/cache/"+key, new Response(JSON.stringify(d), {headers:{"Content-Type":"application/json"}})); }catch(e){} }
 async function fetchSteigeCells(cells){
   const bb = [Math.min(...cells.map(c=>c[0]))*STEIGE_CELL, Math.min(...cells.map(c=>c[1]))*STEIGE_CELL,
               (Math.max(...cells.map(c=>c[0]))+1)*STEIGE_CELL, (Math.max(...cells.map(c=>c[1]))+1)*STEIGE_CELL].map(v=>v.toFixed(4)).join(",");
-  const js = await overpass('[out:json][timeout:60];(way["highway"~"^(path|footway|steps|bridleway|via_ferrata)$"]('+bb+');way["via_ferrata_scale"]('+bb+'););out tags geom;');
+  const js = await overpass('[out:json][timeout:90];(way["highway"~"^(path|footway|steps|bridleway|via_ferrata)$"]('+bb+');way["sac_scale"]('+bb+');way["via_ferrata_scale"]('+bb+'););out tags geom;');
   const out = {}; cells.forEach(([a,b])=>out[cellKey(a,b)] = []);
   (js.elements||[]).forEach(e=>{
     if(!e.geometry || e.geometry.length < 2) return;
@@ -1722,7 +1727,7 @@ async function steigeFor(a, b){
 async function ensureSteige(cells){
   if(cells.length > 400) return;
   const need = []; for(const [a,b] of cells){ if(!(await steigeFor(a,b))) need.push([a,b]); }
-  for(let i=0; i<need.length; i+=24){ const out = await fetchSteigeCells(need.slice(i, i+24)); if(steigeLayer) Object.values(out).forEach(drawSteige); }
+  for(let i=0; i<need.length; i+=6){ try{ const out = await fetchSteigeCells(need.slice(i, i+6)); if(steigeLayer) Object.values(out).forEach(drawSteige); }catch(e){} }
 }
 function steigPopup(t, wc){
   const info = [wc.txt]; if(t.ref) info.push("Weg Nr. "+t.ref); if(badVis(t)) info.push("Weg schlecht erkennbar");
@@ -1757,12 +1762,18 @@ async function loadSteige(){
   if(steigeMsg.startsWith("Zum Anzeigen der Steige")) steigeNote("");
   const need = [];
   for(const [a,b] of cells){ const ways = await steigeFor(a,b); if(ways) drawSteige(ways); else need.push([a,b]); }
-  if(!need.length || steigeBusy) return;
+  if(!need.length) return;
+  if(steigeBusy){ steigeAgain = true; return; }
   if(!navigator.onLine){ steigeNote("Ohne Internet gibt es Steige nur in offline gespeicherten Gebieten."); return; }
   steigeBusy = true; steigeNote("Lade Steige …");
-  try{ for(let i=0; i<need.length; i+=24){ const out = await fetchSteigeCells(need.slice(i, i+24)); Object.values(out).forEach(drawSteige); } steigeNote(""); }
-  catch(e){ steigeNote("Steige gerade nicht abrufbar. Später noch einmal versuchen."); }
-  finally{ steigeBusy = false; }
+  let failed = 0;
+  // smaller batches: big areas make the server time out
+  for(let i=0; i<need.length; i+=6){ if(!steigeOn) break;
+    try{ const out = await fetchSteigeCells(need.slice(i, i+6)); Object.values(out).forEach(drawSteige); }
+    catch(e){ failed++; } }
+  steigeBusy = false;
+  steigeNote(failed ? "Ein Teil der Steige konnte nicht geladen werden. Karte etwas verschieben, dann wird es erneut versucht." : "");
+  if(steigeAgain){ steigeAgain = false; loadSteige(); }
 }
 function toggleSteige(force){
   if(!map) return;
@@ -1778,6 +1789,14 @@ function toggleSteige(force){
 function closeLayersPanel(){ $("lpanel").hidden = true; $("lyOpen").setAttribute("aria-expanded","false"); }
 $("lyOpen").addEventListener("click", ()=>{ const open = $("lpanel").hidden; closeAllSheets(); $("lpanel").hidden = !open; $("lyOpen").setAttribute("aria-expanded", String(open)); });
 $("lpClose").addEventListener("click", closeLayersPanel);
+(async()=>{ try{ const c = await caches.open("gipfelbuch-wege"); const keys = await c.keys(); await Promise.all(keys.filter(k=>/\/cache\/(steige|wege)-/.test(k.url)).map(k=>c.delete(k))); }catch(e){} })();
+$("steigeReload").addEventListener("click", async ()=>{
+  try{ const c = await caches.open("gipfelbuch-wege"); const keys = await c.keys(); await Promise.all(keys.filter(k=>/\/cache\/(steige|wege)/.test(k.url)).map(k=>c.delete(k))); }catch(e){}
+  steigeMem.clear();
+  if(steigeLayer){ steigeLayer.clearLayers(); steigeLines = []; steigeSeen = new Set(); }
+  if(!steigeOn) toggleSteige(true); else loadSteige();
+  closeLayersPanel();
+});
 document.querySelectorAll("#bases button").forEach(b=>b.addEventListener("click", ()=>setBase(b.dataset.base)));
 $("lySteige").addEventListener("click", ()=>{ wp.autoSteige = false; toggleSteige(); });
 
